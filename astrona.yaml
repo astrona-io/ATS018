@@ -176,6 +176,22 @@ modules:
         title: Section Overview
         path: sections/section-030/README.md
 
+      - type: reading
+        title: "Reconcile Git Sources With Flux Kustomizations"
+        path: sections/section-030/module-01/course.md
+      - type: reading
+        title: "Fetch Git With A Flux Source"
+        path: sections/section-030/module-01/course-01-fetch-git-with-a-flux-source.md
+      - type: reading
+        title: "Apply Paths And Order Dependencies"
+        path: sections/section-030/module-01/course-02-apply-paths-and-order-dependencies.md
+      - type: reading
+        title: "Reconcile, Suspend And Resume"
+        path: sections/section-030/module-01/course-03-reconcile-suspend-and-resume.md
+      - type: reading
+        title: "Summary"
+        path: sections/section-030/module-01/course-04-summary.md
+
 
 
   - id: module-040

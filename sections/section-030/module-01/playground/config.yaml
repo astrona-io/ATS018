@@ -1,0 +1,46 @@
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-018-playground-030-01
+  docs:
+    guide: docs/overview.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - curlimages/curl:8.22.0
+      - ghcr.io/stefanprodan/podinfo:6.14.0
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - gitea/gitea:28.1.0-rootless
+      - ghcr.io/fluxcd/source-controller:v1.9.6
+      - ghcr.io/fluxcd/kustomize-controller:v1.9.6
+      - ghcr.io/fluxcd/helm-controller:v1.6.5
+      - ghcr.io/fluxcd/notification-controller:v1.9.4
+  portForwards:
+    - name: git
+      description: The deployment repository
+      namespace: gitea
+      resource: svc/gitea-http
+      targetPort: 3000
+      hostPort: 3000
+      scheme: http
+bootstrap:
+  manifests:
+    - name: lab-start
+      type: file
+      source: manifests/lab-start.yaml
+  init:
+    - name: install-gitea
+      type: file
+      source: bootstrap/01-install-gitea.sh
+    - name: install-flux
+      type: file
+      source: bootstrap/02-install-flux.sh
+    - name: seed
+      type: file
+      source: bootstrap/03-seed.sh
+  waitFor:
+    - resource: deploy/shuttle
+      namespace: starfleet
+teardown:
+  keepCluster: false

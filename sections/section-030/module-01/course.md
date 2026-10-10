@@ -1,40 +1,27 @@
 # Reconcile Git Sources With Flux Kustomizations
 
-<!-- astrona:playground -->
-> [!NOTE]
-> This module has a playground — a throwaway environment to run the commands in.
-> ```bash
-> astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-030/module-01/playground
-> ```
+The `scout` application belongs in staging, with its image and settings held in Git. Flux is a GitOps controller that reads that desired state and changes the live cluster to match it. GitOps means keeping the desired state in a versioned Git repository and letting a controller apply it continuously.
 
-<!-- TODO(build): opening framing — what this module settles, and the contrast that sharpens its boundary. -->
+Flux splits delivery into two objects. A `GitRepository` fetches a repository and stores its files as an artifact, a copy that another controller can use. A Flux `Kustomization` renders one path from that artifact and applies the resulting Kubernetes objects. You can check a fetch failure separately from an apply failure.
+
+The module has three parts. **Fetch Git With A Flux Source** checks the controllers and creates the source. **Apply Paths And Order Dependencies** creates an application and the namespace it needs, then checks readiness and a real response. **Reconcile, Suspend And Resume** pauses delivery, proves that reconciliation repairs drift, and delivers a committed change.
 
 ## Learning objectives
 
-- Install the Flux controllers and check them with flux check
-- Create a GitRepository source and a Flux Kustomization that applies a path with prune enabled
-- Read the Ready condition of sources and Kustomizations with flux get and kubectl describe
-- Force a reconcile and suspend and resume a Kustomization
-- Order two Kustomizations with dependsOn
+After this module you can:
+
+- Install the Flux controllers and verify them with `flux check`.
+- Create a GitRepository and a Flux Kustomization with pruning enabled.
+- Read Ready conditions and diagnose source and apply failures.
+- Force reconciliation and suspend and resume a Kustomization.
+- Order two Kustomizations with `dependsOn`.
 
 ## Before you start
 
-<!-- TODO(build): assumed knowledge, and what the playground already provides. -->
+You need namespaces, Deployments, Services, Secrets, Kustomize directories and basic Git commands. A namespace groups Kubernetes objects. A Deployment keeps application pods running, and a Service gives ready pods a stable network address. A Secret stores credentials or other private values.
 
-## Outline
+The playground runs Kubernetes 1.35.8 and Flux 2.9.6. Its four controllers are in `flux-system`. The private `starfleet/scout-deploy` repository contains a shared base, a staging overlay and a namespace directory. The read-only Secret `scout-readonly` already exists. Gitea hosts the repository as bootstrap plumbing.
 
-<!-- TODO(build): each beat below becomes a section of this module (or a deep-dive part via /astrona-course-deep-dive). Delete this Outline section once written. -->
+`shuttle` runs in `starfleet` as a client. There is no application in staging yet, and no GitRepository or Flux Kustomization. The node has podinfo 6.14.0 and 6.15.0 preloaded. Run commands on your machine against the playground; use the Flux 2.9.6 command-line tool.
 
-- The Flux controllers and their split into sources and appliers
-- GitRepository and the artifact it produces
-- The Flux Kustomization (path, interval, prune, targetNamespace)
-- Reading status with the flux CLI
-- Reconcile, suspend, resume and dependsOn
-
-## Diagrams planned
-
-<!-- TODO(build): mermaid `flowchart` — The source controller producing an artifact that the kustomize controller applies -->
-
-<!-- playground provides: kind cluster with the flux CLI 2.9.6 and the Flux controllers installed (no bootstrap), and Gitea with repository `starfleet/scout-deploy` (Kustomize base and overlays) and a read-only credential Secret ready in `flux-system`. Deliberately absent: no GitRepository or Kustomization; no Argo CD in this cluster. -->
-
-<!-- module section-030/module-01 (Module 1) — stub written by /astrona-course-domain-scaffold, prose written by /astrona-course-domain-build. -->
+<!-- astrona:playground -->
