@@ -374,6 +374,11 @@ content: `starfleet/scout-deploy` (Kustomize base and overlays, Helm values),
     new installs use server-side apply by default.
   - podinfo's metric names, labels and its option for returning random
     errors, before writing PromQL or an `AnalysisTemplate`.
+  - podinfo chart 6.15.0 readiness (verified 2026-10-10): its probe path
+    is fixed at `/readyz`; a `readinessProbe.httpGet.path` value has no
+    effect. Use `faults.unready: true` for the deliberate Flux upgrade
+    failure, then `false` to repair it. The failed upgrade leaves the
+    previous successful revision in release history as `deployed`.
   - Which Flagger provider settings and bundled Prometheus the Istio
     install of Flagger 1.45 uses.
   - The `kubectl` embedded Kustomize version on Kubernetes 1.35.
