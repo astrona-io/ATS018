@@ -192,6 +192,22 @@ modules:
         title: "Summary"
         path: sections/section-030/module-01/course-04-summary.md
 
+      - type: reading
+        title: "Deliver Helm Releases With Flux"
+        path: sections/section-030/module-02/course.md
+      - type: reading
+        title: "Chart Sources And HelmRelease"
+        path: sections/section-030/module-02/course-01-chart-sources-and-helmrelease.md
+      - type: reading
+        title: "Values And Release History"
+        path: sections/section-030/module-02/course-02-values-and-release-history.md
+      - type: reading
+        title: "Remediation And Rollback"
+        path: sections/section-030/module-02/course-03-remediation-and-rollback.md
+      - type: reading
+        title: "Summary"
+        path: sections/section-030/module-02/course-04-summary.md
+
 
 
   - id: module-040

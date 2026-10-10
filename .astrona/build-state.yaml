@@ -89,13 +89,15 @@ items:
 - key: section-030/module-02/playground
   kind: playground
   what: 'playground for module 2: Deliver Helm Releases With Flux'
-  status: pending
-  note: ''
+  status: done
+  note: astrona CLI developer; booted Flux 2.9.6 / podinfo chart 6.15.0; initial failed upgrade and rollback
+    verified
 - key: section-030/module-02/course
   kind: course
   what: 'chapter for module 2: Deliver Helm Releases With Flux'
-  status: pending
-  note: ''
+  status: done
+  note: landing + 3 parts + summary; real valuesFrom, history, retry exhaustion and rollback output; validators
+    pass
 - key: section-030/quiz
   kind: quiz
   what: 'knowledge check for section-030: Continuous Delivery With Flux'

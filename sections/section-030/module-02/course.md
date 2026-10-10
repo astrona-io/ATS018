@@ -1,40 +1,27 @@
 # Deliver Helm Releases With Flux
 
-<!-- astrona:playground -->
-> [!NOTE]
-> This module has a playground — a throwaway environment to run the commands in.
-> ```bash
-> astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-030/module-02/playground
-> ```
+The `scout` chart installed successfully, but its latest upgrade cannot become ready. Flux reports the failure, and the cluster still holds the last successful release. You need to read which operation failed, repair the values, and decide what the controller should do when another upgrade fails.
 
-<!-- TODO(build): opening framing — what this module settles, and the contrast that sharpens its boundary. -->
+A Helm chart is a package of Kubernetes templates and default values. A release is one installed copy of that package, and a revision is one numbered install, upgrade or rollback. Flux uses a HelmRelease object to manage the release through its helm controller. You use Flux and Kubernetes commands to configure and inspect it.
+
+The module has three parts. **Chart Sources And HelmRelease** reads the starting failure, selects a chart source and repairs the release with inline values. **Values And Release History** loads values from a ConfigMap and reads the installed revisions. **Remediation And Rollback** sets recovery rules, observes a failed upgrade roll back and compares the Flux objects with Argo CD.
 
 ## Learning objectives
 
-- Create an OCIRepository or HelmRepository source and a HelmRelease with inline values
-- Read HelmRelease status and history and find why an install or upgrade failed
-- Configure install and upgrade remediation so a failed upgrade rolls back
-- Load values from a ConfigMap with valuesFrom
-- Match each Flux object to the Argo CD object that does the same job
+After this module you can:
+
+- Create a chart source and a HelmRelease with inline values.
+- Read release conditions, history and failure messages.
+- Configure install and upgrade remediation, including rollback.
+- Load values from a ConfigMap through `valuesFrom`.
+- Match Flux source and release objects to Argo CD source and delivery settings.
 
 ## Before you start
 
-<!-- TODO(build): assumed knowledge, and what the playground already provides. -->
+You need Kubernetes namespaces, Deployments, Services and ConfigMaps, and the commands `kubectl apply`, `kubectl get` and `kubectl exec`. A ConfigMap holds configuration values that are not secret. A Deployment keeps application pods running, and a Service gives ready pods a stable address.
 
-## Outline
+The playground runs Kubernetes 1.35.8 and Flux 2.9.6. In `starfleet`, the `podinfo` OCIRepository fetches chart 6.15.0 from an Open Container Initiative (OCI) registry. The HelmRelease `scout` has a successful revision and a deliberate failed upgrade: its values set `faults.unready: true`. No remediation is configured.
 
-<!-- TODO(build): each beat below becomes a section of this module (or a deep-dive part via /astrona-course-deep-dive). Delete this Outline section once written. -->
+`shuttle` runs in `starfleet` as a client. Podinfo images are preloaded. Use the Flux 2.9.6 command-line tool on your machine; every command runs against the playground. The source fetch needs outbound access to the chart registry.
 
-- Helm sources in Flux (HelmRepository, OCIRepository)
-- The HelmRelease resource and its values
-- Status, history and failure messages
-- Remediation, retries and rollback
-- Flux and Argo CD side by side
-
-## Diagrams planned
-
-<!-- TODO(build): mermaid `sequence` — The helm controller installing, failing an upgrade and remediating with a rollback -->
-
-<!-- playground provides: kind cluster with the Flux controllers, outbound internet to ghcr.io, and a HelmRelease `scout` in `starfleet` (podinfo chart) that is deliberately failing: its values set a readiness probe path that never answers, so the upgrade times out. No remediation is configured yet. -->
-
-<!-- module section-030/module-02 (Module 2) — stub written by /astrona-course-domain-scaffold, prose written by /astrona-course-domain-build. -->
+<!-- astrona:playground -->

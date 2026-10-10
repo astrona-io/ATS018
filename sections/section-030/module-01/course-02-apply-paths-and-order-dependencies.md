@@ -1,6 +1,8 @@
 # Apply Paths And Order Dependencies
 
-An overlay is a Kustomize directory that changes a shared set of manifests for one environment. The staging overlay needs the namespace `starfleet-staging`. Its Git files describe a Deployment, which keeps application pods running, and a Service, which gives ready pods a stable network address. They do not describe that namespace. A Flux Kustomization can wait for a separate Kustomization to create the namespace before it applies the application. You will first see the missing dependency, then provide it.
+An overlay is a Kustomize directory that changes a shared set of manifests for one environment. The staging overlay needs the namespace `starfleet-staging`.
+
+Its Git files describe a Deployment, which keeps application pods running, and a Service, which gives ready pods a stable network address. They do not describe that namespace. A Flux Kustomization can wait for a separate Kustomization to create the namespace before it applies the application. You will first see the missing dependency, then provide it.
 
 ## The source and the applier
 
