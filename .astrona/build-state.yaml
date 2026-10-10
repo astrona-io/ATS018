@@ -57,13 +57,13 @@ items:
 - key: section-020/module-03/playground
   kind: playground
   what: 'playground for module 3: Diagnose Sync And Health Failures In Argo CD'
-  status: pending
-  note: ''
+  status: done
+  note: booted 2026-10-10; metrics-server addon; 4 broken Applications
 - key: section-020/module-03/course
   kind: course
   what: 'chapter for module 3: Diagnose Sync And Health Failures In Argo CD'
-  status: pending
-  note: ''
+  status: done
+  note: landing + 4 parts + summary; default automated retry, terminate-op, RespectIgnoreDifferences verified
 - key: section-020/quiz
   kind: quiz
   what: 'knowledge check for section-020: Continuous Delivery With Argo CD'
