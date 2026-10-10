@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Plumbing: start the in-cluster registry, let the node's containerd pull from
-# it over plain HTTP, and copy podinfo 6.14.0 into it as starfleet/scout:6.14.0.
+# it over plain HTTP, copy the podinfo base images 6.14.0, 6.14.1 and 6.15.0
+# into it as starfleet/podinfo, and publish starfleet/scout:6.14.0.
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 kubectl apply -f "$SCRIPT_DIR/../manifests/registry.yaml"
@@ -37,11 +38,12 @@ spec:
           hostPath:
             path: /etc/containerd/certs.d
             type: DirectoryOrCreate
----
+YAML
+kubectl apply -f - <<'YAML'
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: seed-scout-image
+  name: seed-images
   namespace: registry
 spec:
   backoffLimit: 3
@@ -50,8 +52,16 @@ spec:
       restartPolicy: Never
       containers:
         - name: crane
-          image: gcr.io/go-containerregistry/crane:v0.22.1
-          args: ["copy", "--insecure", "ghcr.io/stefanprodan/podinfo:6.14.0", "registry.registry.svc:5000/starfleet/scout:6.14.0"]
+          image: gcr.io/go-containerregistry/crane/debug:v0.22.1
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              for tag in 6.14.0 6.14.1 6.15.0; do
+                crane copy --insecure "ghcr.io/stefanprodan/podinfo:$tag" "registry.registry.svc:5000/starfleet/podinfo:$tag"
+              done
+              crane copy --insecure registry.registry.svc:5000/starfleet/podinfo:6.14.0 registry.registry.svc:5000/starfleet/scout:6.14.0
 YAML
 kubectl -n registry wait --for=condition=complete job/containerd-registry-host --timeout=180s
-kubectl -n registry wait --for=condition=complete job/seed-scout-image --timeout=300s
+kubectl -n registry wait --for=condition=complete job/seed-images --timeout=600s

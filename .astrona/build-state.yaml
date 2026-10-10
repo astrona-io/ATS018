@@ -123,13 +123,15 @@ items:
 - key: section-040/module-02/playground
   kind: playground
   what: 'playground for module 2: Hand Off From A Tekton Pipeline To GitOps'
-  status: pending
-  note: ''
+  status: done
+  note: booted 2026-10-10 (twice, clean); Argo CD + Tekton + Triggers + Gitea + registry ~2.2 GB; containerd
+    hosts.toml for in-cluster registry; Gitea ALLOWED_HOST_LIST private,loopback
 - key: section-040/module-02/course
   kind: course
   what: 'chapter for module 2: Hand Off From A Tekton Pipeline To GitOps'
-  status: pending
-  note: ''
+  status: done
+  note: landing + 4 parts + summary; real push -> EventListener -> PipelineRun -> commit -> Argo CD sync
+    to 6.15.0
 - key: section-040/quiz
   kind: quiz
   what: 'knowledge check for section-040: Continuous Integration Pipelines With Tekton'

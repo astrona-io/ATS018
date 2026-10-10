@@ -244,6 +244,25 @@ modules:
         title: "Summary"
         path: sections/section-040/module-01/course-05-summary.md
 
+      - type: reading
+        title: "Hand Off From A Tekton Pipeline To GitOps"
+        path: sections/section-040/module-02/course.md
+      - type: reading
+        title: "Publish An Image To The Registry"
+        path: sections/section-040/module-02/course-01-publish-an-image-to-the-registry.md
+      - type: reading
+        title: "Commit The New Tag With Git Credentials"
+        path: sections/section-040/module-02/course-02-commit-the-new-tag-with-git-credentials.md
+      - type: reading
+        title: "One Pipeline From Source To Commit"
+        path: sections/section-040/module-02/course-03-one-pipeline-from-source-to-commit.md
+      - type: reading
+        title: "Start The Pipeline From A Git Push"
+        path: sections/section-040/module-02/course-04-start-the-pipeline-from-a-git-push.md
+      - type: reading
+        title: "Summary"
+        path: sections/section-040/module-02/course-05-summary.md
+
 
 
   - id: module-050

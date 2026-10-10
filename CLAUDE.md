@@ -374,6 +374,13 @@ content: `starfleet/scout-deploy` (Kustomize base and overlays, Helm values),
     resolves). The git resolver's `url` form clones anonymously unless the
     `gitToken` param names a token Secret. Do not preload the digest-pinned
     Tekton images: kind then fails the pods with `CreateContainerError`.
+  - Gitea 28.1.0 webhooks (verified 2026-10-10): with
+    `webhook.ALLOWED_HOST_LIST = *` Gitea refuses to deliver to a ClusterIP
+    ("denied by egress"); set it to `private,loopback` for an in-cluster
+    `EventListener`. Tekton writes `~/.gitconfig` and `~/.git-credentials`
+    into each step's home from a `tekton.dev/git-0` basic-auth Secret on the
+    run's service account. The kind node pulls from the in-cluster registry
+    through a containerd `hosts.toml` written by a privileged Job.
   - Helm 4.3.0 (bootstrap only, checked 2026-10-10): `--wait` defaults to
     `hookOnly` when omitted, `--atomic` is now `--rollback-on-failure`, and
     new installs use server-side apply by default.
