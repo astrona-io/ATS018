@@ -51,7 +51,7 @@ Installation alone does not connect Flux to Git. `bootstrapped: false` means thi
 
 ## Fetch the deployment repository
 
-The Secret `scout-readonly` contains a username and password with read permission. It lives in `flux-system`, the same namespace as the source. The `secretRef` names that Secret; it does not contain the password in the source manifest.
+A Secret is a Kubernetes object that stores private values. The Secret `scout-readonly` contains a username and password with read permission. It lives in `flux-system`, the same namespace as the source. The `secretRef` names that Secret; it does not contain the password in the source manifest.
 
 Save this as `gitrepository-scout.yaml`:
 

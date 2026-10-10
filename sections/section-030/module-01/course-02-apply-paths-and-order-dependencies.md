@@ -1,6 +1,6 @@
 # Apply Paths And Order Dependencies
 
-The staging overlay needs the namespace `starfleet-staging`. Its Git files describe a Deployment and Service, but not that namespace. A Flux Kustomization can wait for a separate Kustomization to create the namespace before it applies the application. You will first see the missing dependency, then provide it.
+An overlay is a Kustomize directory that changes a shared set of manifests for one environment. The staging overlay needs the namespace `starfleet-staging`. Its Git files describe a Deployment, which keeps application pods running, and a Service, which gives ready pods a stable network address. They do not describe that namespace. A Flux Kustomization can wait for a separate Kustomization to create the namespace before it applies the application. You will first see the missing dependency, then provide it.
 
 ## The source and the applier
 
@@ -139,7 +139,7 @@ For more detail, inspect the applier:
 kubectl -n flux-system describe kustomization scout
 ```
 
-Read its conditions, last applied revision, inventory and events. The events name `kustomize-controller` as the component that created the Service and Deployment and passed the health check. When an object is rejected, the condition and events give the failing object and API error.
+Read its conditions, last applied revision, inventory and events. The events name `kustomize-controller` as the component that created the Service and Deployment and passed the health check. When an object is rejected, the condition and events give the failing object and application programming interface (API) error.
 
 You have now delivered two paths in the right order, checked the controller's result and proved the application answers. The same dependency mechanism can order configuration before workloads, but it does not copy data between the two appliers.
 

@@ -1,10 +1,10 @@
 # Reconcile, Suspend And Resume
 
-The staging Deployment has one replica because Git says it should. If someone scales it by hand, the kustomize controller normally restores one replica. That difference between the live cluster and the desired state is called drift. You can suspend reconciliation to inspect a problem without the controller changing the objects during your inspection.
+A Deployment is a Kubernetes object that keeps a requested number of application pods running. The staging Deployment has one replica because Git says it should. If someone scales it by hand, the kustomize controller normally restores one replica. That difference between the live cluster and the desired state is called drift. You can suspend reconciliation to inspect a problem without the controller changing the objects during your inspection.
 
 ## Suspend the applier
 
-The GitRepository `scout` and Kustomizations `platform` and `scout` must already be Ready. A suspended Kustomization keeps the objects it applied. It stops applying changes and checking for drift; it does not stop the application or the source controller.
+A GitRepository is the Flux object that fetches files from Git. A Flux Kustomization selects a source path and asks the controller to render and apply it. The GitRepository `scout` and Kustomizations `platform` and `scout` must already be Ready. A suspended Kustomization keeps the objects it applied. It stops applying changes and checking for drift; it does not stop the application or the source controller.
 
 <!-- astrona:playground:renew -->
 
@@ -82,7 +82,7 @@ The replica check now prints:
 1
 ```
 
-The controller restored the value in Git. This is why a live `kubectl scale` is not a lasting GitOps change. Here the manual change was a controlled test, with suspension first. For a lasting change, edit the repository and let the controller apply it.
+The controller restored the value in Git. GitOps keeps desired state in Git and lets a controller apply it continuously. This is why a live `kubectl scale` is not a lasting GitOps change. Here the manual change was a controlled test, with suspension first. For a lasting change, edit the repository and let the controller apply it.
 
 If a Kustomization is itself delivered by another GitOps controller, record suspension in that object's source repository too. Otherwise its parent can restore the old `suspend` value. The two Kustomizations in this playground were created directly, so no parent is managing their specification.
 
