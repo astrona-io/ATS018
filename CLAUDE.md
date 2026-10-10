@@ -317,7 +317,7 @@ technical terms and use the names as they are.
 | Kubernetes name | Image | What it is |
 | --- | --- | --- |
 | `scout` | `ghcr.io/stefanprodan/podinfo:6.15.0` | Web application on port `9898`; the response shows its version; exposes Prometheus metrics on `/metrics`. An older 6.14.x tag is the "previous version" in rollout modules |
-| `probe` | `mccutchen/go-httpbin:v2.25.0` | HTTP echo server on port `8080`, used where a second service is needed |
+| `probe` | `mccutchen/go-httpbin:2.25.0` | HTTP echo server on port `8080`, used where a second service is needed |
 | `shuttle` | `curlimages/curl` | Client pod; every test request is sent with `kubectl exec deploy/shuttle -- curl ...` |
 | `bridge` | `nginx` | Front end, only in a module that needs one |
 

@@ -17,7 +17,7 @@ runtime:
     preloadImages:
       - curlimages/curl:8.22.0
       - ghcr.io/stefanprodan/podinfo:6.15.0
-      - mccutchen/go-httpbin:v2.25.0
+      - mccutchen/go-httpbin:2.25.0
       - nginx:1.29-alpine
       - gitea/gitea:28.1.0-rootless
       - quay.io/argoproj/argocd:v3.5.4
