@@ -8,7 +8,7 @@ labels:
       environment: production
 images:
   - name: ghcr.io/stefanprodan/podinfo
-    newTag: 6.14.0
+    newTag: 6.15.0
 replicas:
   - name: scout
     count: 2
