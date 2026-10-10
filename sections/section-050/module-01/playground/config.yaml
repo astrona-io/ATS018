@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Roll Out A Canary With Argo Rollouts (PLAYGROUND) — playground environment.
+# The Argo Rollouts 1.10.0 controller, and `scout` in `starfleet` as a plain
+# Deployment (podinfo 6.14.0, 5 replicas) with a Service, plus `shuttle`.
+# Deliberately absent: no Rollout, no traffic router, no metrics provider.
+# No task, no grading.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-018-playground-050-01
+  docs:
+    guide: docs/overview.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - curlimages/curl:8.22.0
+      - ghcr.io/stefanprodan/podinfo:6.14.0
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - quay.io/argoproj/argo-rollouts:v1.10.0
+
+bootstrap:
+  manifests:
+    - name: lab-start
+      type: file
+      source: manifests/lab-start.yaml
+  init:
+    - name: install-argo-rollouts
+      description: "Installs the Argo Rollouts 1.10.0 controller"
+      type: file
+      source: bootstrap/01-install-argo-rollouts.sh
+  waitFor:
+    - resource: deploy/shuttle
+      namespace: starfleet
+    - resource: deploy/scout
+      namespace: starfleet
+
+teardown:
+  keepCluster: false

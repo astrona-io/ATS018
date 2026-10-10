@@ -367,8 +367,13 @@ content: `starfleet/scout-deploy` (Kustomize base and overlays, Helm values),
     upgrade notes.
   - The name and location of the initial admin password Secret in Argo CD
     3.5.
-  - Which Tekton resolvers are enabled by default in Pipelines 1.17, and the
-    state of the Tekton Hub and catalog.
+  - Tekton resolvers (verified 2026-10-10): Pipelines 1.17 enables all five
+    resolvers (`cluster`, `git`, `bundles`, `http`, `hub`) in the ConfigMap
+    `resolvers-feature-flags`. The hub resolver defaults to `type: artifact`
+    (Artifact Hub); Tekton Hub is shut down (`api.hub.tekton.dev` no longer
+    resolves). The git resolver's `url` form clones anonymously unless the
+    `gitToken` param names a token Secret. Do not preload the digest-pinned
+    Tekton images: kind then fails the pods with `CreateContainerError`.
   - Helm 4.3.0 (bootstrap only, checked 2026-10-10): `--wait` defaults to
     `hookOnly` when omitted, `--atomic` is now `--rollback-on-failure`, and
     new installs use server-side apply by default.

@@ -1,0 +1,33 @@
+# Argo CD reads the private scout-deploy repository with its own credentials
+# and keeps `starfleet` equal to it. The pipeline has no credentials yet.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: repo-scout-deploy
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: repository
+stringData:
+  type: git
+  url: http://gitea-http.gitea.svc:3000/starfleet/scout-deploy.git
+  username: platform
+  password: starfleet-gitops
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: scout
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: http://gitea-http.gitea.svc:3000/starfleet/scout-deploy.git
+    targetRevision: main
+    path: .
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: starfleet
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

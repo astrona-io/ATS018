@@ -111,13 +111,15 @@ items:
 - key: section-040/module-01/playground
   kind: playground
   what: 'playground for module 1: Build Tekton Tasks And Pipelines'
-  status: pending
-  note: ''
+  status: done
+  note: 'booted 2026-10-10; Tekton 1.17.0 (not preloaded: digest-pinned preloads fail), public scout-app
+    with tekton/run-tests.yaml'
 - key: section-040/module-01/course
   kind: course
   what: 'chapter for module 1: Build Tekton Tasks And Pipelines'
-  status: pending
-  note: ''
+  status: done
+  note: landing + 4 parts + summary; all resolvers on by default, hub defaults to Artifact Hub, Tekton
+    Hub gone; git resolver gitToken verified in docs
 - key: section-040/module-02/playground
   kind: playground
   what: 'playground for module 2: Hand Off From A Tekton Pipeline To GitOps'

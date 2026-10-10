@@ -225,6 +225,25 @@ modules:
         title: Section Overview
         path: sections/section-040/README.md
 
+      - type: reading
+        title: "Build Tekton Tasks And Pipelines"
+        path: sections/section-040/module-01/course.md
+      - type: reading
+        title: "Tasks, TaskRuns And Pods"
+        path: sections/section-040/module-01/course-01-tasks-taskruns-and-pods.md
+      - type: reading
+        title: "Workspaces, Pipelines And Results"
+        path: sections/section-040/module-01/course-02-workspaces-and-pipelines.md
+      - type: reading
+        title: "Reading A Failed TaskRun"
+        path: sections/section-040/module-01/course-03-reading-a-failed-taskrun.md
+      - type: reading
+        title: "Shared Tasks With Resolvers"
+        path: sections/section-040/module-01/course-04-shared-tasks-with-resolvers.md
+      - type: reading
+        title: "Summary"
+        path: sections/section-040/module-01/course-05-summary.md
+
 
 
   - id: module-050

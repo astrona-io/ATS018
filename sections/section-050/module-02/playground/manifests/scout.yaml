@@ -1,0 +1,88 @@
+# scout as an Argo Rollout with a blueGreen strategy and no analysis yet.
+# `scout` is the active Service, `scout-preview` the preview Service. The
+# PodMonitor makes Prometheus scrape every scout pod and keep the
+# rollouts-pod-template-hash label, so a query can select one version.
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: scout
+  namespace: starfleet
+spec:
+  replicas: 2
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: scout
+  template:
+    metadata:
+      labels:
+        app: scout
+    spec:
+      containers:
+        - name: scout
+          image: ghcr.io/stefanprodan/podinfo:6.14.0
+          command: ["./podinfo", "--port=9898"]
+          ports:
+            - name: http
+              containerPort: 9898
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+  strategy:
+    blueGreen:
+      activeService: scout
+      previewService: scout-preview
+      autoPromotionEnabled: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scout
+  namespace: starfleet
+  labels:
+    app: scout
+spec:
+  selector:
+    app: scout
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scout-preview
+  namespace: starfleet
+  labels:
+    app: scout
+spec:
+  selector:
+    app: scout
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: scout
+  namespace: starfleet
+spec:
+  selector:
+    matchLabels:
+      app: scout
+  podTargetLabels:
+    - rollouts-pod-template-hash
+  podMetricsEndpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

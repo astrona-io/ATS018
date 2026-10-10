@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Automate Canary Analysis With Flagger (PLAYGROUND) — playground environment.
+# Istio 1.31.1 (istiod only, sidecar injection on `starfleet`), Istio's
+# Prometheus add-on, Flagger 1.45.0 for the Istio provider, and the Flagger
+# load tester in `starfleet`. `scout` runs as a plain Deployment with a
+# Service. Deliberately absent: no Canary resource and no Argo Rollouts.
+# No task, no grading.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-018-playground-050-03
+  docs:
+    guide: docs/overview.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - curlimages/curl:8.22.0
+      - ghcr.io/stefanprodan/podinfo:6.14.0
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - docker.io/istio/pilot:1.31.1
+      - docker.io/istio/proxyv2:1.31.1
+      - docker.io/prom/prometheus:v3.10.0
+      - ghcr.io/prometheus-operator/prometheus-config-reloader:v0.89.0
+      - ghcr.io/fluxcd/flagger:1.45.0
+      - ghcr.io/fluxcd/flagger-loadtester:0.39.0
+
+bootstrap:
+  manifests:
+    - name: lab-start
+      type: file
+      source: manifests/lab-start.yaml
+  init:
+    - name: install-istio-flagger
+      description: "Installs Istio 1.31.1, its Prometheus add-on, Flagger 1.45.0 and the load tester"
+      type: file
+      source: bootstrap/01-install-istio-flagger.sh
+  waitFor:
+    - resource: deploy/shuttle
+      namespace: starfleet
+    - resource: deploy/scout
+      namespace: starfleet
+
+teardown:
+  keepCluster: false
