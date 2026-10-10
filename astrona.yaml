@@ -130,10 +130,19 @@ modules:
       - type: reading
         title: "Manage Many Applications With ApplicationSets"
         path: sections/section-020/module-02/course.md
-
       - type: reading
-        title: "Diagnose Sync And Health Failures In Argo CD"
-        path: sections/section-020/module-03/course.md
+        title: "App Of Apps"
+        path: sections/section-020/module-02/course-01-app-of-apps.md
+      - type: reading
+        title: "ApplicationSets And Generators"
+        path: sections/section-020/module-02/course-02-applicationsets-and-generators.md
+      - type: reading
+        title: "AppProjects For A Second Tenant"
+        path: sections/section-020/module-02/course-03-appprojects-for-a-second-tenant.md
+      - type: reading
+        title: "Summary"
+        path: sections/section-020/module-02/course-04-summary.md
+
 
   - id: module-030
     title: "Continuous Delivery With Flux"
@@ -149,13 +158,7 @@ modules:
         title: Section Overview
         path: sections/section-030/README.md
 
-      - type: reading
-        title: "Reconcile Git Sources With Flux Kustomizations"
-        path: sections/section-030/module-01/course.md
 
-      - type: reading
-        title: "Deliver Helm Releases With Flux"
-        path: sections/section-030/module-02/course.md
 
   - id: module-040
     title: "Continuous Integration Pipelines With Tekton"
@@ -172,13 +175,7 @@ modules:
         title: Section Overview
         path: sections/section-040/README.md
 
-      - type: reading
-        title: "Build Tekton Tasks And Pipelines"
-        path: sections/section-040/module-01/course.md
 
-      - type: reading
-        title: "Hand Off From A Tekton Pipeline To GitOps"
-        path: sections/section-040/module-02/course.md
 
   - id: module-050
     title: "Progressive Delivery"
@@ -195,14 +192,5 @@ modules:
         title: Section Overview
         path: sections/section-050/README.md
 
-      - type: reading
-        title: "Roll Out A Canary With Argo Rollouts"
-        path: sections/section-050/module-01/course.md
 
-      - type: reading
-        title: "Gate A Blue/Green Release With Analysis"
-        path: sections/section-050/module-02/course.md
 
-      - type: reading
-        title: "Automate Canary Analysis With Flagger"
-        path: sections/section-050/module-03/course.md

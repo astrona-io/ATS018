@@ -47,13 +47,13 @@ items:
 - key: section-020/module-02/playground
   kind: playground
   what: 'playground for module 2: Manage Many Applications With ApplicationSets'
-  status: pending
-  note: ''
+  status: done
+  note: booted 2026-10-10; go-httpbin tag fixed to 2.25.0
 - key: section-020/module-02/course
   kind: course
   what: 'chapter for module 2: Manage Many Applications With ApplicationSets'
-  status: pending
-  note: ''
+  status: done
+  note: landing + 3 parts + summary; ApplicationSet adoption, cascade finalizer, AppProject errors verified
 - key: section-020/module-03/playground
   kind: playground
   what: 'playground for module 3: Diagnose Sync And Health Failures In Argo CD'
