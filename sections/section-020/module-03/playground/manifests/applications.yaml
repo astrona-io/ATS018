@@ -1,0 +1,86 @@
+# The four Applications of this playground. Each one is broken on purpose;
+# the fault is the material. Never fix it here.
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: scout-path
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: http://gitea-http.gitea.svc:3000/starfleet/scout-faults.git
+    targetRevision: main
+    path: paths
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: starfleet-path
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: scout-reject
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: http://gitea-http.gitea.svc:3000/starfleet/scout-faults.git
+    targetRevision: main
+    path: reject
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: starfleet-reject
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: scout-hpa
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: http://gitea-http.gitea.svc:3000/starfleet/scout-faults.git
+    targetRevision: main
+    path: hpa
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: starfleet-hpa
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: scout-image
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: http://gitea-http.gitea.svc:3000/starfleet/scout-faults.git
+    targetRevision: main
+    path: image
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: starfleet-image
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

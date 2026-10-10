@@ -142,6 +142,24 @@ modules:
       - type: reading
         title: "Summary"
         path: sections/section-020/module-02/course-04-summary.md
+      - type: reading
+        title: "Diagnose Sync And Health Failures In Argo CD"
+        path: sections/section-020/module-03/course.md
+      - type: reading
+        title: "Where Argo CD Reports A Problem"
+        path: sections/section-020/module-03/course-01-where-argo-cd-reports-a-problem.md
+      - type: reading
+        title: "Sync Failures, Waves And Hooks"
+        path: sections/section-020/module-03/course-02-sync-failures-waves-and-hooks.md
+      - type: reading
+        title: "Permanent Drift And ignoreDifferences"
+        path: sections/section-020/module-03/course-03-permanent-drift-and-ignore-differences.md
+      - type: reading
+        title: "Health Failures"
+        path: sections/section-020/module-03/course-04-health-failures.md
+      - type: reading
+        title: "Summary"
+        path: sections/section-020/module-03/course-05-summary.md
 
 
   - id: module-030
