@@ -1,0 +1,462 @@
+# Curriculum blueprint — written by /astrona-course-domain-plan, consumed by
+# /astrona-course-domain-scaffold and /astrona-course-domain-build.
+#
+# This file is the design record for the course. Commit it. Edit it by hand and
+# re-run scaffold/build; both are idempotent and will not overwrite written prose.
+#
+# Schema: references/blueprint-schema.md in the astrona-course-domain-plan skill.
+
+version: 1
+mode: new
+
+course:
+  id: ATS018
+  title: "CNPE: GitOps and Continuous Delivery"
+  git_url: ssh://git@github.com/astrona-io/ATS018.git
+  description: >
+    Training material covering the Certified Cloud Native Platform Engineer
+    (CNPE) GitOps and Continuous Delivery domain: packaging applications with
+    Kustomize, continuous delivery from Git with Argo CD and Flux,
+    continuous integration pipelines with Tekton that hand a new image to a
+    GitOps repository, and progressive delivery with Argo Rollouts and
+    Flagger. Each module pairs a layered reader with an ungraded hands-on
+    playground on a local kind cluster with an in-cluster Gitea server. Each
+    section closes with an integration capstone.
+  certification:
+    name: Certified Cloud Native Platform Engineer
+    code: CNPE
+    provider: CNCF / Linux Foundation
+    domain: GitOps and Continuous Delivery
+    weight: 25
+  environment:
+    runtime: kind
+    kind: "0.33.0"
+    kind_node_image: "kindest/node:v1.35.8"
+    kubernetes: "1.35"
+    kustomize: "5.7.1 (embedded in kubectl 1.35)"
+    helm: "4.3.0 (bootstrap plumbing only, not taught)"
+    argocd: "3.5.4"
+    flux: "2.9.6"
+    tekton_pipelines: "1.17.0"
+    tekton_triggers: "0.36.4"
+    tkn: "0.46.1"
+    argo_rollouts: "1.10.0"
+    flagger: "1.45.0"
+    istio: "1.31.1"
+    kube_prometheus_stack_chart: "92.3.0"
+    gitea: "28.1.0-rootless (plumbing only, not taught)"
+    podinfo: "6.15.0"
+    go_httpbin: "2.25.0"
+
+defaults:
+  playground: true
+  module_lab: false
+  capstone: true
+  section_quiz: true
+  final_quiz: true
+
+sections:
+  - id: section-010
+    title: Packaging Applications For GitOps
+    curriculum_item: Implementing GitOps Workflows for Application and Infrastructure Deployment
+    description: >
+      Every GitOps controller applies manifests that a packaging tool renders
+      from Git. This section teaches Kustomize, the packaging tool built into
+      kubectl and rendered natively by Argo CD and Flux, so the reader can
+      produce a repeatable manifest per environment and read what an overlay
+      will apply before any controller touches the cluster. It comes first
+      because Argo CD, Flux and Tekton all consume this format. Helm charts
+      appear later only as a source that Argo CD and Flux consume.
+    modules:
+      - id: module-01
+        title: Build Environment Overlays With Kustomize
+        objectives:
+          - Write a kustomization.yaml that sets a namespace, common labels and an image tag for a base
+          - Create staging and production overlays that patch the replica count and resources of one base
+          - Render an overlay with kubectl kustomize and compare it with the cluster using kubectl diff -k
+          - Generate a ConfigMap with configMapGenerator and explain why its name carries a hash suffix
+          - Diagnose a kustomize build error caused by a wrong resource path or a patch that matches no object
+        outline:
+          - Why a GitOps controller needs one rendered, repeatable manifest per environment
+          - The base and its kustomization.yaml fields (resources, namespace, labels, images)
+          - Overlays and patches (strategic merge and JSON 6902 patches with a target)
+          - Generators and the hash suffix that makes a Deployment roll on a configuration change
+          - Render, diff and apply with kubectl kustomize, kubectl diff -k and kubectl apply -k
+          - Reading kustomize build errors
+        diagrams:
+          - type: flowchart
+            shows: One base plus a staging and a production overlay rendering to two different manifests
+        playground: true
+        playground_env: >
+          kind cluster (Kubernetes 1.35). Namespaces `starfleet-staging` and
+          `starfleet-production` exist and are empty; `shuttle` (curlimages/curl)
+          runs in `starfleet` to send test requests. The reader writes every
+          kustomization file on their own machine; kubectl's built-in
+          kustomize is enough. Deliberately absent: no GitOps controller, no
+          Helm release, no `scout` workload yet.
+        notes: >
+          kubectl embeds its own kustomize version, which can lag the
+          standalone 5.8.3 binary. State which one each command uses and
+          check `kubectl version --client` output at build.
+    capstone:
+      title: Packaging Applications For GitOps Capstone
+      objective: >
+        The `scout` service must ship to staging and production from one
+        source. Fix a broken Kustomize base and overlays so they render, set
+        the right image tag, replica count and generated configuration per
+        environment, and apply cleanly, proving both environments answer
+        from `shuttle` with the expected version and message.
+
+  - id: section-020
+    title: Continuous Delivery With Argo CD
+    curriculum_item: Implementing GitOps Workflows for Application and Infrastructure Deployment
+    description: >
+      Argo CD is the primary GitOps controller in this course. The section
+      teaches the reader to deliver an application from a Git repository,
+      scale that to many applications and tenants with ApplicationSets and
+      AppProjects, and diagnose the sync and health failures that the exam
+      expects a platform engineer to fix. It comes after packaging because
+      every Argo CD Application renders a Kustomize overlay or a Helm chart.
+    modules:
+      - id: module-01
+        title: Deploy An Application With Argo CD
+        objectives:
+          - Create an Application that points at a Git repository path, a target revision and a destination namespace
+          - Read the sync status and the health status of an Application with argocd app get and kubectl
+          - Turn on automated sync with prune and selfHeal and prove that a manual change in the cluster is reverted
+          - Tell OutOfSync from Degraded on the same Application and name which component reports each
+          - Register a private Git repository with a repository Secret
+          - Deliver a Kustomize overlay and a Helm chart through the Application source fields
+        outline:
+          - The GitOps principles (declarative, versioned, pulled, continuously reconciled)
+          - Argo CD components (API server, repo server, application controller, Redis) and what each does
+          - The Application resource and its source and destination fields
+          - Sync status and health status
+          - Sync policy (automated, prune, selfHeal, CreateNamespace)
+          - Helm and Kustomize sources
+        diagrams:
+          - type: flowchart
+            shows: Argo CD components and the path from the Git repository to the cluster
+          - type: sequence
+            shows: A Git commit being fetched, rendered, compared and applied by the repo server and application controller
+        playground: true
+        playground_env: >
+          kind cluster with Argo CD 3.5.4 (non-HA install) in `argocd`, the
+          `argocd` CLI logged in through a port-forward, and Gitea in `gitea`
+          with the private repository `starfleet/scout-deploy` holding a
+          Kustomize base with staging and production overlays and a Helm
+          values file for podinfo. A repository Secret is deliberately not
+          created, so the first Application fails to fetch until the reader
+          adds credentials. Namespace `starfleet` does not exist yet.
+          Deliberately absent: no Application, no ApplicationSet.
+        notes: >
+          Argo CD 3.x changed defaults from 2.x (for example resource tracking
+          and RBAC inheritance). Check every default against the 3.5 docs and
+          the 2.14-to-3.0 upgrade notes before writing it.
+      - id: module-02
+        title: Manage Many Applications With ApplicationSets
+        objectives:
+          - Bootstrap several Applications from one parent Application with the app of apps pattern
+          - Generate one Application per environment with an ApplicationSet list generator
+          - Generate one Application per directory with the ApplicationSet git generator
+          - Name and place generated Applications with Go template fields
+          - Restrict a tenant's source repositories and destination namespaces with an AppProject
+        outline:
+          - Why one Application per service does not scale
+          - App of apps and its limits
+          - ApplicationSet, generators and the template
+          - List and git directory generators with Go templates
+          - AppProject restrictions for a second tenant
+        diagrams:
+          - type: flowchart
+            shows: An ApplicationSet generator producing parameters that fill the template into several Applications
+        playground: true
+        playground_env: >
+          kind cluster with Argo CD 3.5.4 and Gitea. Repository
+          `starfleet/platform-apps` holds directories `apps/scout`,
+          `apps/probe` and `apps/shuttle`, each a Kustomize base, plus
+          `envs/staging` and `envs/production`. A second tenant namespace
+          `outpost` exists. The default AppProject is the only project.
+          Deliberately absent: no ApplicationSet, no AppProject for `outpost`.
+      - id: module-03
+        title: Diagnose Sync And Health Failures In Argo CD
+        objectives:
+          - Read the sync result and the per-resource messages of a failed sync with argocd app get
+          - Find why an Application stays OutOfSync with argocd app diff and ignore a field another controller changes with ignoreDifferences
+          - Order dependent resources with sync waves and run a PreSync hook Job
+          - Diagnose a ComparisonError caused by a wrong repository URL, revision or path
+          - Recover a Degraded Application by fixing the Git repository instead of the cluster
+        outline:
+          - Where Argo CD reports a problem (conditions, operation state, resource status)
+          - Fetch and render failures (ComparisonError)
+          - Sync failures (rejected manifests, missing namespaces, ordering) and sync waves and hooks
+          - Permanent drift and ignoreDifferences
+          - Health failures and why the fix belongs in Git
+        diagrams:
+          - type: flowchart
+            shows: A decision tree from the Application status to the failing stage (fetch, render, sync, health)
+          - type: state
+            shows: Sync status and health status combinations an Application moves through during a failed and a repaired sync
+        playground: true
+        playground_env: >
+          kind cluster with Argo CD 3.5.4 and Gitea. Four Applications are
+          deliberately broken: one with a wrong path (ComparisonError), one
+          with a manifest the API server rejects (sync failed), one whose
+          Deployment replicas are changed by a HorizontalPodAutoscaler
+          (permanent OutOfSync), and one that references an image tag that
+          does not exist (Degraded). The Git repository is writable by the
+          reader through the Gitea web UI and git over HTTP.
+    capstone:
+      title: Continuous Delivery With Argo CD Capstone
+      objective: >
+        Onboard the `outpost` tenant: create an AppProject that limits it to
+        its own repository and namespace, generate its staging and production
+        Applications with an ApplicationSet, and repair an existing `starfleet`
+        Application that is OutOfSync and Degraded, proving self-heal reverts
+        a manual change and both tenants answer from `shuttle`.
+
+  - id: section-030
+    title: Continuous Delivery With Flux
+    curriculum_item: Implementing GitOps Workflows for Application and Infrastructure Deployment
+    description: >
+      Flux is the second GitOps controller the exam allows. This compact
+      section teaches the Flux objects that match the Argo CD skills the
+      reader already has, so they can pick either tool on exam day. It comes
+      after Argo CD because it reuses the same repositories and packaging and
+      only changes the controller.
+    modules:
+      - id: module-01
+        title: Reconcile Git Sources With Flux Kustomizations
+        objectives:
+          - Install the Flux controllers and check them with flux check
+          - Create a GitRepository source and a Flux Kustomization that applies a path with prune enabled
+          - Read the Ready condition of sources and Kustomizations with flux get and kubectl describe
+          - Force a reconcile and suspend and resume a Kustomization
+          - Order two Kustomizations with dependsOn
+        outline:
+          - The Flux controllers and their split into sources and appliers
+          - GitRepository and the artifact it produces
+          - The Flux Kustomization (path, interval, prune, targetNamespace)
+          - Reading status with the flux CLI
+          - Reconcile, suspend, resume and dependsOn
+        diagrams:
+          - type: flowchart
+            shows: The source controller producing an artifact that the kustomize controller applies
+        playground: true
+        playground_env: >
+          kind cluster with the flux CLI 2.9.6 and the Flux controllers
+          installed (no bootstrap), and Gitea with repository
+          `starfleet/scout-deploy` (Kustomize base and overlays) and a
+          read-only credential Secret ready in `flux-system`. Deliberately
+          absent: no GitRepository or Kustomization; no Argo CD in this
+          cluster.
+      - id: module-02
+        title: Deliver Helm Releases With Flux
+        objectives:
+          - Create an OCIRepository or HelmRepository source and a HelmRelease with inline values
+          - Read HelmRelease status and history and find why an install or upgrade failed
+          - Configure install and upgrade remediation so a failed upgrade rolls back
+          - Load values from a ConfigMap with valuesFrom
+          - Match each Flux object to the Argo CD object that does the same job
+        outline:
+          - Helm sources in Flux (HelmRepository, OCIRepository)
+          - The HelmRelease resource and its values
+          - Status, history and failure messages
+          - Remediation, retries and rollback
+          - Flux and Argo CD side by side
+        diagrams:
+          - type: sequence
+            shows: The helm controller installing, failing an upgrade and remediating with a rollback
+        playground: true
+        playground_env: >
+          kind cluster with the Flux controllers, outbound internet to
+          ghcr.io, and a HelmRelease `scout` in `starfleet` (podinfo chart) that
+          is deliberately failing: its values set a readiness probe path that
+          never answers, so the upgrade times out. No remediation is
+          configured yet.
+    capstone:
+      title: Continuous Delivery With Flux Capstone
+      objective: >
+        Deliver `scout` to `starfleet` with Flux from Gitea, apply the
+        configuration only after a dependent namespace Kustomization is ready,
+        and repair a HelmRelease stuck after a failed upgrade so it rolls
+        back automatically next time, proving the service answers from
+        `shuttle`.
+
+  - id: section-040
+    title: Continuous Integration Pipelines With Tekton
+    curriculum_item: Building and Configuring CI/CD Pipelines Integrated with Kubernetes
+    description: >
+      A GitOps controller only delivers what lands in Git. This section
+      teaches Tekton, a CI system that runs each step as a container in a
+      pod, and ends with the hand-off where a pipeline pushes a new image
+      tag and commits it to the GitOps repository that Argo CD watches. It
+      comes after the delivery sections because the hand-off needs an
+      Application to deliver the result.
+    modules:
+      - id: module-01
+        title: Build Tekton Tasks And Pipelines
+        objectives:
+          - Write a Task with params, steps, results and a workspace
+          - Chain Tasks in a Pipeline with runAfter and pass a result from one Task to the next
+          - Start a PipelineRun with a PersistentVolumeClaim workspace and read its logs with tkn
+          - Reference a shared Task through the cluster or git resolver instead of copying it
+          - Diagnose a failed TaskRun from its step status and the pod logs
+        outline:
+          - Task, TaskRun, Pipeline and PipelineRun, and the pod each TaskRun creates
+          - Params, results and workspaces
+          - Pipelines, runAfter and result passing
+          - Resolvers for shared Tasks
+          - Reading a failure with tkn and kubectl
+        diagrams:
+          - type: flowchart
+            shows: A PipelineRun creating TaskRuns, each a pod whose steps run as containers sharing a workspace
+        playground: true
+        playground_env: >
+          kind cluster with Tekton Pipelines 1.17.0, the tkn CLI 0.46.1 and
+          Gitea with repository `starfleet/scout-app` (a small source tree with
+          a Makefile-style test script). A Task `run-tests` is installed and
+          deliberately has a step that fails on a wrong working directory.
+          Deliberately absent: no Pipeline, no Triggers, no registry.
+        notes: >
+          Verify at build which Tekton resolvers are enabled by default in
+          1.17 and the current state of the Tekton Hub and catalog before
+          writing about shared Tasks.
+      - id: module-02
+        title: Hand Off From A Tekton Pipeline To GitOps
+        objectives:
+          - Push a newly tagged image to the in-cluster registry from a pipeline Task
+          - Update the image tag in a GitOps repository from a pipeline with a Git commit
+          - Give a Task Git credentials through a Secret and a service account
+          - Start a PipelineRun from a Git push with an EventListener, a TriggerBinding and a TriggerTemplate
+          - Prove the full flow from a push to a PipelineRun, a commit and an Argo CD sync of the new version
+        outline:
+          - The CI to GitOps hand-off and why the pipeline never applies to the cluster
+          - Publishing an image tag to the in-cluster registry
+          - Committing the new tag with credentials from a Secret
+          - Tekton Triggers (EventListener, TriggerBinding, TriggerTemplate) and a Gitea webhook
+          - Following one change end to end
+        diagrams:
+          - type: sequence
+            shows: A Git push through the webhook, EventListener, PipelineRun, registry, GitOps commit and Argo CD sync
+        playground: true
+        playground_env: >
+          kind cluster with Tekton Pipelines 1.17.0 and Triggers 0.36.4, an
+          in-cluster OCI registry, Gitea with `starfleet/scout-app` and
+          `starfleet/scout-deploy`, and Argo CD 3.5.4 with an Application
+          `scout` that auto-syncs `scout-deploy` into `starfleet`. Deliberately
+          absent: no Gitea webhook, no EventListener and no Git credential
+          Secret for the pipeline.
+        notes: >
+          To keep memory low the "build" Task copies the podinfo image to a new
+          tag in the in-cluster registry (for example with crane) instead of
+          building a container image; say so in the text. Check the playground
+          fits the 10 GiB Podman budget with Argo CD, Tekton and Gitea running.
+    capstone:
+      title: Continuous Integration Pipelines With Tekton Capstone
+      objective: >
+        Repair a CI pipeline for `scout` that fails at its test step and
+        cannot push its GitOps commit, then wire a Gitea webhook so a push to
+        `scout-app` starts it, proving one push ends with the new version
+        serving traffic in `starfleet` through Argo CD.
+
+  - id: section-050
+    title: Progressive Delivery
+    curriculum_item: Deploying Applications Using Progressive Delivery Strategies (for example Blue/Green or Canary)
+    description: >
+      A new version should reach users a step at a time and stop on bad
+      metrics. This section teaches canary and blue/green releases with
+      Argo Rollouts, the primary tool, including an automatic gate on a
+      Prometheus metric, and then the same canary with Flagger, the
+      alternative the exam allows. It comes last because it reuses delivery,
+      packaging and metrics from the earlier sections.
+    modules:
+      - id: module-01
+        title: Roll Out A Canary With Argo Rollouts
+        objectives:
+          - Convert a Deployment into a Rollout with canary steps (setWeight and pause)
+          - Follow a canary with kubectl argo rollouts get rollout --watch
+          - Promote, pause and abort a rollout and name the ReplicaSet that serves traffic
+          - Explain how Argo Rollouts approximates a weight with replica counts when no traffic router is configured
+          - Retry an aborted rollout after the image is fixed
+        outline:
+          - Why a Deployment rolling update is not a canary
+          - The Rollout resource and the canary strategy steps
+          - The kubectl argo rollouts plugin and its status view
+          - Promote, pause, abort and retry
+          - Weights without a traffic router
+        diagrams:
+          - type: state
+            shows: Rollout phases (Progressing, Paused, Healthy, Degraded) through promote and abort
+          - type: flowchart
+            shows: Stable and canary ReplicaSets behind one Service and the replica split per step
+        playground: true
+        playground_env: >
+          kind cluster with the Argo Rollouts 1.10.0 controller and the
+          kubectl argo rollouts plugin. Namespace `starfleet` holds `scout` as
+          a Deployment (podinfo 6.14.x) with 5 replicas and a Service, and
+          `shuttle`. Deliberately absent: no Rollout, no traffic router, no
+          metrics provider.
+      - id: module-02
+        title: Gate A Blue/Green Release With Analysis
+        objectives:
+          - Configure a blueGreen strategy with activeService, previewService and autoPromotionEnabled set to false
+          - Test the new version through the preview Service before promotion
+          - Write an AnalysisTemplate that queries Prometheus for the success rate of the new version
+          - Run the analysis as prePromotionAnalysis and read the AnalysisRun result
+          - Prove that a failing metric aborts the release and keeps the old version active
+        outline:
+          - Blue/green with an active and a preview Service
+          - Manual promotion and scale-down delay
+          - AnalysisTemplate, AnalysisRun and the Prometheus provider
+          - Pre-promotion and post-promotion analysis
+          - A failed analysis and what stays active
+        diagrams:
+          - type: sequence
+            shows: A blue/green release with pre-promotion analysis querying Prometheus and promoting or aborting
+        playground: true
+        playground_env: >
+          kind cluster with Argo Rollouts 1.10.0 and a small Prometheus
+          (kube-prometheus-stack 92.3.0 trimmed to Prometheus and the operator)
+          scraping `scout` in `starfleet`. `scout` runs podinfo 6.15.0 as a
+          Rollout with a blueGreen strategy and no analysis. A second podinfo
+          configuration that returns random 500 errors is ready to deploy as the
+          bad version. `shuttle` sends steady traffic.
+        notes: >
+          Verify the podinfo metric names and labels (for example the HTTP
+          request counter and status label) and its random error option at
+          build before writing PromQL.
+      - id: module-03
+        title: Automate Canary Analysis With Flagger
+        objectives:
+          - Create a Canary resource that targets a Deployment and read the primary and canary objects Flagger creates
+          - Configure the analysis interval, threshold, stepWeight and maxWeight with the built-in request-success-rate metric
+          - Trigger a canary by changing the Deployment image and follow it in the Canary status and events
+          - Generate test traffic during analysis with the Flagger load tester webhook
+          - Compare how Flagger and Argo Rollouts each take over a workload
+        outline:
+          - What Flagger does with a Deployment and the objects it generates
+          - The Canary resource and its analysis block
+          - A promoted and a rolled back canary
+          - Load testing webhooks
+          - Flagger and Argo Rollouts side by side
+        diagrams:
+          - type: flowchart
+            shows: Flagger reading metrics and shifting the mesh traffic weight between the primary and canary Deployments
+        playground: true
+        playground_env: >
+          kind cluster with Istio 1.31.1 (minimal profile, sidecar injection on
+          `starfleet`), Flagger 1.45.0 for the Istio provider with its bundled
+          Prometheus, and the flagger-loadtester in `starfleet`. `scout` runs as
+          a plain Deployment with a Service. Deliberately absent: no Canary
+          resource and no Argo Rollouts in this cluster.
+        notes: >
+          This is the compact module for the secondary tool. Check the memory
+          of Istio plus Flagger and its Prometheus against the Podman budget.
+    capstone:
+      title: Progressive Delivery Capstone
+      objective: >
+        Release a new `scout` version with Argo Rollouts: convert it to a
+        canary with an analysis step on the Prometheus success rate, prove a
+        bad version is aborted automatically while the stable version keeps
+        serving `shuttle`, then promote a good version to full traffic.

@@ -1,0 +1,181 @@
+# Phase-3 build progress — written by /astrona-course-domain-build.
+# Commit it: a later session resumes from here.
+
+version: 1
+items:
+- key: section-010/module-01/playground
+  kind: playground
+  what: 'playground for module 1: Build Environment Overlays With Kustomize'
+  status: done
+  note: astrona CLI developer; kindest/node:v1.35.8; booted and verified 2026-10-10
+- key: section-010/module-01/course
+  kind: course
+  what: 'chapter for module 1: Build Environment Overlays With Kustomize'
+  status: done
+  note: 'split: landing + 4 parts + summary; output captured with kubectl 1.35.8 / Kustomize 5.7.1'
+- key: section-010/module-02/playground
+  kind: playground
+  what: 'playground for module 2: Package And Configure Applications With Helm'
+  status: skipped
+  note: 'removed: Helm not on CNPE tool list'
+- key: section-010/module-02/course
+  kind: course
+  what: 'chapter for module 2: Package And Configure Applications With Helm'
+  status: skipped
+  note: 'removed: Helm not on CNPE tool list'
+- key: section-010/quiz
+  kind: quiz
+  what: 'knowledge check for section-010: Packaging Applications For GitOps'
+  status: pending
+  note: ''
+- key: section-010/capstone
+  kind: capstone
+  what: 'capstone lab: Packaging Applications For GitOps Capstone'
+  status: pending
+  note: ''
+- key: section-020/module-01/playground
+  kind: playground
+  what: 'playground for module 1: Deploy An Application With Argo CD'
+  status: done
+  note: booted 2026-10-10; Argo CD 3.5.4 + Gitea 28.1.0-rootless; port forwards 8080/3000
+- key: section-020/module-01/course
+  kind: course
+  what: 'chapter for module 1: Deploy An Application With Argo CD'
+  status: done
+  note: landing + 4 parts + summary; Argo CD 3.x facts verified (annotation tracking, per-resource health
+    not in CR)
+- key: section-020/module-02/playground
+  kind: playground
+  what: 'playground for module 2: Manage Many Applications With ApplicationSets'
+  status: pending
+  note: ''
+- key: section-020/module-02/course
+  kind: course
+  what: 'chapter for module 2: Manage Many Applications With ApplicationSets'
+  status: pending
+  note: ''
+- key: section-020/module-03/playground
+  kind: playground
+  what: 'playground for module 3: Diagnose Sync And Health Failures In Argo CD'
+  status: pending
+  note: ''
+- key: section-020/module-03/course
+  kind: course
+  what: 'chapter for module 3: Diagnose Sync And Health Failures In Argo CD'
+  status: pending
+  note: ''
+- key: section-020/quiz
+  kind: quiz
+  what: 'knowledge check for section-020: Continuous Delivery With Argo CD'
+  status: pending
+  note: ''
+- key: section-020/capstone
+  kind: capstone
+  what: 'capstone lab: Continuous Delivery With Argo CD Capstone'
+  status: pending
+  note: ''
+- key: section-030/module-01/playground
+  kind: playground
+  what: 'playground for module 1: Reconcile Git Sources With Flux Kustomizations'
+  status: pending
+  note: ''
+- key: section-030/module-01/course
+  kind: course
+  what: 'chapter for module 1: Reconcile Git Sources With Flux Kustomizations'
+  status: pending
+  note: ''
+- key: section-030/module-02/playground
+  kind: playground
+  what: 'playground for module 2: Deliver Helm Releases With Flux'
+  status: pending
+  note: ''
+- key: section-030/module-02/course
+  kind: course
+  what: 'chapter for module 2: Deliver Helm Releases With Flux'
+  status: pending
+  note: ''
+- key: section-030/quiz
+  kind: quiz
+  what: 'knowledge check for section-030: Continuous Delivery With Flux'
+  status: pending
+  note: ''
+- key: section-030/capstone
+  kind: capstone
+  what: 'capstone lab: Continuous Delivery With Flux Capstone'
+  status: pending
+  note: ''
+- key: section-040/module-01/playground
+  kind: playground
+  what: 'playground for module 1: Build Tekton Tasks And Pipelines'
+  status: pending
+  note: ''
+- key: section-040/module-01/course
+  kind: course
+  what: 'chapter for module 1: Build Tekton Tasks And Pipelines'
+  status: pending
+  note: ''
+- key: section-040/module-02/playground
+  kind: playground
+  what: 'playground for module 2: Hand Off From A Tekton Pipeline To GitOps'
+  status: pending
+  note: ''
+- key: section-040/module-02/course
+  kind: course
+  what: 'chapter for module 2: Hand Off From A Tekton Pipeline To GitOps'
+  status: pending
+  note: ''
+- key: section-040/quiz
+  kind: quiz
+  what: 'knowledge check for section-040: Continuous Integration Pipelines With Tekton'
+  status: pending
+  note: ''
+- key: section-040/capstone
+  kind: capstone
+  what: 'capstone lab: Continuous Integration Pipelines With Tekton Capstone'
+  status: pending
+  note: ''
+- key: section-050/module-01/playground
+  kind: playground
+  what: 'playground for module 1: Roll Out A Canary With Argo Rollouts'
+  status: pending
+  note: ''
+- key: section-050/module-01/course
+  kind: course
+  what: 'chapter for module 1: Roll Out A Canary With Argo Rollouts'
+  status: pending
+  note: ''
+- key: section-050/module-02/playground
+  kind: playground
+  what: 'playground for module 2: Gate A Blue/Green Release With Analysis'
+  status: pending
+  note: ''
+- key: section-050/module-02/course
+  kind: course
+  what: 'chapter for module 2: Gate A Blue/Green Release With Analysis'
+  status: pending
+  note: ''
+- key: section-050/module-03/playground
+  kind: playground
+  what: 'playground for module 3: Automate Canary Analysis With Flagger'
+  status: pending
+  note: ''
+- key: section-050/module-03/course
+  kind: course
+  what: 'chapter for module 3: Automate Canary Analysis With Flagger'
+  status: pending
+  note: ''
+- key: section-050/quiz
+  kind: quiz
+  what: 'knowledge check for section-050: Progressive Delivery'
+  status: pending
+  note: ''
+- key: section-050/capstone
+  kind: capstone
+  what: 'capstone lab: Progressive Delivery Capstone'
+  status: pending
+  note: ''
+- key: course/final-quiz
+  kind: quiz
+  what: final domain quiz across every section
+  status: pending
+  note: ''

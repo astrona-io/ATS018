@@ -1,0 +1,64 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Manage Many Applications With ApplicationSets (PLAYGROUND) — playground environment.
+# Argo CD 3.5.4 and two private Git repositories (in-cluster Gitea, plumbing only):
+# platform-apps (one folder per application and per environment) and outpost-apps.
+# No Application, ApplicationSet or extra AppProject exists. No task, no grading.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-018-playground-020-02
+  docs:
+    guide: docs/overview.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - curlimages/curl:8.22.0
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - mccutchen/go-httpbin:v2.25.0
+      - nginx:1.29-alpine
+      - gitea/gitea:28.1.0-rootless
+      - quay.io/argoproj/argocd:v3.5.4
+      - public.ecr.aws/docker/library/redis:8.2.3-alpine
+  portForwards:
+    - name: argocd
+      description: "Argo CD API server and web page"
+      namespace: argocd
+      resource: svc/argocd-server
+      targetPort: 443
+      hostPort: 8080
+      scheme: https
+    - name: gitea
+      description: "The Git server (git over HTTP)"
+      namespace: gitea
+      resource: svc/gitea-http
+      targetPort: 3000
+      hostPort: 3000
+      scheme: http
+
+bootstrap:
+  manifests:
+    - name: lab-start
+      type: file
+      source: manifests/lab-start.yaml
+  init:
+    - name: install-gitea
+      description: "Starts the in-cluster Git server"
+      type: file
+      source: bootstrap/01-install-gitea.sh
+    - name: install-argocd
+      description: "Installs Argo CD 3.5.4 (non-HA, without Dex and notifications)"
+      type: file
+      source: bootstrap/02-install-argocd.sh
+    - name: seed
+      description: "Pushes platform-apps and outpost-apps into Git and adds a credential template"
+      type: file
+      source: bootstrap/03-seed.sh
+  waitFor:
+    - resource: deploy/shuttle
+      namespace: starfleet
+
+teardown:
+  keepCluster: false

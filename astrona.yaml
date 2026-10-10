@@ -1,0 +1,208 @@
+# Course manifest for ATS018 - GitOps and Continuous Delivery (Certified Cloud Native Platform Engineer).
+#
+# One entry per section under `modules:`. Each section lists, in order: its
+# README, then for each module the landing page (course.md), its parts
+# (course-0N-*.md), and right after the part a lab tests, the lab's
+# question.md reading and the `type: lab` entry. The module's wrap-up page
+# comes last. The section capstone closes the section. Playgrounds are not
+# listed: the landing page's playground marker shows them. solution.md is
+# never listed.
+#
+# Every `path:` is relative to this file.
+
+training:
+  id: ATS018
+  title: "CNPE: GitOps and Continuous Delivery"
+  description: >
+    Training material covering the Certified Cloud Native Platform Engineer
+    (CNPE) GitOps and Continuous Delivery domain: packaging applications with
+    Kustomize, continuous delivery from Git with Argo CD and Flux,
+    continuous integration pipelines with Tekton that hand a new image to a
+    GitOps repository, and progressive delivery with Argo Rollouts and
+    Flagger. Each module pairs a layered reader with an ungraded hands-on
+    playground on a local kind cluster with an in-cluster Gitea server. Each
+    section closes with an integration capstone.
+    Built for Kubernetes 1.35.
+
+  certification:
+    name: Certified Cloud Native Platform Engineer
+    code: CNPE
+    provider: CNCF / Linux Foundation
+    domain: GitOps and Continuous Delivery
+    weight: 25
+    competencies:
+      - "Implementing GitOps Workflows for Application and Infrastructure Deployment"
+      - "Building and Configuring CI/CD Pipelines Integrated with Kubernetes"
+      - "Deploying Applications Using Progressive Delivery Strategies (for example Blue/Green or Canary)"
+
+modules:
+
+  - id: module-intro
+    title: "Introduction"
+    description: >
+      Start here. What this course trains you to do, how it is laid out, how
+      to get your machine ready with the astrona command-line tool, how the
+      content is written and checked, who maintains it, and how to report a
+      mistake.
+
+    content:
+      - type: reading
+        title: Introduction
+        path: sections/intro/README.md
+      - type: reading
+        title: "Welcome To The Course"
+        path: sections/intro/course-01-welcome.md
+      - type: reading
+        title: "Get Your Machine Ready"
+        path: sections/intro/course-02-get-your-machine-ready.md
+      - type: reading
+        title: "How This Course Is Made"
+        path: sections/intro/course-03-how-this-course-is-made.md
+
+  - id: module-010
+    title: "Packaging Applications For GitOps"
+    description: >
+      Every GitOps controller applies manifests that a packaging tool
+      renders from Git. This section teaches Kustomize, the packaging tool
+      built into kubectl and rendered natively by Argo CD and Flux, so the
+      reader can produce a repeatable manifest per environment and read what
+      an overlay will apply before any controller touches the cluster.
+
+    content:
+      - type: reading
+        title: Section Overview
+        path: sections/section-010/README.md
+
+      - type: reading
+        title: "Build Environment Overlays With Kustomize"
+        path: sections/section-010/module-01/course.md
+      - type: reading
+        title: "One Base, Rendered Before It Is Applied"
+        path: sections/section-010/module-01/course-01-base-and-kustomization.md
+      - type: reading
+        title: "Overlays And Patches"
+        path: sections/section-010/module-01/course-02-overlays-and-patches.md
+      - type: reading
+        title: "Generators, Diff And Apply"
+        path: sections/section-010/module-01/course-03-generators-diff-and-apply.md
+      - type: reading
+        title: "Reading Kustomize Build Errors"
+        path: sections/section-010/module-01/course-04-reading-build-errors.md
+      - type: reading
+        title: Summary
+        path: sections/section-010/module-01/course-05-summary.md
+
+  - id: module-020
+    title: "Continuous Delivery With Argo CD"
+    description: >
+      Argo CD is the primary GitOps controller in this course. The
+      section teaches the reader to deliver an application from a Git
+      repository, scale that to many applications and tenants with
+      ApplicationSets and AppProjects, and diagnose the sync and health
+      failures that the exam expects a platform engineer to fix. It
+      comes after packaging because every Argo CD Application renders a
+      Kustomize overlay or a Helm chart.
+
+    content:
+      - type: reading
+        title: Section Overview
+        path: sections/section-020/README.md
+
+      - type: reading
+        title: "Deploy An Application With Argo CD"
+        path: sections/section-020/module-01/course.md
+      - type: reading
+        title: "GitOps And The Argo CD Components"
+        path: sections/section-020/module-01/course-01-gitops-and-argo-cd-components.md
+      - type: reading
+        title: "The Application Resource"
+        path: sections/section-020/module-01/course-02-the-application-resource.md
+      - type: reading
+        title: "Sync Policy, Drift And Health"
+        path: sections/section-020/module-01/course-03-sync-policy-drift-and-health.md
+      - type: reading
+        title: "Helm Charts As A Source"
+        path: sections/section-020/module-01/course-04-helm-charts-as-a-source.md
+      - type: reading
+        title: "Summary"
+        path: sections/section-020/module-01/course-05-summary.md
+
+      - type: reading
+        title: "Manage Many Applications With ApplicationSets"
+        path: sections/section-020/module-02/course.md
+
+      - type: reading
+        title: "Diagnose Sync And Health Failures In Argo CD"
+        path: sections/section-020/module-03/course.md
+
+  - id: module-030
+    title: "Continuous Delivery With Flux"
+    description: >
+      Flux is the second GitOps controller the exam allows. This compact
+      section teaches the Flux objects that match the Argo CD skills the
+      reader already has, so they can pick either tool on exam day. It
+      comes after Argo CD because it reuses the same repositories and
+      packaging and only changes the controller.
+
+    content:
+      - type: reading
+        title: Section Overview
+        path: sections/section-030/README.md
+
+      - type: reading
+        title: "Reconcile Git Sources With Flux Kustomizations"
+        path: sections/section-030/module-01/course.md
+
+      - type: reading
+        title: "Deliver Helm Releases With Flux"
+        path: sections/section-030/module-02/course.md
+
+  - id: module-040
+    title: "Continuous Integration Pipelines With Tekton"
+    description: >
+      A GitOps controller only delivers what lands in Git. This section
+      teaches Tekton, a CI system that runs each step as a container in
+      a pod, and ends with the hand-off where a pipeline pushes a new
+      image tag and commits it to the GitOps repository that Argo CD
+      watches. It comes after the delivery sections because the hand-off
+      needs an Application to deliver the result.
+
+    content:
+      - type: reading
+        title: Section Overview
+        path: sections/section-040/README.md
+
+      - type: reading
+        title: "Build Tekton Tasks And Pipelines"
+        path: sections/section-040/module-01/course.md
+
+      - type: reading
+        title: "Hand Off From A Tekton Pipeline To GitOps"
+        path: sections/section-040/module-02/course.md
+
+  - id: module-050
+    title: "Progressive Delivery"
+    description: >
+      A new version should reach users a step at a time and stop on bad
+      metrics. This section teaches canary and blue/green releases with
+      Argo Rollouts, the primary tool, including an automatic gate on a
+      Prometheus metric, and then the same canary with Flagger, the
+      alternative the exam allows. It comes last because it reuses
+      delivery, packaging and metrics from the earlier sections.
+
+    content:
+      - type: reading
+        title: Section Overview
+        path: sections/section-050/README.md
+
+      - type: reading
+        title: "Roll Out A Canary With Argo Rollouts"
+        path: sections/section-050/module-01/course.md
+
+      - type: reading
+        title: "Gate A Blue/Green Release With Analysis"
+        path: sections/section-050/module-02/course.md
+
+      - type: reading
+        title: "Automate Canary Analysis With Flagger"
+        path: sections/section-050/module-03/course.md
