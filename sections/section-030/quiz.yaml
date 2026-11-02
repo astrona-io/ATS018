@@ -57,10 +57,10 @@ questions:
   - id: ats018-030-q03
     type: single_choice
     difficulty: intermediate
-    learning_objective: "Suspend and resume a Kustomization."
+    learning_objective: "Request a reconciliation with a fresh source fetch."
     source_readings:
       - sections/section-030/module-01/course-03-reconcile-suspend-and-resume.md
-    prompt: "A Kustomization is suspended and the repository has a new commit. After you resume it, you want a fresh fetch before apply. Which flag does that?"
+    prompt: "The repository has a new commit. You run `flux reconcile kustomization scout` and want the source fetched again before the apply. Which flag does that?"
     options:
       - id: a
         text: "`--prune`"
@@ -70,12 +70,12 @@ questions:
         explanation: "`wait` adds health checks to readiness. It does not request a fresh fetch."
       - id: c
         text: "`--with-source`"
-        explanation: "Correct. Resuming restores reconciliation, and `--with-source` requests a fresh fetch before applying."
+        explanation: "Correct. `flux reconcile kustomization --with-source` first requests a source fetch, so the applier uses the new artifact."
       - id: d
         text: "`--force`"
         explanation: "Forcing an apply does not request a fresh fetch."
     correct_option: c
-    explanation: "Suspension pauses reconciliation while the objects keep running. `flux resume ... --with-source` also fetches the source again."
+    explanation: "`flux resume` clears the suspension and waits for reconciliation. `flux reconcile kustomization ... --with-source` also fetches the source again."
   - id: ats018-030-q04
     type: single_choice
     difficulty: intermediate

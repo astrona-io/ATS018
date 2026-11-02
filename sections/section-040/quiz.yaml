@@ -53,7 +53,7 @@ questions:
         text: "Through `runAfter`, which copies the files"
         explanation: "`runAfter` only orders the Tasks."
     correct_option: b
-    explanation: "Two Tasks share files only through a PersistentVolumeClaim workspace. A `volumeClaimTemplate` creates a fresh claim for each run."
+    explanation: "Each Task runs in its own pod, so an `emptyDir` workspace is empty for the second Task. A PersistentVolumeClaim workspace carries the files. A `volumeClaimTemplate` creates a fresh claim for each run."
   - id: ats018-040-q03
     type: single_choice
     difficulty: intermediate

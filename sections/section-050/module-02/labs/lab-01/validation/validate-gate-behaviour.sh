@@ -13,6 +13,12 @@ grep -qx Failed <<<"$phases" || fail "no Failed AnalysisRun - the faulty candida
 failed_values=$(kubectl -n "$NS" get analysisrun -o jsonpath='{range .items[?(@.status.phase=="Failed")]}{range .status.metricResults[0].measurements[*]}{.value}{"\n"}{end}{end}')
 grep -q '^\[0\.' <<<"$failed_values" || fail "the failed AnalysisRun has no measurement below 0.99"
 
+# `promote --full` skips the gate; the controller records it in the RolloutCompleted event.
+if kubectl -n "$NS" get events --field-selector involvedObject.kind=Rollout,involvedObject.name=scout,reason=RolloutCompleted \
+  -o jsonpath='{.items[*].message}' 2>/dev/null | grep -q 'Full promotion requested'; then
+  fail "a release was promoted with --full; promote the paused release with 'kubectl argo rollouts promote' only"
+fi
+
 phase=$(kubectl -n "$NS" get rollout scout -o jsonpath='{.status.phase}')
 [[ "$phase" == "Healthy" ]] || fail "Rollout phase is '$phase', expected Healthy"
 

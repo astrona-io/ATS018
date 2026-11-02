@@ -53,7 +53,7 @@ Then check the result after about 45 seconds:
 kubectl -n starfleet get canary scout
 ```
 
-The status is `Initialized`. Flagger created `scout-primary` and scaled `scout` to zero replicas.
+The status is `Initialized`. Flagger created `scout-primary` and scaled `scout` to zero replicas. Wait until the status is `Initialized`, and then wait about one more minute so Prometheus can scrape the first Istio metrics, before you release a new image. A release started earlier can fail with `no values found for istio metric` and roll back.
 
 ## Step 2: promote 6.15.0
 

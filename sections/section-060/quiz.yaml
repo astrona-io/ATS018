@@ -96,7 +96,7 @@ questions:
         explanation: "That reverts manual changes in Argo CD."
       - id: d
         text: "With `dependsOn` between two `Kustomization` objects"
-        explanation: "Correct. Argo CD uses sync waves and `SkipDryRunOnMissingResource=true`."
+        explanation: "Correct. `dependsOn` makes one Kustomization wait for the Ready condition of the other."
     correct_option: d
     explanation: "A definition must exist before its instances. Argo CD orders with sync waves and Flux with `dependsOn`."
   - id: ats018-060-q05

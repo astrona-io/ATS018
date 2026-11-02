@@ -184,8 +184,8 @@ questions:
         text: "Create the XR by hand with `kubectl`"
         explanation: "That moves the object out of Git."
       - id: d
-        text: "Put the XRD in an earlier sync wave and set `SkipDryRunOnMissingResource=true` on the XR"
-        explanation: "Correct. The definition must exist before its instances."
+        text: "Put the XRD in an earlier sync wave and set the sync option `SkipDryRunOnMissingResource=true` on the `Application`"
+        explanation: "Correct. The sync wave applies the definition first, and the sync option skips the dry run for a kind that does not exist yet."
     correct_option: d
     explanation: "Argo CD orders with sync waves. Flux orders with `dependsOn` between two Kustomizations."
   - id: ats018-final-q09

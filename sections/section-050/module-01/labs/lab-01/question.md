@@ -14,6 +14,6 @@ When you finish, these must be true:
 - The Rollout is `Healthy`, its stable ReplicaSet is the `6.15.0` one, and 5 pods are ready.
 - A request from the `shuttle` pod to `http://scout.starfleet/` returns version `6.15.0`.
 
-Do not delete the Service. Do not skip the release by creating the Rollout directly on `6.15.0`.
+Do not delete the Service. Do not skip the release by creating the Rollout directly on `6.15.0`, and do not use `promote --full`.
 
 Check your work with `astrona submit`.

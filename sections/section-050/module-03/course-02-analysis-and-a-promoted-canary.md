@@ -18,6 +18,8 @@ The `webhooks` entry of type `rollout` runs at every step. It calls the load tes
 
 Change the image of the `scout` Deployment. Flagger sees a new pod template and starts a release.
 
+<!-- astrona:playground:renew -->
+
 ```sh
 kubectl -n starfleet set image deploy/scout scout=ghcr.io/stefanprodan/podinfo:6.15.0
 ```

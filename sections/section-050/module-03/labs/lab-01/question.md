@@ -15,4 +15,6 @@ When you finish, these must be true:
 - Last, a fixed template was released and promoted: the faulty command is removed and the environment variable `PODINFO_UI_MESSAGE` is `fixed`.
 - The `Canary` is `Succeeded`, the Deployment `scout-primary` runs `6.15.0`, and a request from the `shuttle` pod (container `shuttle`) to `http://scout.starfleet/` returns the message `fixed`.
 
+Wait until the `Canary` is `Initialized`, and about one more minute for the first metrics, before you release the first image. A release started earlier can roll back because Flagger finds no metric values.
+
 Check your work with `astrona submit`.

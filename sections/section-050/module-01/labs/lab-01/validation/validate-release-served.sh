@@ -13,6 +13,12 @@ image=$(kubectl -n "$NS" get rollout scout -o jsonpath='{.spec.template.spec.con
 revision=$(kubectl -n "$NS" get rollout scout -o jsonpath='{.metadata.annotations.rollout\.argoproj\.io/revision}')
 [[ "${revision:-0}" -ge 2 ]] || fail "the Rollout is on revision '${revision:-0}'; create it on 6.14.0 and release 6.15.0 as a template change"
 
+# `promote --full` skips the remaining steps; the controller records it in the RolloutCompleted event.
+if kubectl -n "$NS" get events --field-selector involvedObject.kind=Rollout,involvedObject.name=scout,reason=RolloutCompleted \
+  -o jsonpath='{.items[*].message}' 2>/dev/null | grep -q 'Full promotion requested'; then
+  fail "the release was fully promoted with --full; promote each pause step instead"
+fi
+
 phase=$(kubectl -n "$NS" get rollout scout -o jsonpath='{.status.phase}')
 [[ "$phase" == "Healthy" ]] || fail "Rollout phase is '$phase', expected Healthy (promote each pause step)"
 
