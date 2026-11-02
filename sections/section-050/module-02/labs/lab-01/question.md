@@ -6,7 +6,7 @@ The `scout` application in the namespace `starfleet` is an Argo Rollouts `Rollou
 
 Prometheus is at `http://kps-prometheus.monitoring.svc:9090`. It scrapes every `scout` pod every 15 seconds. The metric `http_request_duration_seconds_count` has the labels `namespace`, `path` (requests to `/` use `root`), `status` and `rollouts_pod_template_hash`. A new pod needs about 45 seconds before its rate has data.
 
-Gate the releases with a pre-promotion analysis, then prove it works with a good and a faulty candidate. Do not delete the analysis to get a release through and do not use `promote --full`.
+Gate the releases with a pre-promotion analysis, then prove it works with a good and a faulty candidate. Do not delete the analysis to get a release through and do not use `promote --full`. A watcher named `gate-recorder` in `starfleet` records, for each pod template hash, the `BlueGreenPause`, the `Successful` pre-promotion `AnalysisRun` and whether the active Service switched only after both. Do not delete it or its ConfigMap `gate-trace`. A release promoted with `--full` switches the active Service too early, and `astrona submit` rejects it.
 
 When you finish, these must be true:
 

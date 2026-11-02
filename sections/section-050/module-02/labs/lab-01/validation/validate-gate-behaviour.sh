@@ -22,6 +22,15 @@ gate_phase=$(kubectl -n "$NS" get analysisrun -l "rollout-type=PrePromotion,roll
   -o jsonpath='{range .items[*]}{.status.phase}{"\n"}{end}' 2>/dev/null)
 grep -qx Successful <<<"$gate_phase" || fail "no Successful pre-promotion AnalysisRun for the serving template $current; it was promoted without passing the gate (do not use --full)"
 
+# Durable check. The gate-recorder (installed by the lab bootstrap) writes into the ConfigMap gate-trace,
+# which does not expire. For the serving hash it records the BlueGreenPause, the Successful PrePromotion
+# AnalysisRun and whether the active selector switched only after both. `promote --full` switches first.
+kubectl -n "$NS" get configmap gate-trace >/dev/null 2>&1 || fail "the ConfigMap gate-trace is missing; do not delete it"
+trace() { kubectl -n "$NS" get configmap gate-trace -o jsonpath="{.data.$current\\.$1}" 2>/dev/null; }
+[[ "$(trace paused)" == "seen" ]] || fail "the release of $current never paused at BlueGreenPause; it was promoted with --full - promote the paused release instead"
+[[ "$(trace analysis)" == "seen" ]] || fail "the pre-promotion AnalysisRun for $current was never recorded as Successful"
+[[ "$(trace switch)" == "ok" ]] || fail "the active Service switched to $current before the pause and a Successful analysis; it was promoted with --full - promote the paused release instead"
+
 # Extra check while the events still exist.
 if kubectl -n "$NS" get events --field-selector involvedObject.kind=Rollout,involvedObject.name=scout,reason=RolloutCompleted \
   -o jsonpath='{.items[*].message}' 2>/dev/null | grep -q 'Full promotion requested'; then

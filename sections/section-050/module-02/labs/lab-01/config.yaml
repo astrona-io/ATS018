@@ -33,6 +33,10 @@ bootstrap:
       description: Creates the blue/green Rollout scout without analysis, its Services and its PodMonitor
       type: file
       source: bootstrap/03-start-scout.sh
+    - name: install-gate-recorder
+      description: Installs a watcher that records the pause and the pre-promotion AnalysisRun before each switch
+      type: file
+      source: bootstrap/04-install-gate-recorder.sh
   waitFor:
     - resource: deploy/shuttle
       namespace: starfleet

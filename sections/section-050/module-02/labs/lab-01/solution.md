@@ -119,7 +119,7 @@ kubectl -n starfleet get analysisrun
 kubectl argo rollouts get rollout scout -n starfleet --no-color
 ```
 
-The AnalysisRun is `Successful` and the Rollout is `Paused` with `BlueGreenPause`. Active requests still return the old message. Promote the candidate with a normal promotion:
+The AnalysisRun is `Successful` and the Rollout is `Paused` with `BlueGreenPause`. Active requests still return the old message. The `gate-recorder` watcher writes the pause and the passed analysis into the ConfigMap `gate-trace`. Promote the candidate with a normal promotion. The watcher then records that the active Service switched after both:
 
 ```sh
 kubectl argo rollouts promote scout -n starfleet
@@ -201,7 +201,7 @@ kubectl argo rollouts get rollout scout -n starfleet --no-color
 kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout | grep '"message"'
 ```
 
-The newest AnalysisRun is `Failed` with measurements below `0.99`. The Rollout is `Degraded` with `RolloutAborted`, and the active Service still returns `gated-good`. Do not use `promote --full`: it skips the analysis.
+The newest AnalysisRun is `Failed` with measurements below `0.99`. The Rollout is `Degraded` with `RolloutAborted`, and the active Service still returns `gated-good`. Do not use `promote --full`: it skips the analysis and switches the active Service before the analysis passes. The `gate-recorder` records that, and `astrona submit` fails.
 
 ## Step 4: restore the good template
 
