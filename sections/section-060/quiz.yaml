@@ -31,7 +31,7 @@ questions:
         text: "Permission to read Git"
         explanation: "A Function adds no Git access."
     correct_option: a
-    explanation: "Both must be `INSTALLED` and `HEALTHY` before anything depends on them."
+    explanation: "A `Provider` adds the kinds for one outside system. A `Function` adds logic that a `Composition` calls. Both must be `INSTALLED` and `HEALTHY` before anything depends on them."
   - id: ats018-060-q02
     type: single_choice
     difficulty: intermediate
@@ -53,7 +53,7 @@ questions:
         text: "A `Rollout` and an `AnalysisTemplate`"
         explanation: "Those are Argo Rollouts objects."
     correct_option: b
-    explanation: "In `Pipeline` mode the `Composition` calls functions such as `function-patch-and-transform`."
+    explanation: "The `CompositeResourceDefinition` defines the kind that other teams create. The `Composition` says which real objects Crossplane creates behind it. In `Pipeline` mode the `Composition` calls functions such as `function-patch-and-transform`."
   - id: ats018-060-q03
     type: single_choice
     difficulty: intermediate

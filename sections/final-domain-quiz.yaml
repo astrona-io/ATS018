@@ -60,7 +60,7 @@ questions:
     learning_objective: "Choose Argo CD or Flux feature for Helm charts."
     source_readings:
       - sections/section-020/module-01/course-04-helm-charts-as-a-source.md
-      - sections/section-030/module-02/course-04-summary.md
+      - sections/section-030/module-02/course-02-values-and-release-history.md
     prompt: "An administrator says: \"I want a numbered release history I can read.\" Which tool installs a Helm release and keeps that history?"
     options:
       - id: a
@@ -71,7 +71,7 @@ questions:
         explanation: "Kustomize renders files; it keeps no release history."
       - id: c
         text: "The Flux helm controller, through a `HelmRelease`"
-        explanation: "Correct. Argo CD renders the chart and applies the manifests; no Helm release is installed."
+        explanation: "Correct. The helm controller installs the release, and each install, upgrade or rollback adds a numbered revision to the history of the `HelmRelease`."
       - id: d
         text: "Crossplane, through a `Provider`"
         explanation: "A Provider adds kinds for one system."
@@ -223,7 +223,7 @@ questions:
         explanation: "`apply` needs a fixed `name`."
       - id: b
         text: "`kubectl create -f pipelinerun.yaml`"
-        explanation: "Correct. `kubectl apply` needs a fixed name."
+        explanation: "Correct. `kubectl create` accepts `generateName` and makes a new object for each run."
       - id: c
         text: "`kubectl replace -f pipelinerun.yaml`"
         explanation: "`replace` needs an existing object."
@@ -297,7 +297,7 @@ questions:
         text: "A `Provider`, a `Function` and a `Composition`"
         explanation: "Those are Crossplane objects."
     correct_option: a
-    explanation: "An `EventSource` with a `Sensor` is like an `EventListener` with a trigger."
+    explanation: "In Argo Events the `EventSource` receives the webhook and the `Sensor` runs the trigger. In Tekton Triggers the `EventListener` receives the webhook and a `TriggerTemplate` creates the run."
   - id: ats018-final-q14
     type: single_choice
     difficulty: advanced
