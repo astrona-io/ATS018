@@ -26,6 +26,10 @@ bootstrap:
       description: Installs the Argo Rollouts 1.10.0 controller
       type: file
       source: bootstrap/01-install-argo-rollouts.sh
+    - name: install-release-recorder
+      description: Installs a watcher that records the canary steps each release passes
+      type: file
+      source: bootstrap/02-install-release-recorder.sh
   waitFor:
     - resource: deploy/shuttle
       namespace: starfleet

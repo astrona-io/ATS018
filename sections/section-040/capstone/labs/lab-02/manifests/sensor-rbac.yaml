@@ -1,0 +1,34 @@
+# The service account a Sensor runs as, and the permissions it needs: create
+# Workflow objects in `starfleet` and read WorkflowTemplates.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: workflow-submitter
+  namespace: argo-events
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: workflow-submitter
+  namespace: starfleet
+rules:
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflows"]
+    verbs: ["create", "get", "list", "watch"]
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflowtemplates"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: workflow-submitter
+  namespace: starfleet
+subjects:
+  - kind: ServiceAccount
+    name: workflow-submitter
+    namespace: argo-events
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: workflow-submitter

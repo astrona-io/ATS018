@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: push-ci
+  namespace: argo-events
+spec:
+  template:
+    serviceAccountName: workflow-submitter
+  dependencies:
+    - name: push-main
+      eventSourceName: push-webhook
+      eventName: push
+      filters:
+        data:
+          - path: body.ref
+            type: string
+            value:
+              - refs/heads/master
+  triggers:
+    - template:
+        name: run-tests
+        argoWorkflow:
+          operation: submit
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: push-ci-
+                namespace: starfleet
+              spec:
+                workflowTemplateRef:
+                  name: run-tests
+                arguments:
+                  parameters:
+                    - name: revision
+                      value: main
+          parameters:
+            - src:
+                dependencyName: push-main
+                dataKey: body.before
+              dest: spec.arguments.parameters.0.value

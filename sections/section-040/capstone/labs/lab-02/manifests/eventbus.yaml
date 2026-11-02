@@ -1,0 +1,12 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventBus
+metadata:
+  name: default
+  namespace: argo-events
+spec:
+  jetstream:
+    version: latest
+    replicas: 1
+    streamConfig: |
+      maxAge: 24h
+      replicas: 1

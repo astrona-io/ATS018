@@ -587,6 +587,26 @@ modules:
             url: https://tekton.dev/docs/pipelines/auth/
 
 
+      - type: reading
+        title: Question
+        path: sections/section-040/capstone/labs/lab-02/question.md
+      - type: lab
+        title: "Repair A Push-Driven Argo Events And Workflows Pipeline"
+        path: sections/section-040/capstone/labs/lab-02
+        difficulty: advanced
+        estimated_duration: 40m
+        topic: ci-pipelines
+        task_kind: troubleshooting
+        tags: [argo-workflows, argo-events, workflowtemplate, webhook]
+        learning_goals:
+          - Find why a Sensor drops pushes or passes the wrong commit, and fix its filter and trigger parameter
+          - Fix a WorkflowTemplate that starts in the wrong folder and a service account that cannot write workflow results
+          - Prove a Git push starts a Succeeded Workflow for exactly the pushed commit
+        resources:
+          - name: "Argo Events Sensor"
+            url: https://argoproj.github.io/argo-events/concepts/sensor/
+          - name: "Argo Workflows service account RBAC"
+            url: https://argo-workflows.readthedocs.io/en/latest/workflow-rbac/
       - type: quiz
         title: "Knowledge Check: Continuous Integration Pipelines"
         path: sections/section-040/quiz.yaml
@@ -777,6 +797,26 @@ modules:
             url: https://argo-rollouts.readthedocs.io/en/stable/features/analysis/
           - name: "Argo Rollouts canary strategy"
             url: https://argo-rollouts.readthedocs.io/en/stable/features/canary/
+      - type: reading
+        title: Question
+        path: sections/section-050/capstone/labs/lab-02/question.md
+      - type: lab
+        title: "Repair A Header-Routed Canary With A Background Analysis"
+        path: sections/section-050/capstone/labs/lab-02
+        difficulty: advanced
+        estimated_duration: 50m
+        topic: progressive-delivery
+        task_kind: troubleshooting
+        tags: [argo-rollouts, canary, analysistemplate, promql, prometheus, abort-rollback, promotion]
+        learning_goals:
+          - Repair a header route and a canary scale step that stop testers from reaching the canary
+          - Fix a background analysis that counts the wrong status class
+          - Show a faulty canary is aborted while the good canary is promoted, and the route is clean at the end
+        resources:
+          - name: "Argo Rollouts Gateway API plugin"
+            url: https://rollouts-plugin-trafficrouter-gatewayapi.readthedocs.io/en/latest/
+          - name: "Argo Rollouts analysis"
+            url: https://argo-rollouts.readthedocs.io/en/stable/features/analysis/
       - type: quiz
         title: "Knowledge Check: Progressive Delivery"
         path: sections/section-050/quiz.yaml

@@ -1,0 +1,95 @@
+# The release setup the team wrote for scout. It does not work yet:
+#  - trafficRouting has no managedRoutes entry for the header route
+#  - there is no setCanaryScale step, so the canary Service has no pods at weight 0
+#  - the header route matches the value "Yes", and testers send "yes"
+#  - the AnalysisTemplate measures the share of 5xx responses, not 2xx
+# The pod template is the same as the running one, so applying this starts no release.
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: scout
+  namespace: starfleet
+spec:
+  replicas: 2
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: scout
+  template:
+    metadata:
+      labels:
+        app: scout
+    spec:
+      containers:
+        - name: scout
+          image: ghcr.io/stefanprodan/podinfo:6.14.0
+          command: ["./podinfo", "--port=9898", "--port-metrics=9797"]
+          env:
+            - name: PODINFO_UI_MESSAGE
+              value: stable
+          ports:
+            - name: http
+              containerPort: 9898
+            - name: metrics
+              containerPort: 9797
+          readinessProbe:
+            tcpSocket:
+              port: http
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+  strategy:
+    canary:
+      stableService: scout
+      canaryService: scout-canary
+      trafficRouting:
+        plugins:
+          argoproj-labs/gatewayAPI:
+            httpRoute: scout-route
+            namespace: starfleet
+      analysis:
+        templates:
+          - templateName: scout-success
+        startingStep: 4
+        args:
+          - name: canary-hash
+            valueFrom:
+              podTemplateHashValue: Latest
+      steps:
+        - setHeaderRoute:
+            name: canary-header
+            match:
+              - headerName: x-canary
+                headerValue:
+                  exact: "Yes"
+        - pause: {}
+        - setWeight: 20
+        - pause: {duration: 90s}
+        - setWeight: 50
+        - pause: {duration: 30s}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: scout-success
+  namespace: starfleet
+spec:
+  args:
+    - name: canary-hash
+  metrics:
+    - name: success-rate
+      initialDelay: 45s
+      interval: 15s
+      failureLimit: 1
+      successCondition: len(result) == 1 && result[0] >= 0.99
+      failureCondition: len(result) != 1 || result[0] < 0.99
+      provider:
+        prometheus:
+          address: http://kps-prometheus.monitoring.svc:9090
+          query: |
+            sum(rate(http_request_duration_seconds_count{namespace="starfleet",path="root",rollouts_pod_template_hash="{{args.canary-hash}}",status=~"5.."}[1m]))
+            /
+            sum(rate(http_request_duration_seconds_count{namespace="starfleet",path="root",rollouts_pod_template_hash="{{args.canary-hash}}"}[1m]))
