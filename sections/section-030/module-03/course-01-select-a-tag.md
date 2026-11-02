@@ -130,6 +130,6 @@ You now know how Flux finds tags and picks one, and how to read a policy that se
 
 > [!WARNING]
 > - **Reading a Ready `ImageRepository` as a chosen tag.** The scan can succeed while the policy selects nothing. Check `flux get image policy` for the `TAG` column.
-> - **Forgetting `insecure: true` on a plain HTTP registry.** The scan then fails with a connection error and no tags appear.
+> - **Forgetting `insecure: true` on a plain HTTP registry.** The controller tries HTTPS, the scan fails with `server gave HTTP response to HTTPS client`, `READY` is `False` and no tags appear.
 > - **Using a range that matches no version.** The message `unable to determine latest version from provided list` means the range is wrong, not the registry.
 > - **Expecting the policy to change the cluster.** An `ImagePolicy` only records a tag. It never edits Git or a Deployment.
