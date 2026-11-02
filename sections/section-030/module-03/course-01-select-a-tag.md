@@ -122,7 +122,7 @@ NAME 	IMAGE                                     	TAG   	READY	MESSAGE
 scout	registry.registry.svc:5000/starfleet/scout	6.15.0	True 	Latest image tag for registry.registry.svc:5000/starfleet/scout resolved to 6.15.0
 ```
 
-The policy now resolves to `6.15.0`, the highest version in the range. The chosen tag is also stored in the status as `latestRef`, and that field is what the next part reads. Nothing runs 6.15.0 yet: the Deployment still uses 6.14.0, because no object has written the tag to Git.
+The policy now resolves to `6.15.0`, the highest version in the range. The chosen tag is also stored in the status as `latestRef`, and Flux uses that field when it writes the tag to Git. Nothing runs 6.15.0 yet: the Deployment still uses 6.14.0, because no object has written the tag to Git.
 
 You now know how Flux finds tags and picks one, and how to read a policy that selects nothing. The chosen tag lives only in the cluster status. The open question is how it reaches the Git repository, so the Kustomization can deliver it.
 

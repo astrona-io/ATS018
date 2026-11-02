@@ -29,36 +29,38 @@ A new version should reach users a step at a time and stop on bad metrics. This 
 
 ## The Learning Path
 
+The section has the modules below, in reading order. Each module has a playground for practice, and the section ends with a capstone challenge.
+
 ### 1. Roll Out A Canary With Argo Rollouts
-*   **Module Reader:** **[Module 1: Roll Out A Canary With Argo Rollouts](./module-01/course.md)**
+*   **Module Reader:** Roll Out A Canary With Argo Rollouts
 *   **Hands-on Playground:** `sections/section-050/module-01/playground` — kind cluster with the Argo Rollouts 1.10.0 controller and the kubectl argo rollouts plugin. Namespace `starfleet` holds `scout` as a Deployment (podinfo 6.14.x) with 5 replicas and a Service, and `shuttle`. Deliberately absent: no Rollout, no traffic router, no metrics provider.
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-050/module-01/playground
     ```
 
 ### 2. Gate A Blue/Green Release With Analysis
-*   **Module Reader:** **[Module 2: Gate A Blue/Green Release With Analysis](./module-02/course.md)**
+*   **Module Reader:** Gate A Blue/Green Release With Analysis
 *   **Hands-on Playground:** `sections/section-050/module-02/playground` — kind cluster with Argo Rollouts 1.10.0 and a small Prometheus (kube-prometheus-stack 92.3.0 trimmed to Prometheus and the operator) scraping `scout` in `starfleet`. `scout` runs podinfo 6.15.0 as a Rollout with a blueGreen strategy and no analysis. A second podinfo configuration that returns random 500 errors is ready to deploy as the bad version. `shuttle` sends steady traffic.
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-050/module-02/playground
     ```
 
 ### 3. Automate Canary Analysis With Flagger
-*   **Module Reader:** **[Module 3: Automate Canary Analysis With Flagger](./module-03/course.md)**
+*   **Module Reader:** Automate Canary Analysis With Flagger
 *   **Hands-on Playground:** `sections/section-050/module-03/playground` — kind cluster with Istio 1.30.7 (base and istiod, with sidecar injection on `starfleet`), Flagger 1.45.0 for the Istio provider with its bundled Prometheus, and the flagger-loadtester in `starfleet`. `scout` runs as a plain Deployment with a Service. Deliberately absent: no Canary resource and no Argo Rollouts in this cluster.
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-050/module-03/playground
     ```
 
 ### 4. Shift Canary Traffic With Argo Rollouts And A Traffic Router
-*   **Module Reader:** **[Module 4: Shift Canary Traffic With Argo Rollouts And A Traffic Router](./module-04/course.md)**
+*   **Module Reader:** Shift Canary Traffic With Argo Rollouts And A Traffic Router
 *   **Hands-on Playground:** `sections/section-050/module-04/playground` — kind cluster with Argo Rollouts 1.10.0 and the Gateway API plugin v0.17.0, Envoy Gateway with a Gateway and an HTTPRoute for `scout`, and a small Prometheus. Deliberately absent: no Rollout and no AnalysisTemplate.
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-050/module-04/playground
     ```
 
 ### Section Capstone Challenge
-*   **Comprehensive Challenge:** Progressive Delivery Capstone — `sections/section-050/capstone/labs/lab-01` *(created in the build phase)*
+*   **Comprehensive Challenge:** Progressive Delivery Capstone — `sections/section-050/capstone/labs/lab-01`
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-050/capstone/labs/lab-01
     astrona submit -c .
@@ -69,4 +71,4 @@ A new version should reach users a step at a time and stop on bad metrics. This 
 
 ## Ready for Assessment?
 
-*   **[Take the Section 050 Knowledge Check](./quiz.md)**
+*   Take the knowledge check for this section.

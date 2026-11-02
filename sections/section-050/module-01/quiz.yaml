@@ -1,0 +1,221 @@
+# Knowledge check for section 050, module 01. Listed in astrona.yaml as a
+# `type: quiz` entry right after the module summary. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats018-050-01
+course_id: ATS018
+exam_code: CNPE
+status: draft
+provenance: "Original practice material written for this course; not official exam questions."
+scope:
+  type: module
+  id: section-050/module-01
+  title: "Roll Out A Canary With Argo Rollouts"
+questions:
+  - id: ats018-050-01-q01
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Know how a Rollout starts."
+    source_readings:
+      - sections/section-050/module-01/course-01-convert-a-deployment.md
+    prompt: "You create a `Rollout` with a canary strategy for the first time. What do the canary steps do?"
+    options:
+      - id: a
+        text: "They are skipped; the controller establishes the stable ReplicaSet"
+        explanation: "Correct. The initial Rollout does not stop at the canary steps, because there is no previous stable version."
+      - id: b
+        text: "They run at once and pause at the first `pause`"
+        explanation: "Steps start only when the pod template changes."
+      - id: c
+        text: "They run only after you promote"
+        explanation: "There is no release to promote on the first creation."
+      - id: d
+        text: "The Rollout fails until a second template exists"
+        explanation: "The first template becomes the stable one."
+    correct_option: a
+    explanation: "The initial Rollout establishes its stable template and reaches `Healthy`. A later template change starts the canary steps."
+
+  - id: ats018-050-01-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Avoid two controllers behind one selector."
+    source_readings:
+      - sections/section-050/module-01/course-01-convert-a-deployment.md
+    prompt: "You create the `Rollout` for `scout` but leave the old `Deployment` running with the same pod labels. What goes wrong?"
+    options:
+      - id: a
+        text: "Nothing, because the Service ignores who owns the pods"
+        explanation: "The Service selects pods by labels, so it uses the pods of both controllers."
+      - id: b
+        text: "Both controllers add pods to the Service endpoints, and the replica split of the canary no longer describes all traffic"
+        explanation: "Correct. The Deployment pods add endpoints that the Rollout does not control."
+      - id: c
+        text: "Argo Rollouts deletes the Deployment by itself"
+        explanation: "The controller does not delete a Deployment unless you use a `workloadRef` migration setup."
+      - id: d
+        text: "The Rollout stays `Paused` until you delete the Service"
+        explanation: "The Service has no part in this."
+    correct_option: b
+    explanation: "Delete the Deployment, keep the Service, and let the Rollout own the pods. Deleting the Deployment can briefly interrupt service, so plan for it."
+
+  - id: ats018-050-01-q03
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Compute a replica split without a traffic router."
+    source_readings:
+      - sections/section-050/module-01/course-02-canary-steps-and-weights.md
+    prompt: "A Rollout with five replicas and no traffic router reaches `setWeight: 20`. What does the controller run?"
+    options:
+      - id: a
+        text: "Five new pods and five stable pods"
+        explanation: "The total stays at five."
+      - id: b
+        text: "One new pod and one stable pod"
+        explanation: "The stable ReplicaSet keeps four pods."
+      - id: c
+        text: "Five stable pods and one new pod receiving exactly 20% of requests"
+        explanation: "Replica counts approximate the weight. A short sample need not match."
+      - id: d
+        text: "One new pod and four stable pods"
+        explanation: "Correct. Without a router, the controller approximates the weight with whole replica counts."
+    correct_option: d
+    explanation: "Five replicas give one new and four stable pods at 20%, and three new and two stable at 60%."
+
+  - id: ats018-050-01-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Read a paused canary."
+    source_readings:
+      - sections/section-050/module-01/course-02-canary-steps-and-weights.md
+    prompt: "`kubectl argo rollouts get rollout scout` shows `Status: Paused`, `Message: CanaryPauseStep`, `Step: 1/4` and `SetWeight: 20`. What is true?"
+    options:
+      - id: a
+        text: "The application stopped serving requests"
+        explanation: "A pause stops release progress. Ready pods keep serving."
+      - id: b
+        text: "The Rollout waits for an operator, and the stable and canary pods both keep serving"
+        explanation: "Correct. `pause: {}` has no duration, so it ends only when you promote."
+      - id: c
+        text: "The canary failed and the Rollout is aborted"
+        explanation: "An abort reports `Degraded`, not `Paused`."
+      - id: d
+        text: "The pause ends by itself after 30 seconds"
+        explanation: "Only a pause with a `duration` expires on its own."
+    correct_option: b
+    explanation: "`Paused` is the release status. The ReplicaSet table shows four ready stable pods and one ready canary pod."
+
+  - id: ats018-050-01-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Promote past a canary pause."
+    source_readings:
+      - sections/section-050/module-01/course-03-promote-and-pause.md
+    prompt: "A canary is paused at `setWeight: 20` and you run `kubectl argo rollouts promote scout -n starfleet`. What happens?"
+    options:
+      - id: a
+        text: "The controller runs the next `setWeight` step and stops at the next pause, here at 60%"
+        explanation: "Correct. Promotion clears the current pause. It does not skip every remaining step."
+      - id: b
+        text: "The canary becomes stable at once"
+        explanation: "Reaching 60% does not make the canary stable. Full completion does."
+      - id: c
+        text: "The Rollout jumps to 100% and skips all pauses"
+        explanation: "Only `promote --full` bypasses the remaining pauses."
+      - id: d
+        text: "The Rollout aborts because it was promoted too early"
+        explanation: "Promotion never aborts a release."
+    correct_option: a
+    explanation: "Normal promotion advances one pause at a time. The status then shows `Step: 3/4` with three updated pods and two stable pods."
+
+  - id: ats018-050-01-q06
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Tell an explicit pause from a strategy pause."
+    source_readings:
+      - sections/section-050/module-01/course-03-promote-and-pause.md
+    prompt: "You run `kubectl argo rollouts pause scout` on a Rollout that already waits at a canary pause. Then you promote once. What is `spec.paused` and where is the release?"
+    options:
+      - id: a
+        text: "`false`, and the release is complete"
+        explanation: "One promotion cannot finish a release that waits at a canary pause."
+      - id: b
+        text: "`true`, because promotion never changes `spec.paused`"
+        explanation: "Promotion first clears `spec.paused` when it is set."
+      - id: c
+        text: "`false`, and the canary pause is still in place, so you must promote again"
+        explanation: "Correct. The first promotion clears the explicit pause only."
+      - id: d
+        text: "`true`, and the Rollout is `Degraded`"
+        explanation: "A pause does not make the Rollout `Degraded`."
+    correct_option: c
+    explanation: "The `pause` command sets `spec.paused: true`, a pause on the Rollout itself. The pause from the `steps` list is a separate control."
+
+  - id: ats018-050-01-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Tell abort from retry."
+    source_readings:
+      - sections/section-050/module-01/course-04-abort-and-retry.md
+    prompt: "A canary with a broken image was aborted. The Rollout reports `Degraded`. What does the abort not do?"
+    options:
+      - id: a
+        text: "Keep the stable version serving"
+        explanation: "The abort does exactly that."
+      - id: b
+        text: "Scale the canary down"
+        explanation: "The abort does that."
+      - id: c
+        text: "Correct the desired pod template"
+        explanation: "Correct. The abort keeps the stable pods serving and scales the canary down. The broken image stays in `spec.template`."
+      - id: d
+        text: "Report `Degraded`"
+        explanation: "The abort does report `Degraded`."
+    correct_option: c
+    explanation: "An abort does not rewrite `spec.template`. Do not assume the release is fixed just because a request succeeds."
+
+  - id: ats018-050-01-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Choose between a new template and retry."
+    source_readings:
+      - sections/section-050/module-01/course-04-abort-and-retry.md
+    prompt: "After the abort of the image `does-not-exist`, you run `kubectl argo rollouts set image` with the valid tag `6.14.0`. Which statement is true?"
+    options:
+      - id: a
+        text: "You must run `retry rollout` first, or the new image is ignored"
+        explanation: "A changed pod template starts a new release and clears the abort."
+      - id: b
+        text: "The Rollout stays aborted until you delete it"
+        explanation: "A new template clears the abort."
+      - id: c
+        text: "The new template starts a new release without `retry`"
+        explanation: "Correct. `retry rollout` is for another attempt at the same aborted template."
+      - id: d
+        text: "The Rollout jumps to 100% because the image is valid"
+        explanation: "The canary steps run again, starting with the first pause."
+    correct_option: c
+    explanation: "Retrying the nonexistent image would reproduce the image pull failure. Fix the cause first, or change the template."
+
+  - id: ats018-050-01-q09
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Know what promote --full skips."
+    source_readings:
+      - sections/section-050/module-01/course-04-abort-and-retry.md
+    prompt: "A Rollout has pauses and an analysis configured. You run `kubectl argo rollouts promote scout --full`. What happens?"
+    options:
+      - id: a
+        text: "It runs the pauses and the analysis, but faster"
+        explanation: "`--full` does not run them."
+      - id: b
+        text: "It skips the remaining pauses, steps and analysis, but cannot make an invalid image start"
+        explanation: "Correct. Use normal promotion when the checks must run."
+      - id: c
+        text: "It only clears `spec.paused`"
+        explanation: "That is the behavior of a normal promotion when the Rollout is explicitly paused."
+      - id: d
+        text: "It reverts the Rollout to the previous stable version"
+        explanation: "That is not what `--full` does."
+    correct_option: b
+    explanation: "Neither form of promotion can make an invalid image start or a failed readiness probe pass."

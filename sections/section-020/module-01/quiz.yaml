@@ -1,0 +1,243 @@
+# Knowledge check for section 020, module 01. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats018-020-01
+course_id: ATS018
+exam_code: CNPE
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: module
+  id: section-020/module-01
+  title: Deploy An Application With Argo CD
+questions:
+  - id: ats018-020-01-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Say which Argo CD component reports a Git or rendering error."
+    source_readings:
+      - sections/section-020/module-01/course-01-gitops-and-argo-cd-components.md
+    prompt: "An `Application` shows an error about cloning its repository. Which Argo CD component produced it?"
+    options:
+      - id: a
+        text: "The repo server"
+        explanation: "Correct. The repo server clones and renders. Errors about Git and rendering come from it."
+      - id: b
+        text: "The application controller"
+        explanation: "The application controller compares, applies and checks health. Its errors are about applying objects."
+      - id: c
+        text: "Redis"
+        explanation: "Redis only caches."
+      - id: d
+        text: "The API server"
+        explanation: "The API server serves the web page and the `argocd` tool."
+    correct_option: a
+    explanation: "Git and rendering errors come from the repo server. Errors about applying objects come from the application controller."
+
+  - id: ats018-020-01-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Name the GitOps principle that a push from a pipeline breaks."
+    source_readings:
+      - sections/section-020/module-01/course-01-gitops-and-argo-cd-components.md
+    prompt: "A pipeline runs `kubectl apply` against the cluster after every build. Which GitOps principle does this break, and what should change the cluster instead?"
+    options:
+      - id: a
+        text: "Declarative: manifests must be scripts, so rewrite them as shell scripts"
+        explanation: "Declarative means the desired state is written as data, not as a script."
+      - id: b
+        text: "Versioned and immutable: the pipeline must delete old commits"
+        explanation: "Versioned and immutable means every change is a commit. It does not mean deleting commits."
+      - id: c
+        text: "Continuously reconciled: the pipeline must run every second"
+        explanation: "Continuous reconciliation is done by the controller, not by a pipeline timer."
+      - id: d
+        text: "Pulled automatically: a controller inside the cluster should fetch the desired state from Git"
+        explanation: "Correct. Nobody outside pushes changes in. The pipeline changes Git, and the controller is the only writer."
+    correct_option: d
+    explanation: "With GitOps, a person or a pipeline changes Git, never the cluster. The controller in the cluster pulls the desired state and applies it."
+
+  - id: ats018-020-01-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Connect a private repository with a repository Secret."
+    source_readings:
+      - sections/section-020/module-01/course-02-the-application-resource.md
+    prompt: "An `Application` for a private repository shows a `ComparisonError` and the sync status `Unknown`. No repository credentials exist. What is missing?"
+    options:
+      - id: a
+        text: "A `ClusterRoleBinding` for the application controller"
+        explanation: "Rights in the cluster do not give access to a Git server."
+      - id: b
+        text: "A Secret in the `argocd` namespace with the label `argocd.argoproj.io/secret-type: repository` and a `url` that matches `repoURL`"
+        explanation: "Correct. Without it Argo CD cannot read the repository."
+      - id: c
+        text: "`CreateNamespace=true` in the sync options"
+        explanation: "That option creates the destination namespace and does not give repository access."
+      - id: d
+        text: "An `AppProject` for the repository"
+        explanation: "A project limits repositories; it does not hold credentials."
+    correct_option: b
+    explanation: "A private repository needs a repository Secret. The `url` must match `repoURL` of the `Application`."
+
+  - id: ats018-020-01-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Read a failed sync and fix a missing destination namespace."
+    source_readings:
+      - sections/section-020/module-01/course-02-the-application-resource.md
+    prompt: "`argocd app sync scout-staging` ends with phase `Failed` and the message `namespaces \"starfleet-staging\" not found`. The overlay renders without a problem. What is the right fix?"
+    options:
+      - id: a
+        text: "Add a repository Secret in the `argocd` namespace"
+        explanation: "The repository is already reachable, because the overlay rendered. This is an apply error."
+      - id: b
+        text: "Run `argocd app get scout-staging --refresh` and sync again"
+        explanation: "A refresh compares again. It does not create the namespace."
+      - id: c
+        text: "Add the sync option `CreateNamespace=true` to the `Application`, or put the Namespace in Git"
+        explanation: "Correct. Argo CD does not create a destination namespace unless you ask. The Kubernetes API server sent the error, and the application controller passed it on."
+      - id: d
+        text: "Change `destination.server` to `in-cluster`"
+        explanation: "The server is already the cluster Argo CD runs in. The namespace is what is missing."
+    correct_option: c
+    explanation: "Rendering worked and applying failed. The sync option `CreateNamespace=true` makes the application controller create the destination namespace."
+
+  - id: ats018-020-01-q05
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Define `selfHeal` and `prune`."
+    source_readings:
+      - sections/section-020/module-01/course-03-sync-policy-drift-and-health.md
+    prompt: "Someone deletes a file from the Git folder of an `Application` with `automated` sync. Which setting deletes the matching object from the cluster?"
+    options:
+      - id: a
+        text: "`selfHeal`"
+        explanation: "`selfHeal` reverts manual changes in the cluster. It does not delete objects that left Git."
+      - id: b
+        text: "`CreateNamespace=true`"
+        explanation: "That option creates the destination namespace."
+      - id: c
+        text: "`RespectIgnoreDifferences=true`"
+        explanation: "That option keeps a sync from overwriting ignored fields."
+      - id: d
+        text: "`prune`"
+        explanation: "Correct. `prune` deletes objects that left Git."
+    correct_option: d
+    explanation: "`automated` syncs new commits, `selfHeal` reverts manual changes and `prune` deletes objects that left Git."
+
+  - id: ats018-020-01-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Say what `automated` does without `selfHeal`."
+    source_readings:
+      - sections/section-020/module-01/course-03-sync-policy-drift-and-health.md
+    prompt: "An `Application` has `syncPolicy.automated` with no `selfHeal` and no `prune`. Someone runs `kubectl scale deploy/scout --replicas=3`, and Git says `replicas: 1`. What happens?"
+    options:
+      - id: a
+        text: "The Deployment stays at three replicas and the application stays `OutOfSync` until Git changes or someone syncs"
+        explanation: "Correct. `automated` alone follows new commits. Only `selfHeal: true` reverts drift in the cluster."
+      - id: b
+        text: "Argo CD reverts the Deployment to one replica within seconds"
+        explanation: "That needs `selfHeal: true`."
+      - id: c
+        text: "Argo CD deletes the Deployment, because it drifted"
+        explanation: "Deleting objects that left Git is `prune`, and the Deployment is still in Git."
+      - id: d
+        text: "The sync status changes to `Unknown`"
+        explanation: "`Unknown` means Argo CD could not render the desired state. Here it rendered and found a difference."
+    correct_option: a
+    explanation: "`automated` syncs when Git changes. `selfHeal` also syncs when the cluster changes, so without it the manual change stays."
+
+  - id: ats018-020-01-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Tell sync status from health status."
+    source_readings:
+      - sections/section-020/module-01/course-03-sync-policy-drift-and-health.md
+    prompt: "An application is `Synced` and `Degraded`. The Deployment uses an image tag that does not exist. How do you fix it?"
+    options:
+      - id: a
+        text: "Run `kubectl edit deployment` to change the tag"
+        explanation: "With self-heal on, Argo CD reverts the change. The fix belongs in Git."
+      - id: b
+        text: "Run `argocd app sync` again"
+        explanation: "Git and the cluster already match, so a sync changes nothing."
+      - id: c
+        text: "Commit a valid image tag to Git"
+        explanation: "Correct. Git already matches the cluster, so the fix is another commit."
+      - id: d
+        text: "Delete the `Application`"
+        explanation: "That removes the symptom and the application with it."
+    correct_option: c
+    explanation: "`Synced` says Git equals the cluster. `Degraded` says the objects do not work. The fix is a commit."
+
+  - id: ats018-020-01-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Find the health message of one object."
+    source_readings:
+      - sections/section-020/module-01/course-03-sync-policy-drift-and-health.md
+    prompt: "An application is `Synced` and `Degraded`. `kubectl -n argocd get application scout-staging -o yaml` does not show which object is unhealthy or why. Which command shows the health status and message of each object?"
+    options:
+      - id: a
+        text: "`argocd app diff scout-staging`"
+        explanation: "It shows differences between the cluster and Git. This application is `Synced`, so there is no difference."
+      - id: b
+        text: "`argocd app get scout-staging -o json`, then read `.status.resources[]`"
+        explanation: "Correct. Since Argo CD 3.0 the per-object health is not stored in the `Application` object, and the `argocd` tool shows it."
+      - id: c
+        text: "`argocd repo list`"
+        explanation: "It lists repository connections, not object health."
+      - id: d
+        text: "`kubectl -n argocd logs argocd-repo-server-0`"
+        explanation: "The repo server renders manifests. Health is set by the application controller."
+    correct_option: b
+    explanation: "The `argocd` tool shows the health of each object. In Argo CD 3 the `Application` YAML shows only the overall health."
+
+  - id: ats018-020-01-q09
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Say what `targetRevision` means for a Helm chart source."
+    source_readings:
+      - sections/section-020/module-01/course-04-helm-charts-as-a-source.md
+    prompt: "An `Application` source has `repoURL: ghcr.io/stefanprodan/charts`, `chart: podinfo` and `targetRevision: 6.15.0`. What does `6.15.0` select?"
+    options:
+      - id: a
+        text: "A Git commit in the repository"
+        explanation: "The source has a `chart` field, so `repoURL` is a chart repository, not a Git repository."
+      - id: b
+        text: "The Argo CD version"
+        explanation: "Argo CD has its own version. This field belongs to the source."
+      - id: c
+        text: "A Git branch named `6.15.0`"
+        explanation: "A branch is a Git source. With `chart` there is no branch."
+      - id: d
+        text: "The version of the chart `podinfo`"
+        explanation: "Correct. The sync status then reads `Synced to 6.15.0`."
+    correct_option: d
+    explanation: "With a `chart` field, `targetRevision` is the chart version. With a `path`, it is a branch, a tag or a commit."
+
+  - id: ats018-020-01-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Explain why Argo CD has no Helm release to roll back."
+    source_readings:
+      - sections/section-020/module-01/course-04-helm-charts-as-a-source.md
+    prompt: "An `Application` delivers a Helm chart. A new value breaks the workload, and you want to go back. `helm rollback` finds no release. Why, and what is the right way back?"
+    options:
+      - id: a
+        text: "Argo CD renders the chart and applies plain manifests, so no Helm release exists. Set `targetRevision` or the values back in the `Application` and let Argo CD sync"
+        explanation: "Correct. `kubectl get secrets` in the namespace shows no release Secrets, so rollback is a change in the `Application`."
+      - id: b
+        text: "The Helm release is stored in the `argocd` namespace, so run `helm rollback -n argocd`"
+        explanation: "No Helm release is stored anywhere. Argo CD installs no release."
+      - id: c
+        text: "Helm releases are removed after one hour, so rollback is impossible"
+        explanation: "Nothing is removed on a timer. No release was ever created."
+      - id: d
+        text: "Delete the namespace and sync again"
+        explanation: "That removes every object in it. A change in the `Application` is enough."
+    correct_option: a
+    explanation: "Argo CD runs the chart templates in the repo server and the application controller applies plain manifests. Rollback is a Git or `Application` change."

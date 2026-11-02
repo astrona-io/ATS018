@@ -30,29 +30,31 @@ Argo CD is the primary GitOps controller in this course. The section teaches the
 
 ## The Learning Path
 
+The section has the modules below, in reading order. Each module has a playground for practice, and the section ends with a capstone challenge.
+
 ### 1. Deploy An Application With Argo CD
-*   **Module Reader:** **[Module 1: Deploy An Application With Argo CD](./module-01/course.md)**
+*   **Module Reader:** Deploy An Application With Argo CD
 *   **Hands-on Playground:** `sections/section-020/module-01/playground` — kind cluster with Argo CD 3.5.4 (non-HA install) in `argocd`, the `argocd` CLI logged in through a port-forward, and Gitea in `gitea` with the private repository `starfleet/scout-deploy` holding a Kustomize base with staging and production overlays and a Helm values file for podinfo. A repository Secret is deliberately not created, so the first Application fails to fetch until the reader adds credentials. Namespace `starfleet` does not exist yet. Deliberately absent: no Application, no ApplicationSet.
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-020/module-01/playground
     ```
 
 ### 2. Manage Many Applications With ApplicationSets
-*   **Module Reader:** **[Module 2: Manage Many Applications With ApplicationSets](./module-02/course.md)**
+*   **Module Reader:** Manage Many Applications With ApplicationSets
 *   **Hands-on Playground:** `sections/section-020/module-02/playground` — kind cluster with Argo CD 3.5.4 and Gitea. Repository `starfleet/platform-apps` holds directories `apps/scout`, `apps/probe` and `apps/shuttle`, each a Kustomize base, plus `envs/staging` and `envs/production`. A second tenant namespace `outpost` exists. The default AppProject is the only project. Deliberately absent: no ApplicationSet, no AppProject for `outpost`.
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-020/module-02/playground
     ```
 
 ### 3. Diagnose Sync And Health Failures In Argo CD
-*   **Module Reader:** **[Module 3: Diagnose Sync And Health Failures In Argo CD](./module-03/course.md)**
+*   **Module Reader:** Diagnose Sync And Health Failures In Argo CD
 *   **Hands-on Playground:** `sections/section-020/module-03/playground` — kind cluster with Argo CD 3.5.4 and Gitea. Four Applications are deliberately broken: one with a wrong path (ComparisonError), one with a manifest the API server rejects (sync failed), one whose Deployment replicas are changed by a HorizontalPodAutoscaler (permanent OutOfSync), and one that references an image tag that does not exist (Degraded). The Git repository is writable by the reader through the Gitea web UI and git over HTTP.
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-020/module-03/playground
     ```
 
 ### Section Capstone Challenge
-*   **Comprehensive Challenge:** Continuous Delivery With Argo CD Capstone — `sections/section-020/capstone/labs/lab-01` *(created in the build phase)*
+*   **Comprehensive Challenge:** Continuous Delivery With Argo CD Capstone — `sections/section-020/capstone/labs/lab-01`
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-020/capstone/labs/lab-01
     astrona submit -c .
@@ -63,4 +65,4 @@ Argo CD is the primary GitOps controller in this course. The section teaches the
 
 ## Ready for Assessment?
 
-*   **[Take the Section 020 Knowledge Check](./quiz.md)**
+*   Take the knowledge check for this section.

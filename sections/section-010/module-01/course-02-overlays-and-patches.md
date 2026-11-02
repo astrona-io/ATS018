@@ -130,7 +130,7 @@ spec:
             memory: 32Mi
 ```
 
-Every change is visible: the namespace, both labels, the image `6.15.0`, and the `envFrom` block from the patch. The ConfigMap name ends in `-6khtk7h7k6`, although the patch says `scout-settings`. Kustomize added that suffix and updated the reference for you; the next part explains why.
+Every change is visible: the namespace, both labels, the image `6.15.0`, and the `envFrom` block from the patch. The ConfigMap name ends in `-6khtk7h7k6`, although the patch says `scout-settings`. Kustomize added that suffix and updated the reference for you. The suffix is a hash of the ConfigMap content.
 
 ## The production overlay
 

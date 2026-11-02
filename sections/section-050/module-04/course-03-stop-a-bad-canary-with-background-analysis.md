@@ -41,7 +41,7 @@ The metric has no `count` field. It measures every 15 seconds until the analysis
 
 The Rollout points to the template in `strategy.canary.analysis`. `startingStep: 1` starts the analysis when the Rollout reaches step number 1, counted from 0. In the steps below that is the pause after the first weight. The argument `canary-hash` takes its value from `podTemplateHashValue: Latest`, which is the hash of the newest pod template. That means the canary. The pause steps now have durations, so the release moves on without a manual promotion.
 
-Open `rollout-scout.yaml` from the last part and make two changes. Set the message to `good-build`. Then replace the whole `strategy` section with the one below. It drops the header route and its steps, and it adds the `analysis` block:
+Open the `rollout-scout.yaml` file you saved earlier and make two changes. Set the message to `good-build`. Then replace the whole `strategy` section with the one below. It drops the header route and its steps, and it adds the `analysis` block:
 
 ```yaml
   strategy:

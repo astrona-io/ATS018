@@ -1,16 +1,18 @@
+# Knowledge check for section 010, module 01. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
 schema_version: 1
 kind: question_bank
-id: ats018-section-010-quiz
+id: ats018-010-01
 course_id: ATS018
 exam_code: CNPE
 status: draft
-provenance: "Original practice material written for this course; not official exam questions."
+provenance: Original practice material written for this course; not official exam questions.
 scope:
-  type: section
-  id: section-010
-  title: "Packaging Applications For GitOps"
+  type: module
+  id: section-010/module-01
+  title: Build Environment Overlays With Kustomize
 questions:
-  - id: ats018-010-q01
+  - id: ats018-010-01-q01
     type: single_choice
     difficulty: beginner
     learning_objective: "Add labels to every object of a base without changing the selectors."
@@ -32,7 +34,146 @@ questions:
         explanation: "`namespace` sets the namespace of every object, not labels."
     correct_option: a
     explanation: "`labels` with `pairs` adds labels without touching selectors. The older `commonLabels` field also changes selectors."
-  - id: ats018-010-q02
+
+  - id: ats018-010-01-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Use the `replicas` field of an overlay to change the replica count."
+    source_readings:
+      - sections/section-010/module-01/course-02-overlays-and-patches.md
+    prompt: "The production overlay must run three replicas of the `scout` Deployment. The base has `replicas: 1`. Which change in `overlays/production/kustomization.yaml` does this without a patch file?"
+    options:
+      - id: a
+        text: "An `images` entry with `newTag: 3`"
+        explanation: "`images` changes image names and tags, not replicas."
+      - id: b
+        text: "A `labels` entry with `pairs` that holds `replicas: 3`"
+        explanation: "`labels` adds labels to `metadata.labels`. It does not change `spec.replicas`."
+      - id: c
+        text: "A `replicas` entry with `name: scout` and `count: 3`"
+        explanation: "Correct. The `replicas` field sets `spec.replicas` on the workload with that name."
+      - id: d
+        text: "A second `resources` entry that points at the base"
+        explanation: "The base would be listed twice. It does not change the replica count."
+    correct_option: c
+    explanation: "The `replicas` field is a shortcut for the most common change. It needs the workload `name` and a `count`, and no patch."
+
+  - id: ats018-010-01-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Tell a strategic merge patch from a JSON 6902 patch."
+    source_readings:
+      - sections/section-010/module-01/course-02-overlays-and-patches.md
+    prompt: "Which patch type is a list of `op` and `path` operations and needs a `target` block to select the objects?"
+    options:
+      - id: a
+        text: "Strategic merge"
+        explanation: "A strategic merge patch looks like the object it changes and is matched by `kind` and `metadata.name`."
+      - id: b
+        text: "`replicas` shortcut"
+        explanation: "The `replicas` shortcut is a field of the overlay, not a patch."
+      - id: c
+        text: "`configMapGenerator`"
+        explanation: "A generator creates a ConfigMap; it does not patch objects."
+      - id: d
+        text: "JSON 6902"
+        explanation: "Correct. A JSON 6902 patch is a list of operations with a `target` that selects objects."
+    correct_option: d
+    explanation: "JSON 6902 uses `op` and `path` with a `target`. A strategic merge patch is matched by `kind` and `metadata.name` and merges lists such as containers by name."
+
+  - id: ats018-010-01-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain how a strategic merge patch changes a container list."
+    source_readings:
+      - sections/section-010/module-01/course-02-overlays-and-patches.md
+    prompt: "A strategic merge patch in the staging overlay has a `containers` list with one entry named `scout` that adds an `envFrom` block. The base Deployment already has a container named `scout`. What does the rendered Deployment contain?"
+    options:
+      - id: a
+        text: "Two containers named `scout`, one from the base and one from the patch"
+        explanation: "Strategic merge matches a container list entry by its `name`, so it does not add a second container."
+      - id: b
+        text: "One container named `scout` that has the `envFrom` block added"
+        explanation: "Correct. Kubernetes publishes how each list field is matched, and containers are matched by `name`."
+      - id: c
+        text: "A build error, because a patch cannot add fields"
+        explanation: "A patch can add fields. A build error appears only when the patch matches no object."
+      - id: d
+        text: "One container named `scout` that has only the `envFrom` block"
+        explanation: "The patch merges into the existing container. The image, ports and probe stay."
+    correct_option: b
+    explanation: "Strategic merge patches merge a container list by container name. The existing `scout` container keeps its fields and gets the new `envFrom` block."
+
+  - id: ats018-010-01-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain the hash in a generated ConfigMap name."
+    source_readings:
+      - sections/section-010/module-01/course-03-generators-diff-and-apply.md
+    prompt: "A `configMapGenerator` literal changes from `message=staging` to `message=staging-v2`. What does the rendered output show?"
+    options:
+      - id: a
+        text: "A ConfigMap with a new name hash, and a Deployment that points to the new name"
+        explanation: "Correct. The name ends in a hash of the content, and Kustomize rewrites every reference, so the pod template changes and the Deployment rolls out new pods."
+      - id: b
+        text: "The same ConfigMap name with new data, and no rollout"
+        explanation: "The name carries a hash of the content, so a data change changes the name."
+      - id: c
+        text: "A ConfigMap with a new name hash, and the Deployment still points to the old name"
+        explanation: "Kustomize rewrites every reference to the new name."
+      - id: d
+        text: "A build error, because a literal cannot change"
+        explanation: "A literal can change; the hash changes with it."
+    correct_option: a
+    explanation: "A changed generator literal gives a new ConfigMap name, a changed pod template and a rollout."
+
+  - id: ats018-010-01-q06
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Read the exit code of `kubectl diff -k`."
+    source_readings:
+      - sections/section-010/module-01/course-03-generators-diff-and-apply.md
+    prompt: "You run `kubectl diff -k overlays/production` and the command exits with `1`. What does that mean?"
+    options:
+      - id: a
+        text: "The build failed"
+        explanation: "A failed build prints an error; the exit code `1` of `kubectl diff` means differences."
+      - id: b
+        text: "The rendered output differs from the cluster"
+        explanation: "Correct. The command compares the rendered output with the cluster through a server-side dry run."
+      - id: c
+        text: "The cluster is not reachable"
+        explanation: "`kubectl diff -k` needs the cluster, and an unreachable cluster is an error, not a diff."
+      - id: d
+        text: "The overlay and the cluster are equal"
+        explanation: "Equal output exits with `0`."
+    correct_option: b
+    explanation: "`kubectl diff -k` exits with `1` when there are differences and `0` when there are none."
+
+  - id: ats018-010-01-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "State what `kubectl apply -k` does not delete."
+    source_readings:
+      - sections/section-010/module-01/course-03-generators-diff-and-apply.md
+    prompt: "After two data changes to a generated ConfigMap, the cluster still holds three ConfigMaps with different hashes. Why?"
+    options:
+      - id: a
+        text: "Kustomize keeps old ConfigMaps so a rollback is possible"
+        explanation: "Kustomize does not manage old objects; it only renders."
+      - id: b
+        text: "`kubectl diff -k` created them"
+        explanation: "A diff never changes the cluster."
+      - id: c
+        text: "`kubectl apply -k` applies the output but never deletes objects that left your files"
+        explanation: "Correct. The old generated ConfigMaps stay until something deletes them."
+      - id: d
+        text: "The `labels` field copies the ConfigMap"
+        explanation: "`labels` adds labels and does not copy objects."
+    correct_option: c
+    explanation: "`kubectl apply -k` never prunes. A GitOps controller with prune enabled removes such objects."
+
+  - id: ats018-010-01-q08
     type: single_choice
     difficulty: beginner
     learning_objective: "Name the stage of a Kustomize build error and the cause behind it."
@@ -54,7 +195,8 @@ questions:
         explanation: "`kubectl kustomize` renders files and does not contact the cluster."
     correct_option: b
     explanation: "The first words of a build error name the stage. A wrong path in `resources` fails while Kustomize accumulates resources."
-  - id: ats018-010-q03
+
+  - id: ats018-010-01-q09
     type: single_choice
     difficulty: intermediate
     learning_objective: "Explain why a patch with an unmatched `target` is dangerous."
@@ -77,95 +219,8 @@ questions:
         explanation: "Kustomize renders patches at build time, not at apply time."
     correct_option: c
     explanation: "A `target` that matches nothing builds cleanly and changes nothing. Read the rendered output or run `kubectl diff -k` before you apply."
-  - id: ats018-010-q04
-    type: single_choice
-    difficulty: intermediate
-    learning_objective: "Tell a strategic merge patch from a JSON 6902 patch."
-    source_readings:
-      - sections/section-010/module-01/course-02-overlays-and-patches.md
-    prompt: "Which patch type is a list of `op` and `path` operations and needs a `target` block to select the objects?"
-    options:
-      - id: a
-        text: "Strategic merge"
-        explanation: "A strategic merge patch looks like the object it changes and is matched by `kind` and `metadata.name`."
-      - id: b
-        text: "`replicas` shortcut"
-        explanation: "The `replicas` shortcut is a field of the overlay, not a patch."
-      - id: c
-        text: "`configMapGenerator`"
-        explanation: "A generator creates a ConfigMap; it does not patch objects."
-      - id: d
-        text: "JSON 6902"
-        explanation: "Correct. A JSON 6902 patch is a list of operations with a `target` that selects objects."
-    correct_option: d
-    explanation: "JSON 6902 uses `op` and `path` with a `target`. A strategic merge patch is matched by `kind` and `metadata.name` and merges lists such as containers by name."
-  - id: ats018-010-q05
-    type: single_choice
-    difficulty: intermediate
-    learning_objective: "Explain the hash in a generated ConfigMap name."
-    source_readings:
-      - sections/section-010/module-01/course-03-generators-diff-and-apply.md
-    prompt: "A `configMapGenerator` literal changes from `message=staging` to `message=staging-v2`. What does the rendered output show?"
-    options:
-      - id: a
-        text: "A ConfigMap with a new name hash, and a Deployment that points to the new name"
-        explanation: "Correct. The name ends in a hash of the content, and Kustomize rewrites every reference, so the pod template changes and the Deployment rolls out new pods."
-      - id: b
-        text: "The same ConfigMap name with new data, and no rollout"
-        explanation: "The name carries a hash of the content, so a data change changes the name."
-      - id: c
-        text: "A ConfigMap with a new name hash, and the Deployment still points to the old name"
-        explanation: "Kustomize rewrites every reference to the new name."
-      - id: d
-        text: "A build error, because a literal cannot change"
-        explanation: "A literal can change; the hash changes with it."
-    correct_option: a
-    explanation: "A changed generator literal gives a new ConfigMap name, a changed pod template and a rollout."
-  - id: ats018-010-q06
-    type: single_choice
-    difficulty: beginner
-    learning_objective: "Read the exit code of `kubectl diff -k`."
-    source_readings:
-      - sections/section-010/module-01/course-03-generators-diff-and-apply.md
-    prompt: "You run `kubectl diff -k overlays/production` and the command exits with `1`. What does that mean?"
-    options:
-      - id: a
-        text: "The build failed"
-        explanation: "A failed build prints an error; the exit code `1` of `kubectl diff` means differences."
-      - id: b
-        text: "The rendered output differs from the cluster"
-        explanation: "Correct. The command compares the rendered output with the cluster through a server-side dry run."
-      - id: c
-        text: "The cluster is not reachable"
-        explanation: "`kubectl diff -k` needs the cluster, and an unreachable cluster is an error, not a diff."
-      - id: d
-        text: "The overlay and the cluster are equal"
-        explanation: "Equal output exits with `0`."
-    correct_option: b
-    explanation: "`kubectl diff -k` exits with `1` when there are differences and `0` when there are none."
-  - id: ats018-010-q07
-    type: single_choice
-    difficulty: intermediate
-    learning_objective: "State what `kubectl apply -k` does not delete."
-    source_readings:
-      - sections/section-010/module-01/course-03-generators-diff-and-apply.md
-    prompt: "After two data changes to a generated ConfigMap, the cluster still holds three ConfigMaps with different hashes. Why?"
-    options:
-      - id: a
-        text: "Kustomize keeps old ConfigMaps so a rollback is possible"
-        explanation: "Kustomize does not manage old objects; it only renders."
-      - id: b
-        text: "`kubectl diff -k` created them"
-        explanation: "A diff never changes the cluster."
-      - id: c
-        text: "`kubectl apply -k` applies the output but never deletes objects that left your files"
-        explanation: "Correct. The old generated ConfigMaps stay until something deletes them."
-      - id: d
-        text: "The `labels` field copies the ConfigMap"
-        explanation: "`labels` adds labels and does not copy objects."
-    correct_option: c
-    explanation: "`kubectl apply -k` never prunes. A GitOps controller with prune enabled removes such objects."
-  - id: ats018-010-q08
+
+  - id: ats018-010-01-q10
     type: single_choice
     difficulty: advanced
     learning_objective: "Find the cause of `no resource matches strategic merge patch`."

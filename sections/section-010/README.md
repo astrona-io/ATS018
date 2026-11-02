@@ -19,15 +19,17 @@ Every GitOps controller applies manifests that a packaging tool renders from Git
 
 ## The Learning Path
 
+The section has the modules below, in reading order. Each module has a playground for practice, and the section ends with a capstone challenge.
+
 ### 1. Build Environment Overlays With Kustomize
-*   **Module Reader:** **[Module 1: Build Environment Overlays With Kustomize](./module-01/course.md)**
+*   **Module Reader:** Build Environment Overlays With Kustomize
 *   **Hands-on Playground:** `sections/section-010/module-01/playground` — kind cluster (Kubernetes 1.35). Namespaces `starfleet-staging` and `starfleet-production` exist and are empty; `shuttle` (curlimages/curl) runs in `starfleet` to send test requests. The reader writes every kustomization file on their own machine; kubectl's built-in kustomize is enough. Deliberately absent: no GitOps controller, no Helm release, no `scout` workload yet.
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-010/module-01/playground
     ```
 
 ### Section Capstone Challenge
-*   **Comprehensive Challenge:** Packaging Applications For GitOps Capstone — `sections/section-010/capstone/labs/lab-01` *(created in the build phase)*
+*   **Comprehensive Challenge:** Packaging Applications For GitOps Capstone — `sections/section-010/capstone/labs/lab-01`
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-010/capstone/labs/lab-01
     astrona submit -c .
@@ -38,4 +40,4 @@ Every GitOps controller applies manifests that a packaging tool renders from Git
 
 ## Ready for Assessment?
 
-*   **[Take the Section 010 Knowledge Check](./quiz.md)**
+*   Take the knowledge check for this section.

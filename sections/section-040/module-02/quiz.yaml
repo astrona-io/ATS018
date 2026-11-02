@@ -1,0 +1,244 @@
+# Knowledge check for section 040, module 02. Listed in astrona.yaml as a
+# `type: quiz` entry right after the module summary. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats018-040-02
+course_id: ATS018
+exam_code: CNPE
+status: draft
+provenance: "Original practice material written for this course; not official exam questions."
+scope:
+  type: module
+  id: section-040/module-02
+  title: "Hand Off From A Tekton Pipeline To GitOps"
+questions:
+  - id: ats018-040-02-q01
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Say who applies the release in a CI to GitOps hand-off."
+    source_readings:
+      - sections/section-040/module-02/course-03-one-pipeline-from-source-to-commit.md
+    prompt: "A Pipeline publishes a new image tag and commits it to the GitOps repository. Which component applies the new tag to the cluster?"
+    options:
+      - id: a
+        text: "The Tekton Pipeline, with `kubectl apply`"
+        explanation: "The pipeline never applies to the cluster."
+      - id: b
+        text: "Argo CD"
+        explanation: "Correct. The pipeline writes to the registry and to Git, and only Argo CD writes to the cluster."
+      - id: c
+        text: "The `EventListener`"
+        explanation: "It receives the webhook and creates the run."
+      - id: d
+        text: "The registry"
+        explanation: "A registry stores images and applies nothing."
+    correct_option: b
+    explanation: "The pipeline never applies to the cluster. It commits to Git, and Argo CD syncs. With self-heal on, Argo CD would revert a change that the pipeline made by hand."
+
+  - id: ats018-040-02-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Explain why the image result records a digest."
+    source_readings:
+      - sections/section-040/module-02/course-01-publish-an-image-to-the-registry.md
+    prompt: "The `image` result of the `publish-image` Task holds the tag and the digest. Why record the digest?"
+    options:
+      - id: a
+        text: "A digest names exactly one image, even if someone moves the tag later"
+        explanation: "Correct. A digest is the hash of the image manifest."
+      - id: b
+        text: "A digest makes the registry accept plain HTTP"
+        explanation: "Plain HTTP is allowed by the `--insecure` flag of `crane`."
+      - id: c
+        text: "A digest tells Argo CD which cluster to use"
+        explanation: "The digest says nothing about the cluster."
+      - id: d
+        text: "A digest replaces the tag in the Deployment automatically"
+        explanation: "Nothing changes in the cluster until Git changes."
+    correct_option: a
+    explanation: "A tag can be moved to another image. The digest cannot, so it identifies what the Task published."
+
+  - id: ats018-040-02-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Predict what a failed publish does to the release."
+    source_readings:
+      - sections/section-040/module-02/course-01-publish-an-image-to-the-registry.md
+    prompt: "The `publish-image` Task asks `crane` to copy a base image tag that does not exist. The registry answers `MANIFEST_UNKNOWN`. What happens in a Pipeline where `update-deploy` runs after it?"
+    options:
+      - id: a
+        text: "`update-deploy` commits the tag anyway, and Argo CD reports the error"
+        explanation: "A Task that runs after a failed Task never starts."
+      - id: b
+        text: "Tekton creates the missing tag by itself and continues"
+        explanation: "Tekton does not create images. The step fails."
+      - id: c
+        text: "The registry stores an empty tag and the release continues"
+        explanation: "The registry answers `MANIFEST_UNKNOWN` and stores nothing."
+      - id: d
+        text: "The step fails, and `update-deploy` never starts, so no commit with a broken tag reaches Git"
+        explanation: "Correct. A failed publish must stop the release."
+    correct_option: d
+    explanation: "The step prints the copy log and fails with `StepFailed`. The commit Task is the next one, and it does not run."
+
+  - id: ats018-040-02-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Find why a Task cannot read a private repository."
+    source_readings:
+      - sections/section-040/module-02/course-02-commit-the-new-tag-with-git-credentials.md
+    prompt: "The Task `update-deploy` ends with `fatal: could not read Username for 'http://gitea-http.gitea.svc:3000'`. The repository is private. What is the cause?"
+    options:
+      - id: a
+        text: "The Git server has no webhook for the repository"
+        explanation: "A webhook starts runs. It does not give a step credentials."
+      - id: b
+        text: "The `EventListener` is not ready"
+        explanation: "The run was started by hand, and the `EventListener` plays no part in a clone."
+      - id: c
+        text: "The TaskRun used the service account `default`, which has no Git credentials"
+        explanation: "Correct. `git` asked for a user name, and the step has no terminal to type one."
+      - id: d
+        text: "Argo CD holds the lock on the repository"
+        explanation: "Argo CD only reads the repository."
+    correct_option: c
+    explanation: "Tekton writes Git credentials into the steps only when the run uses a ServiceAccount that lists an annotated Secret."
+
+  - id: ats018-040-02-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Give a pipeline step Git credentials."
+    source_readings:
+      - sections/section-040/module-02/course-02-commit-the-new-tag-with-git-credentials.md
+    prompt: "A Task must push a commit to a private Gitea repository. How does Tekton give the step its credentials?"
+    options:
+      - id: a
+        text: "A Secret of type `kubernetes.io/basic-auth` with the annotation `tekton.dev/git-0`, listed in the ServiceAccount of the run"
+        explanation: "Correct. Tekton writes `.gitconfig` and `.git-credentials` into the home folder of each step."
+      - id: b
+        text: "A ConfigMap that holds the password, mounted by hand in every step"
+        explanation: "Tekton builds the Git files from an annotated Secret."
+      - id: c
+        text: "A ClusterRole for the ServiceAccount on the Gitea Service"
+        explanation: "Kubernetes rights do not give Git access."
+      - id: d
+        text: "The `EventListener`, which forwards its own token"
+        explanation: "The `EventListener` only starts runs."
+    correct_option: a
+    explanation: "The annotated Secret in the run's ServiceAccount is the way. The annotation value must match the scheme and host of the clone URL."
+
+  - id: ats018-040-02-q06
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Check that the pipeline has no rights on workloads."
+    source_readings:
+      - sections/section-040/module-02/course-02-commit-the-new-tag-with-git-credentials.md
+    prompt: "You run `kubectl auth can-i update deployments -n starfleet --as=system:serviceaccount:starfleet:scout-ci`. Which answer is correct for a pipeline that follows the hand-off design?"
+    options:
+      - id: a
+        text: "`yes`, because the pipeline must update the Deployment"
+        explanation: "The pipeline commits to Git. Argo CD updates the Deployment."
+      - id: b
+        text: "`yes`, because every ServiceAccount can update Deployments in its namespace"
+        explanation: "A ServiceAccount has no such right by default."
+      - id: c
+        text: "The command is not allowed for ServiceAccounts"
+        explanation: "`kubectl auth can-i --as` works for ServiceAccounts."
+      - id: d
+        text: "`no`, because the ServiceAccount only gives access to Git"
+        explanation: "Correct. Delivery is the job of Argo CD."
+    correct_option: d
+    explanation: "The service account `scout-ci` holds a Git credentials Secret and nothing else. A pipeline without workload rights cannot change the cluster directly."
+
+  - id: ats018-040-02-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Order Tasks that share no result."
+    source_readings:
+      - sections/section-040/module-02/course-03-one-pipeline-from-source-to-commit.md
+    prompt: "In the release Pipeline, `update-deploy` must run after `publish-image`, but it takes no result from it. What orders the two Tasks?"
+    options:
+      - id: a
+        text: "`runAfter: [publish-image]` on `update-deploy`"
+        explanation: "Correct. Without it, both Tasks start together once `fetch-source` is done."
+      - id: b
+        text: "The order of the entries in `tasks`"
+        explanation: "The list order does not decide when a Task starts."
+      - id: c
+        text: "The service account of the PipelineRun"
+        explanation: "A service account gives access. It does not order Tasks."
+      - id: d
+        text: "A workspace, because only one Task can mount it"
+        explanation: "Only `fetch-source` uses the workspace."
+    correct_option: a
+    explanation: "`runAfter` and result references are the two ways to order Tasks. Without `runAfter`, the commit could land before the image exists."
+
+  - id: ats018-040-02-q08
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Set the service account for all TaskRuns of a PipelineRun."
+    source_readings:
+      - sections/section-040/module-02/course-03-one-pipeline-from-source-to-commit.md
+    prompt: "Two Tasks of the release Pipeline clone private repositories. Where do you set the service account `scout-ci`?"
+    options:
+      - id: a
+        text: "In `spec.serviceAccountName` of the Pipeline"
+        explanation: "A Pipeline has no service account field."
+      - id: b
+        text: "In `taskRunTemplate.serviceAccountName` of the PipelineRun"
+        explanation: "Correct. It applies to every TaskRun that the PipelineRun creates."
+      - id: c
+        text: "In the `kustomization.yaml` of `scout-deploy`"
+        explanation: "That file sets the image tag. It does not select a service account."
+      - id: d
+        text: "In the Argo CD `Application`"
+        explanation: "Argo CD does not run the Tekton Tasks."
+    correct_option: b
+    explanation: "Set the service account on the run, not on the definition. Without it, the TaskRuns use `default` and the clone fails."
+
+  - id: ats018-040-02-q09
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Name the parts of Tekton Triggers."
+    source_readings:
+      - sections/section-040/module-02/course-04-start-the-pipeline-from-a-git-push.md
+    prompt: "In Tekton Triggers, which object reads values such as `$(body.after)` from the webhook request?"
+    options:
+      - id: a
+        text: "The `TriggerBinding`"
+        explanation: "Correct. The binding reads values, and the `TriggerTemplate` creates the PipelineRun with them."
+      - id: b
+        text: "The `TriggerTemplate`"
+        explanation: "It creates the PipelineRun from the values."
+      - id: c
+        text: "The `EventListener`"
+        explanation: "It receives the webhook and runs the interceptors."
+      - id: d
+        text: "The `cel` interceptor"
+        explanation: "It filters events."
+    correct_option: a
+    explanation: "`EventListener` receives, the `cel` interceptor filters, `TriggerBinding` reads values and `TriggerTemplate` creates the run."
+
+  - id: ats018-040-02-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Read an accepted but dropped event."
+    source_readings:
+      - sections/section-040/module-02/course-04-start-the-pipeline-from-a-git-push.md
+    prompt: "You send a push event for `refs/heads/dev` to the `EventListener`. It answers with an event ID, but `tkn pipelinerun list` shows no new run. Why?"
+    options:
+      - id: a
+        text: "The `EventListener` crashed after it answered"
+        explanation: "The listener answered, so it works."
+      - id: b
+        text: "The `cel` interceptor dropped the event, because `ref` is not `refs/heads/main`"
+        explanation: "Correct. The listener answers with an event ID even when an interceptor drops the event."
+      - id: c
+        text: "The `TriggerBinding` could not read `after`"
+        explanation: "A binding problem would not depend on the branch name."
+      - id: d
+        text: "Argo CD blocked the PipelineRun"
+        explanation: "Argo CD plays no part in creating the run."
+    correct_option: b
+    explanation: "\"Accepted\" does not mean \"started\". Check `tkn pipelinerun list` to see whether a run exists."

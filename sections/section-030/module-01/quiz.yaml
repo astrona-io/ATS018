@@ -1,0 +1,197 @@
+# Knowledge check for section 030, module 01. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats018-030-01
+course_id: ATS018
+exam_code: CNPE
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: module
+  id: section-030/module-01
+  title: Reconcile Git Sources With Flux Kustomizations
+questions:
+  - id: ats018-030-01-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Name the Flux controller that fetches Git."
+    source_readings:
+      - sections/section-030/module-01/course-01-fetch-git-with-a-flux-source.md
+    prompt: "Flux fetches the private repository `scout-deploy` and stores the files as an artifact. Which controller does this, and which controller later renders and applies the manifests?"
+    options:
+      - id: a
+        text: "The helm controller fetches, and the notification controller applies"
+        explanation: "The helm controller installs chart releases. The notification controller sends notifications."
+      - id: b
+        text: "The source controller fetches, and the kustomize controller renders and applies"
+        explanation: "Correct. The source controller fetches Git and publishes artifacts. The kustomize controller renders and applies the manifests."
+      - id: c
+        text: "The kustomize controller fetches, and the source controller applies"
+        explanation: "The two jobs are the other way round."
+      - id: d
+        text: "The kubelet fetches, and the API server applies"
+        explanation: "Flux does its own work in its controllers. The kubelet runs containers."
+    correct_option: b
+    explanation: "Flux splits the work. The source controller fetches Git. The kustomize controller renders the path and applies the objects."
+
+  - id: ats018-030-01-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "State what a GitRepository `Ready` condition proves."
+    source_readings:
+      - sections/section-030/module-01/course-01-fetch-git-with-a-flux-source.md
+    prompt: "A `GitRepository` is `Ready`, but requests from the client return the old version. What does `Ready` prove?"
+    options:
+      - id: a
+        text: "Only that the source controller fetched the repository and published an artifact"
+        explanation: "Correct. The fetch worked. The Kustomization and the application are separate questions."
+      - id: b
+        text: "That the application runs the new commit"
+        explanation: "The Kustomization applies the files, and only a request proves the behaviour."
+      - id: c
+        text: "That the Kustomization applied every object"
+        explanation: "The Kustomization has its own Ready condition."
+      - id: d
+        text: "That the Deployment is healthy"
+        explanation: "Health belongs to the Kustomization with `wait: true` and to the application itself."
+    correct_option: a
+    explanation: "Source readiness proves the fetch. A request from the client proves the behaviour."
+
+  - id: ats018-030-01-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Place the credential Secret of a GitRepository."
+    source_readings:
+      - sections/section-030/module-01/course-01-fetch-git-with-a-flux-source.md
+    prompt: "A `GitRepository` in `flux-system` has `secretRef.name: scout-readonly`, and it reports an authentication error. The Secret exists in the namespace `starfleet-staging`. What is wrong?"
+    options:
+      - id: a
+        text: "The Secret needs the label `argocd.argoproj.io/secret-type: repository`"
+        explanation: "That label belongs to Argo CD. Flux does not use it."
+      - id: b
+        text: "The Secret name is too long"
+        explanation: "The length of the name is not the cause."
+      - id: c
+        text: "The password is stored as plain text in the `GitRepository`"
+        explanation: "The `secretRef` only names the Secret. It does not hold the password."
+      - id: d
+        text: "The source reads its Secret from its own namespace, so the Secret must be in `flux-system`"
+        explanation: "Correct. A Secret in the application namespace is not found by the source."
+    correct_option: d
+    explanation: "A `secretRef` names a Secret in the same namespace as the `GitRepository`, here `flux-system`."
+
+  - id: ats018-030-01-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Order Kustomizations with `dependsOn`."
+    source_readings:
+      - sections/section-030/module-01/course-02-apply-paths-and-order-dependencies.md
+    prompt: "A Kustomization sets `targetNamespace: starfleet`, but the Namespace does not exist and apply fails. What is the right fix?"
+    options:
+      - id: a
+        text: "Add `createNamespace: true` to `targetNamespace`"
+        explanation: "`targetNamespace` changes the destination of namespaced objects and does not create it."
+      - id: b
+        text: "Let a dependency Kustomization create the Namespace and add `dependsOn` for it"
+        explanation: "Correct. `targetNamespace` does not create a Namespace, and `dependsOn` waits for the dependency's Ready condition."
+      - id: c
+        text: "Suspend the Kustomization"
+        explanation: "Suspending pauses reconciliation and creates nothing."
+      - id: d
+        text: "Set `prune: true`"
+        explanation: "Pruning deletes objects; it does not create a Namespace."
+    correct_option: b
+    explanation: "`dependsOn` waits for the Ready condition of another Kustomization, so the Namespace can exist first."
+
+  - id: ats018-030-01-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Tell the Flux Kustomization from the local kustomization.yaml file."
+    source_readings:
+      - sections/section-030/module-01/course-02-apply-paths-and-order-dependencies.md
+    prompt: "What is the difference between a Flux `Kustomization` and a `kustomization.yaml` file?"
+    options:
+      - id: a
+        text: "They are the same file, and Flux only renames it"
+        explanation: "They are two different things."
+      - id: b
+        text: "The Flux `Kustomization` is a file in Git, and `kustomization.yaml` is an object in the cluster"
+        explanation: "The roles are the other way round."
+      - id: c
+        text: "The Flux `Kustomization` is an object in the cluster that names a path to render and apply. The `kustomization.yaml` file lives in Git and tells Kustomize how to render"
+        explanation: "Correct. The Flux object names the directory, and the local file lists the resources and changes."
+      - id: d
+        text: "The `kustomization.yaml` file applies the objects to the cluster"
+        explanation: "Kustomize only renders. In Flux, the kustomize controller applies."
+    correct_option: c
+    explanation: "The Flux `Kustomization` custom resource names a path and a source. The local file in that path tells Kustomize what to render."
+
+  - id: ats018-030-01-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Read a DependencyNotReady condition."
+    source_readings:
+      - sections/section-030/module-01/course-02-apply-paths-and-order-dependencies.md
+    prompt: "The `scout` Kustomization shows `Ready=False DependencyNotReady: dependency 'flux-system/platform' not found`. The `GitRepository` is `Ready`. What does this tell you?"
+    options:
+      - id: a
+        text: "The applier stopped at the dependency check and has not tried to create the Deployment. Create the `platform` Kustomization"
+        explanation: "Correct. The source is fine. The `dependsOn` entry names a Kustomization that does not exist yet."
+      - id: b
+        text: "The repository credentials are wrong, so fix the Secret"
+        explanation: "The source is `Ready`, so the files were fetched."
+      - id: c
+        text: "The Deployment was rejected by the API server"
+        explanation: "The controller did not try to apply anything."
+      - id: d
+        text: "The image tag does not exist, so fix it in Git"
+        explanation: "No pod was created, so no image was pulled."
+    correct_option: a
+    explanation: "`dependsOn` blocks the apply until the named Kustomization is `Ready`. A missing dependency stops the applier before any object is created."
+
+  - id: ats018-030-01-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Read SUSPENDED and READY together."
+    source_readings:
+      - sections/section-030/module-01/course-03-reconcile-suspend-and-resume.md
+    prompt: "After `flux suspend kustomization scout`, `flux get kustomizations` shows `SUSPENDED True` and `READY True`. Someone scales the Deployment by hand. What do these columns tell you?"
+    options:
+      - id: a
+        text: "The Deployment matches Git, because `READY` is `True`"
+        explanation: "`READY` records the last completed reconciliation. It is not a live check."
+      - id: b
+        text: "The Deployment and its pods were deleted"
+        explanation: "Suspension keeps the objects it applied."
+      - id: c
+        text: "The Kustomization is broken, because a suspended applier cannot be `Ready`"
+        explanation: "A suspended applier can keep an older `Ready` condition."
+      - id: d
+        text: "No new reconciliation runs, so the manual change stays until you resume"
+        explanation: "Correct. `READY` describes the last reconciliation. After `flux resume`, the controller restores the value in Git."
+    correct_option: d
+    explanation: "`SUSPENDED=True` means the controller does not reconcile. A `Ready` condition from before is not proof that the cluster matches Git."
+
+  - id: ats018-030-01-q08
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Request a reconciliation with a fresh source fetch."
+    source_readings:
+      - sections/section-030/module-01/course-03-reconcile-suspend-and-resume.md
+    prompt: "The repository has a new commit. You run `flux reconcile kustomization scout` and want the source fetched again before the apply. Which flag does that?"
+    options:
+      - id: a
+        text: "`--prune`"
+        explanation: "Pruning deletes objects that left the rendered files. It does not request a fresh fetch."
+      - id: b
+        text: "`--wait`"
+        explanation: "`wait` adds health checks to readiness. It does not request a fresh fetch."
+      - id: c
+        text: "`--with-source`"
+        explanation: "Correct. `flux reconcile kustomization --with-source` first requests a source fetch, so the applier uses the new artifact."
+      - id: d
+        text: "`--force`"
+        explanation: "Forcing an apply does not request a fresh fetch."
+    correct_option: c
+    explanation: "`flux resume` clears the suspension and waits for reconciliation. `flux reconcile kustomization ... --with-source` also fetches the source again."

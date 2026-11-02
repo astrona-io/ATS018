@@ -24,29 +24,31 @@ Flux is the second GitOps controller the exam allows. This compact section teach
 
 ## The Learning Path
 
+The section has the modules below, in reading order. Each module has a playground for practice, and the section ends with a capstone challenge.
+
 ### 1. Reconcile Git Sources With Flux Kustomizations
-*   **Module Reader:** **[Module 1: Reconcile Git Sources With Flux Kustomizations](./module-01/course.md)**
+*   **Module Reader:** Reconcile Git Sources With Flux Kustomizations
 *   **Hands-on Playground:** `sections/section-030/module-01/playground` — kind cluster with the flux CLI 2.9.6 and the Flux controllers installed (no bootstrap), and Gitea with repository `starfleet/scout-deploy` (Kustomize base and overlays) and a read-only credential Secret ready in `flux-system`. Deliberately absent: no GitRepository or Kustomization; no Argo CD in this cluster.
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-030/module-01/playground
     ```
 
 ### 2. Deliver Helm Releases With Flux
-*   **Module Reader:** **[Module 2: Deliver Helm Releases With Flux](./module-02/course.md)**
+*   **Module Reader:** Deliver Helm Releases With Flux
 *   **Hands-on Playground:** `sections/section-030/module-02/playground` — kind cluster with the Flux controllers, outbound internet to ghcr.io, and a HelmRelease `scout` in `starfleet` (podinfo chart) that is deliberately failing: its values set a readiness probe path that never answers, so the upgrade times out. No remediation is configured yet.
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-030/module-02/playground
     ```
 
 ### 3. Automate Image Updates With Flux
-*   **Module Reader:** **[Module 3: Automate Image Updates With Flux](./module-03/course.md)**
+*   **Module Reader:** Automate Image Updates With Flux
 *   **Hands-on Playground:** `sections/section-030/module-03/playground` — kind cluster with Flux 2.9.6 plus the image reflector and image automation controllers, Gitea with `starfleet/scout-deploy`, an in-cluster registry holding `scout` tags 6.14.0 and 6.15.0, and a read-write Git credential Secret. Deliberately absent: no ImageRepository, ImagePolicy or ImageUpdateAutomation.
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-030/module-03/playground
     ```
 
 ### Section Capstone Challenge
-*   **Comprehensive Challenge:** Continuous Delivery With Flux Capstone — `sections/section-030/capstone/labs/lab-01` *(created in the build phase)*
+*   **Comprehensive Challenge:** Continuous Delivery With Flux Capstone — `sections/section-030/capstone/labs/lab-01`
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-030/capstone/labs/lab-01
     astrona submit -c .
@@ -57,4 +59,4 @@ Flux is the second GitOps controller the exam allows. This compact section teach
 
 ## Ready for Assessment?
 
-*   **[Take the Section 030 Knowledge Check](./quiz.md)**
+*   Take the knowledge check for this section.

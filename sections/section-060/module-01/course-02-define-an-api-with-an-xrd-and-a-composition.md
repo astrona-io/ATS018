@@ -107,7 +107,7 @@ kubectl apply -f environments/staging/
 kubectl -n starfleet-staging get scoutenvironments.platform.starfleet.dev,objects.kubernetes.m.crossplane.io,deploy,svc
 ```
 
-The `cat` command prints the XR. The `argocd.argoproj.io/sync-wave` annotation is used in the next part. Crossplane ignores it:
+The `cat` command prints the XR. The `argocd.argoproj.io/sync-wave` annotation is read by Argo CD later in this module. Crossplane ignores it:
 
 ```text
 apiVersion: platform.starfleet.dev/v1alpha1

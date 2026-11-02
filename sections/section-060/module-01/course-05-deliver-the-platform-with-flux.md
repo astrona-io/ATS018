@@ -1,6 +1,6 @@
 # Deliver The Platform With Flux
 
-The exam lets you choose Argo CD or Flux for a delivery task, so you must be able to do the same job with both. This part hands the objects from the previous part to Flux. Flux has no sync waves and no Lua health scripts. It orders work with `dependsOn` and it checks health with `wait`, and both work with Crossplane objects as they are.
+The exam lets you choose Argo CD or Flux for a delivery task, so you must be able to do the same job with both. This part hands the objects that Argo CD delivered to Flux. Flux has no sync waves and no Lua health scripts. It orders work with `dependsOn` and it checks health with `wait`, and both work with Crossplane objects as they are.
 
 ## Hand the objects over to Flux
 
@@ -130,7 +130,7 @@ Ready=False HealthCheckFailed: health check failed after 2m0.005280308s: timeout
 Healthy=False HealthCheckFailed: timeout waiting for: [ScoutEnvironment/starfleet-production/scout status: 'InProgress']
 ```
 
-The kustomize controller names the object that is not Ready, `ScoutEnvironment/starfleet-production/scout`. The `Ready=False` condition sends you to the layers from the last part: the XR, the `Object`, the pods. The fix is the same as before, a change in Git:
+The kustomize controller names the object that is not Ready, `ScoutEnvironment/starfleet-production/scout`. The `Ready=False` condition sends you to the layers of a composite resource: the XR, the `Object`, the pods. The fix is the same as before, a change in Git:
 
 ```sh
 sed -i.bak 's/version: 6.99.0/version: 6.15.0/' environments/production/scoutenvironment.yaml && rm environments/production/scoutenvironment.yaml.bak

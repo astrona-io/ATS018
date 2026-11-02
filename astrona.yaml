@@ -111,6 +111,10 @@ modules:
       - type: reading
         title: Summary
         path: sections/section-010/module-01/course-05-summary.md
+      - type: quiz
+        title: "Knowledge Check: Build Environment Overlays With Kustomize"
+        path: sections/section-010/module-01/quiz.yaml
+        question_count: 10
       - type: reading
         title: Question
         path: sections/section-010/capstone/labs/lab-01/question.md
@@ -131,10 +135,6 @@ modules:
             url: https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/
           - name: "Kustomize reference"
             url: https://kubectl.docs.kubernetes.io/references/kustomize/
-      - type: quiz
-        title: "Knowledge Check: Packaging Applications For GitOps"
-        path: sections/section-010/quiz.yaml
-        pass_score: 70
 
   - id: module-020
     title: "Continuous Delivery With Argo CD"
@@ -190,6 +190,10 @@ modules:
       - type: reading
         title: "Summary"
         path: sections/section-020/module-01/course-05-summary.md
+      - type: quiz
+        title: "Knowledge Check: Deploy An Application With Argo CD"
+        path: sections/section-020/module-01/quiz.yaml
+        question_count: 10
 
       - type: reading
         title: "Manage Many Applications With ApplicationSets"
@@ -226,6 +230,10 @@ modules:
       - type: reading
         title: "Summary"
         path: sections/section-020/module-02/course-04-summary.md
+      - type: quiz
+        title: "Knowledge Check: Manage Many Applications With ApplicationSets"
+        path: sections/section-020/module-02/quiz.yaml
+        question_count: 10
       - type: reading
         title: "Diagnose Sync And Health Failures In Argo CD"
         path: sections/section-020/module-03/course.md
@@ -264,6 +272,10 @@ modules:
       - type: reading
         title: "Summary"
         path: sections/section-020/module-03/course-05-summary.md
+      - type: quiz
+        title: "Knowledge Check: Diagnose Sync And Health Failures In Argo CD"
+        path: sections/section-020/module-03/quiz.yaml
+        question_count: 10
       - type: reading
         title: Question
         path: sections/section-020/capstone/labs/lab-01/question.md
@@ -287,10 +299,6 @@ modules:
           - name: "Argo CD automated sync"
             url: https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/
 
-      - type: quiz
-        title: "Knowledge Check: Continuous Delivery With Argo CD"
-        path: sections/section-020/quiz.yaml
-        pass_score: 70
 
   - id: module-030
     title: "Continuous Delivery With Flux"
@@ -341,6 +349,10 @@ modules:
       - type: reading
         title: "Summary"
         path: sections/section-030/module-01/course-04-summary.md
+      - type: quiz
+        title: "Knowledge Check: Reconcile Git Sources With Flux Kustomizations"
+        path: sections/section-030/module-01/quiz.yaml
+        question_count: 8
 
       - type: reading
         title: "Deliver Helm Releases With Flux"
@@ -375,6 +387,10 @@ modules:
       - type: reading
         title: "Summary"
         path: sections/section-030/module-02/course-04-summary.md
+      - type: quiz
+        title: "Knowledge Check: Deliver Helm Releases With Flux"
+        path: sections/section-030/module-02/quiz.yaml
+        question_count: 8
       - type: reading
         title: "Automate Image Updates With Flux"
         path: sections/section-030/module-03/course.md
@@ -408,6 +424,10 @@ modules:
       - type: reading
         title: "Summary"
         path: sections/section-030/module-03/course-04-summary.md
+      - type: quiz
+        title: "Knowledge Check: Automate Image Updates With Flux"
+        path: sections/section-030/module-03/quiz.yaml
+        question_count: 8
       - type: reading
         title: Question
         path: sections/section-030/capstone/labs/lab-01/question.md
@@ -430,10 +450,6 @@ modules:
             url: https://fluxcd.io/flux/components/helm/helmreleases/
 
 
-      - type: quiz
-        title: "Knowledge Check: Continuous Delivery With Flux"
-        path: sections/section-030/quiz.yaml
-        pass_score: 70
 
   - id: module-040
     title: "Continuous Integration Pipelines With Tekton"
@@ -488,6 +504,10 @@ modules:
       - type: reading
         title: "Summary"
         path: sections/section-040/module-01/course-05-summary.md
+      - type: quiz
+        title: "Knowledge Check: Build Tekton Tasks And Pipelines"
+        path: sections/section-040/module-01/quiz.yaml
+        question_count: 10
 
       - type: reading
         title: "Hand Off From A Tekton Pipeline To GitOps"
@@ -527,6 +547,10 @@ modules:
       - type: reading
         title: "Summary"
         path: sections/section-040/module-02/course-05-summary.md
+      - type: quiz
+        title: "Knowledge Check: Hand Off From A Tekton Pipeline To GitOps"
+        path: sections/section-040/module-02/quiz.yaml
+        question_count: 10
       - type: reading
         title: "Run CI Workflows With Argo Workflows"
         path: sections/section-040/module-03/course.md
@@ -565,6 +589,10 @@ modules:
       - type: reading
         title: "Summary"
         path: sections/section-040/module-03/course-05-summary.md
+      - type: quiz
+        title: "Knowledge Check: Run CI Workflows With Argo Workflows"
+        path: sections/section-040/module-03/quiz.yaml
+        question_count: 10
       - type: reading
         title: Question
         path: sections/section-040/capstone/labs/lab-01/question.md
@@ -607,10 +635,6 @@ modules:
             url: https://argoproj.github.io/argo-events/concepts/sensor/
           - name: "Argo Workflows service account RBAC"
             url: https://argo-workflows.readthedocs.io/en/latest/workflow-rbac/
-      - type: quiz
-        title: "Knowledge Check: Continuous Integration Pipelines"
-        path: sections/section-040/quiz.yaml
-        pass_score: 70
 
   - id: module-050
     title: "Progressive Delivery"
@@ -667,6 +691,10 @@ modules:
       - type: reading
         title: "Summary"
         path: sections/section-050/module-01/course-05-summary.md
+      - type: quiz
+        title: "Knowledge Check: Roll Out A Canary With Argo Rollouts"
+        path: sections/section-050/module-01/quiz.yaml
+        question_count: 9
 
       - type: reading
         title: "Gate A Blue/Green Release With Analysis"
@@ -706,6 +734,10 @@ modules:
       - type: reading
         title: "Summary"
         path: sections/section-050/module-02/course-05-summary.md
+      - type: quiz
+        title: "Knowledge Check: Gate A Blue/Green Release With Analysis"
+        path: sections/section-050/module-02/quiz.yaml
+        question_count: 10
 
       - type: reading
         title: "Automate Canary Analysis With Flagger"
@@ -742,6 +774,10 @@ modules:
       - type: reading
         title: "Summary"
         path: sections/section-050/module-03/course-04-summary.md
+      - type: quiz
+        title: "Knowledge Check: Automate Canary Analysis With Flagger"
+        path: sections/section-050/module-03/quiz.yaml
+        question_count: 8
       - type: reading
         title: "Shift Canary Traffic With Argo Rollouts And A Traffic Router"
         path: sections/section-050/module-04/course.md
@@ -777,6 +813,10 @@ modules:
       - type: reading
         title: "Summary"
         path: sections/section-050/module-04/course-04-summary.md
+      - type: quiz
+        title: "Knowledge Check: Shift Canary Traffic With Argo Rollouts And A Traffic Router"
+        path: sections/section-050/module-04/quiz.yaml
+        question_count: 10
       - type: reading
         title: Question
         path: sections/section-050/capstone/labs/lab-01/question.md
@@ -817,10 +857,6 @@ modules:
             url: https://rollouts-plugin-trafficrouter-gatewayapi.readthedocs.io/en/latest/
           - name: "Argo Rollouts analysis"
             url: https://argo-rollouts.readthedocs.io/en/stable/features/analysis/
-      - type: quiz
-        title: "Knowledge Check: Progressive Delivery"
-        path: sections/section-050/quiz.yaml
-        pass_score: 70
 
   - id: module-060
     title: "Infrastructure Deployment Through GitOps"
@@ -878,6 +914,10 @@ modules:
       - type: reading
         title: "Summary"
         path: sections/section-060/module-01/course-06-summary.md
+      - type: quiz
+        title: "Knowledge Check: Deliver Infrastructure Objects With Crossplane And GitOps"
+        path: sections/section-060/module-01/quiz.yaml
+        question_count: 10
       - type: reading
         title: Question
         path: sections/section-060/capstone/labs/lab-01/question.md
@@ -898,10 +938,6 @@ modules:
             url: https://argo-cd.readthedocs.io/en/stable/operator-manual/health/
           - name: "Crossplane Compositions"
             url: https://docs.crossplane.io/latest/composition/compositions/
-      - type: quiz
-        title: "Knowledge Check: Infrastructure Deployment Through GitOps"
-        path: sections/section-060/quiz.yaml
-        pass_score: 70
       - type: quiz
         title: "Final Quiz: GitOps and Continuous Delivery"
         path: sections/final-domain-quiz.yaml

@@ -171,7 +171,7 @@ kubectl argo rollouts get rollout scout -n starfleet --no-color | head -8
 
 After about 25 seconds the header showed `Status: ✔ Healthy`, `Step: 4/4` and `Images: ghcr.io/stefanprodan/podinfo:6.15.0 (stable)`.
 
-You now know how a Rollout connects to a router. The `trafficRouting` block names a plugin and an `HTTPRoute`, the controller chooses the weight, and the plugin writes it into the route. The weight is a share of requests, proved by a count from `shuttle`, and the pod count is a separate matter. A weight alone still sends random users to the canary. The next part shows how to send only your own test requests there.
+You now know how a Rollout connects to a router. The `trafficRouting` block names a plugin and an `HTTPRoute`, the controller chooses the weight, and the plugin writes it into the route. The weight is a share of requests, proved by a count from `shuttle`, and the pod count is a separate matter. A weight alone still sends random users to the canary. To send only your own test requests there, a second rule must match a request header.
 
 ## Common pitfalls
 

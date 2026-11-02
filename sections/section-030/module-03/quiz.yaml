@@ -1,0 +1,198 @@
+# Knowledge check for section 030, module 03. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats018-030-03
+course_id: ATS018
+exam_code: CNPE
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: module
+  id: section-030/module-03
+  title: Automate Image Updates With Flux
+questions:
+  - id: ats018-030-03-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Explain why a scan lists tags that a semver policy ignores."
+    source_readings:
+      - sections/section-030/module-03/course-01-select-a-tag.md
+    prompt: "An `ImageRepository` scan reports four tags: `6.15.0`, `6.14.0` and two that start with `sha256-`. What happens to the `sha256-` tags in an `ImagePolicy` with a `semver` rule?"
+    options:
+      - id: a
+        text: "They never match, because they are not valid versions"
+        explanation: "Correct. The registry stores signature and attestation data under such tags. They are not versions."
+      - id: b
+        text: "They are the highest versions, so the policy picks one of them"
+        explanation: "A tag that is not a version never satisfies a semver range."
+      - id: c
+        text: "They make the `ImageRepository` fail"
+        explanation: "The scan succeeds and stores all tags it found."
+      - id: d
+        text: "They are deleted from the registry by the policy"
+        explanation: "An `ImagePolicy` only records a tag. It never changes the registry."
+    correct_option: a
+    explanation: "The policy picks the highest valid version inside its range. Tags that are not versions are ignored."
+
+  - id: ats018-030-03-q02
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Read an `ImagePolicy` that is not Ready."
+    source_readings:
+      - sections/section-030/module-03/course-01-select-a-tag.md
+    prompt: "An `ImagePolicy` is not Ready with the message `unable to determine latest version from provided list`, but its `ImageRepository` is Ready. What is the cause?"
+    options:
+      - id: a
+        text: "The registry is not reachable"
+        explanation: "Then the `ImageRepository` would not be Ready."
+      - id: b
+        text: "The `ImageUpdateAutomation` has no write access"
+        explanation: "Write access matters later, when the automation pushes."
+      - id: c
+        text: "The Deployment has no marker comment"
+        explanation: "Markers are read by the automation, not by the policy."
+      - id: d
+        text: "The semver range matches no tag in the list"
+        explanation: "Correct. The scan worked, and no tag satisfies the range."
+    correct_option: d
+    explanation: "An `ImagePolicy` picks the highest version inside its range. A range that no tag satisfies leaves it not Ready while the scan stays Ready."
+
+  - id: ats018-030-03-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Fix a scan that fails against a plain HTTP registry."
+    source_readings:
+      - sections/section-030/module-03/course-01-select-a-tag.md
+    prompt: "An `ImageRepository` for the playground registry is `Ready=False` and no tags appear. The message says `server gave HTTP response to HTTPS client`. What is the fix?"
+    options:
+      - id: a
+        text: "Lower the semver range of the `ImagePolicy`"
+        explanation: "The policy reads the tag list. This error happens before, during the scan."
+      - id: b
+        text: "Set `insecure: true` on the `ImageRepository`, because the registry speaks plain HTTP"
+        explanation: "Correct. Without the field, the controller tries HTTPS."
+      - id: c
+        text: "Add a marker comment to the Deployment"
+        explanation: "Markers are read by the automation, not by the scan."
+      - id: d
+        text: "Give the automation write access to Git"
+        explanation: "Write access matters later, when the automation pushes."
+    correct_option: b
+    explanation: "The image reflector controller tries HTTPS by default. A plain HTTP registry needs `insecure: true`."
+
+  - id: ats018-030-03-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Read the parts of a setter marker."
+    source_readings:
+      - sections/section-030/module-03/course-02-commit-the-tag-to-git.md
+    prompt: "The line `newTag: 6.14.0 # {\"$imagepolicy\": \"flux-system:scout:tag\"}` has a marker. What does the `tag` suffix make the automation write?"
+    options:
+      - id: a
+        text: "Only the tag of the chosen image, without the image name"
+        explanation: "Correct. `name` writes only the image name. With no suffix, name and tag are written together."
+      - id: b
+        text: "The whole image name with the tag"
+        explanation: "That is what a marker with no suffix writes."
+      - id: c
+        text: "Only the image name, without the tag"
+        explanation: "That is what the `name` suffix writes."
+      - id: d
+        text: "The commit hash of the deployment repository"
+        explanation: "The marker names a value of the policy, not a Git commit."
+    correct_option: a
+    explanation: "The marker has the form namespace, policy name and part. `tag` writes the tag only."
+
+  - id: ats018-030-03-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Name the three image automation objects and their jobs."
+    source_readings:
+      - sections/section-030/module-03/course-01-select-a-tag.md
+      - sections/section-030/module-03/course-02-commit-the-tag-to-git.md
+    prompt: "Which Flux object turns the tag chosen by a policy into a commit in Git?"
+    options:
+      - id: a
+        text: "`ImageRepository`"
+        explanation: "It scans a registry and stores the tag list in its status."
+      - id: b
+        text: "`ImagePolicy`"
+        explanation: "It chooses one tag and records it. It never edits Git."
+      - id: c
+        text: "`ImageUpdateAutomation`"
+        explanation: "Correct. It clones the repository, replaces marked values and pushes a commit."
+      - id: d
+        text: "`HelmRelease`"
+        explanation: "It installs a chart and does not write to Git."
+    correct_option: c
+    explanation: "`ImageRepository` scans, `ImagePolicy` chooses, `ImageUpdateAutomation` writes the commit."
+
+  - id: ats018-030-03-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Prove that the automation pushed a commit."
+    source_readings:
+      - sections/section-030/module-03/course-02-commit-the-tag-to-git.md
+    prompt: "`flux get image update` shows `READY True` and the message `repository up-to-date`. How do you prove that the automation pushed a commit?"
+    options:
+      - id: a
+        text: "The message already proves it, because the repository was updated"
+        explanation: "The message says the files match the policy. It does not say whether this run pushed anything."
+      - id: b
+        text: "Run `flux get image policy` and read the `TAG` column"
+        explanation: "That shows the chosen tag, not a push."
+      - id: c
+        text: "Run `kubectl get pods` and look at the pod age"
+        explanation: "Pod age does not name a commit."
+      - id: d
+        text: "Read `.status.lastPushCommit` of the `ImageUpdateAutomation`, or run `git log` and look for the author set in the automation"
+        explanation: "Correct. The status and the Git history show the commit."
+    correct_option: d
+    explanation: "`repository up-to-date` is the message after any run. Check `lastPushCommit` or `git log`."
+
+  - id: ats018-030-03-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Find the first object that stopped a release."
+    source_readings:
+      - sections/section-030/module-03/course-03-release-a-new-tag.md
+    prompt: "A new tag `6.15.1` exists in the registry, but the Deployment still runs `6.15.0` and Git has no new commit. Which object do you check first?"
+    options:
+      - id: a
+        text: "The `Kustomization`, because it applies the Deployment"
+        explanation: "If the commit is missing, the fault is earlier in the flow."
+      - id: b
+        text: "The `ImageRepository` and then the `ImagePolicy`, because they come first in the flow and no commit exists yet"
+        explanation: "Correct. Read the objects in the order of the flow and stop at the first one that failed."
+      - id: c
+        text: "The `HelmRelease`, because it installs charts"
+        explanation: "This delivery uses a `Kustomization`, not a chart."
+      - id: d
+        text: "The `shuttle` pod, because it sends requests"
+        explanation: "The client pod does not decide which tag is chosen."
+    correct_option: b
+    explanation: "The order of the flow is scan, policy, automation run, fetch and apply. No commit means the fault is in the first three."
+
+  - id: ats018-030-03-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Predict what a closed semver range selects."
+    source_readings:
+      - sections/section-030/module-03/course-03-release-a-new-tag.md
+    prompt: "An `ImagePolicy` has the range `>=6.14.0 <6.15.0`. The registry now holds `6.14.0`, `6.15.0` and `6.15.1`. Which tag does the policy resolve to, and is a new commit made for `6.15.1`?"
+    options:
+      - id: a
+        text: "`6.15.1`, and a commit is made"
+        explanation: "The range stops below `6.15.0`, so `6.15.1` is outside it."
+      - id: b
+        text: "`6.14.0`, and no commit is made for `6.15.1`"
+        explanation: "Correct. A range that stops below a tag never selects it."
+      - id: c
+        text: "`6.15.0`, and a commit is made"
+        explanation: "`6.15.0` is outside the range, because the upper bound is `<6.15.0`."
+      - id: d
+        text: "None, and the `ImageRepository` fails"
+        explanation: "The scan still works. The policy selects the highest tag inside its range."
+    correct_option: b
+    explanation: "The policy picks the highest valid version inside its range. A range that stops below a new tag never selects it."

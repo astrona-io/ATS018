@@ -1,0 +1,244 @@
+# Knowledge check for section 050, module 04. Listed in astrona.yaml as a
+# `type: quiz` entry right after the module summary. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats018-050-04
+course_id: ATS018
+exam_code: CNPE
+status: draft
+provenance: "Original practice material written for this course; not official exam questions."
+scope:
+  type: module
+  id: section-050/module-04
+  title: "Shift Canary Traffic With Argo Rollouts And A Traffic Router"
+questions:
+  - id: ats018-050-04-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Say who writes the weight into the route."
+    source_readings:
+      - sections/section-050/module-04/course-01-split-traffic-with-the-gateway-api-plugin.md
+    prompt: "A Rollout uses the `argoproj-labs/gatewayAPI` plugin. Which component writes `weight: 10` into the `HTTPRoute`?"
+    options:
+      - id: a
+        text: "Envoy Gateway"
+        explanation: "Envoy Gateway reads the route and applies the weights to live requests. It does not write them."
+      - id: b
+        text: "The plugin, after the Argo Rollouts controller decides the weight"
+        explanation: "Correct. The controller decides, the plugin writes, and Envoy Gateway applies."
+      - id: c
+        text: "The `shuttle` pod"
+        explanation: "`shuttle` only sends test requests."
+      - id: d
+        text: "The `Gateway` object"
+        explanation: "A `Gateway` opens a listener. It does not edit routes."
+    correct_option: b
+    explanation: "Name the component that does the work: controller, plugin and Gateway controller each have one job."
+
+  - id: ats018-050-04-q02
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Read a weight as a share of requests."
+    source_readings:
+      - sections/section-050/module-04/course-01-split-traffic-with-the-gateway-api-plugin.md
+    prompt: "A Rollout has two stable pods and one canary pod, and the `HTTPRoute` has `weight: 10` for `scout-canary`. What share of requests reaches the canary?"
+    options:
+      - id: a
+        text: "About 33 percent, because one pod of three is canary"
+        explanation: "That is the replica ratio. A router ignores it."
+      - id: b
+        text: "0 percent, because only the stable Service gets requests"
+        explanation: "The canary Service has weight 10."
+      - id: c
+        text: "About 10 percent, because the router picks the backend per request by weight"
+        explanation: "Correct. The pod count only gives capacity."
+      - id: d
+        text: "50 percent, because there are two backends"
+        explanation: "The weights decide, not the number of backends."
+    correct_option: c
+    explanation: "Proof: count the `version` field of 100 responses from `shuttle`. Eleven of 100 is close to 10 percent."
+
+  - id: ats018-050-04-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Pick a sample size to prove a weight."
+    source_readings:
+      - sections/section-050/module-04/course-01-split-traffic-with-the-gateway-api-plugin.md
+    prompt: "You want to check a 10 percent weight with real requests. Which test is reliable?"
+    options:
+      - id: a
+        text: "Send 10 requests and expect exactly one canary response"
+        explanation: "Ten requests can show zero or three canary responses."
+      - id: b
+        text: "Send 100 requests and count the versions, expecting a number near 10"
+        explanation: "Correct. The router picks at random, so the exact count changes between runs."
+      - id: c
+        text: "Read the Rollout status only"
+        explanation: "A status line is not proof of the request share."
+      - id: d
+        text: "Count the pods"
+        explanation: "Pod counts do not show the request share."
+    correct_option: b
+    explanation: "A small sample hides the real share. Count at least 100 requests."
+
+  - id: ats018-050-04-q04
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Name the permissions the plugin needs."
+    source_readings:
+      - sections/section-050/module-04/course-01-split-traffic-with-the-gateway-api-plugin.md
+    prompt: "The plugin cannot write weights, and the controller log shows a permission error. What is missing?"
+    options:
+      - id: a
+        text: "A role that lets the controller get and update `HTTPRoute` objects and get Services"
+        explanation: "Correct. The playground bootstrap grants this role."
+      - id: b
+        text: "A second `Gateway` object"
+        explanation: "The Gateway is not the problem."
+      - id: c
+        text: "A `PodMonitor` for the canary"
+        explanation: "A PodMonitor feeds Prometheus, not the route."
+      - id: d
+        text: "A larger `weight` value"
+        explanation: "The value does not change permissions."
+    correct_option: a
+    explanation: "Without the role, the plugin cannot edit the route."
+
+  - id: ats018-050-04-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Know why setCanaryScale is needed."
+    source_readings:
+      - sections/section-050/module-04/course-02-route-test-traffic-by-header.md
+    prompt: "A Rollout has a `setHeaderRoute` step but no canary pod runs, so header requests have nowhere to go. Which step is missing?"
+    options:
+      - id: a
+        text: "`setWeight: 100`"
+        explanation: "That would send all requests to the canary."
+      - id: b
+        text: "`setCanaryScale`"
+        explanation: "Correct. A header route needs a canary pod, and the weight stays 0."
+      - id: c
+        text: "`pause: {}`"
+        explanation: "A pause stops the steps. It does not start pods."
+      - id: d
+        text: "`analysis`"
+        explanation: "An analysis does not start pods."
+    correct_option: b
+    explanation: "Set the canary pod count independent of the weight."
+
+  - id: ats018-050-04-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Match a header route."
+    source_readings:
+      - sections/section-050/module-04/course-02-route-test-traffic-by-header.md
+    prompt: "The managed route matches `headerName: x-canary` and `headerValue: yes`. A client sends `x-canary: Yes`. Where does the request go?"
+    options:
+      - id: a
+        text: "To the canary, because header values are case-insensitive"
+        explanation: "The match is exact."
+      - id: b
+        text: "To the canary, because the header name matches"
+        explanation: "Both name and value must match."
+      - id: c
+        text: "The request is rejected"
+        explanation: "The route does not reject it."
+      - id: d
+        text: "To the stable pods, because the exact match fails"
+        explanation: "Correct. Only `x-canary: yes` reaches the canary."
+    correct_option: d
+    explanation: "Use the exact value in tests."
+
+  - id: ats018-050-04-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Know when a managed route exists."
+    source_readings:
+      - sections/section-050/module-04/course-02-route-test-traffic-by-header.md
+    prompt: "When does the plugin remove the header rule from the `HTTPRoute`?"
+    options:
+      - id: a
+        text: "After the first promotion"
+        explanation: "At that point both rules still run."
+      - id: b
+        text: "When the release ends and the Rollout is `Healthy`"
+        explanation: "Correct. The weight rule stays, and the managed rule exists only during the release."
+      - id: c
+        text: "Never, you remove it by hand"
+        explanation: "The plugin removes it."
+      - id: d
+        text: "When you change the header value"
+        explanation: "A change does not remove the rule."
+    correct_option: b
+    explanation: "List every rule name the Rollout may create in `managedRoutes`."
+
+  - id: ats018-050-04-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Read the AnalysisTemplate timing."
+    source_readings:
+      - sections/section-050/module-04/course-03-stop-a-bad-canary-with-background-analysis.md
+    prompt: "An AnalysisTemplate has `initialDelay: 45s`, `interval: 15s` and `failureLimit: 1`, and no `count`. What happens?"
+    options:
+      - id: a
+        text: "It measures three times"
+        explanation: "There is no `count` field, so it does not stop after three."
+      - id: b
+        text: "It measures every 15 seconds until the analysis ends, and the second failed measurement fails it"
+        explanation: "Correct. The first measurement waits 45 seconds so Prometheus can scrape the canary more than once."
+      - id: c
+        text: "It fails at the first failed measurement"
+        explanation: "`failureLimit: 1` allows one failure."
+      - id: d
+        text: "It waits for a manual promotion"
+        explanation: "A background analysis runs without a promotion."
+    correct_option: b
+    explanation: "`failureLimit` counts the failures that are allowed. The next one fails the analysis."
+
+  - id: ats018-050-04-q09
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Read a background analysis abort."
+    source_readings:
+      - sections/section-050/module-04/course-03-stop-a-bad-canary-with-background-analysis.md
+    prompt: "A faulty canary has two measurements of 84 percent and 73 percent success, with a 0.99 condition and `failureLimit: 1`. What happens next?"
+    options:
+      - id: a
+        text: "The controller aborts the release, and the plugin writes the weights back so the stable pods get all requests"
+        explanation: "Correct. The Rollout is `Degraded` and the desired template is unchanged."
+      - id: b
+        text: "The controller promotes the canary"
+        explanation: "A failed analysis never promotes."
+      - id: c
+        text: "The controller removes `--random-error` from the template"
+        explanation: "An abort does not edit the template."
+      - id: d
+        text: "The Rollout stays at 20 percent forever"
+        explanation: "The abort sets the weights back."
+    correct_option: a
+    explanation: "Fix the template in the file and apply it again to start a new release."
+
+  - id: ats018-050-04-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Guard against missing data."
+    source_readings:
+      - sections/section-050/module-04/course-03-stop-a-bad-canary-with-background-analysis.md
+    prompt: "Why does the query select pods by `rollouts_pod_template_hash`?"
+    options:
+      - id: a
+        text: "To count the stable pods too"
+        explanation: "That would hide a faulty canary."
+      - id: b
+        text: "Because Prometheus needs a hash to scrape"
+        explanation: "Scraping does not need it."
+      - id: c
+        text: "To measure the canary pods only, so good stable requests do not hide canary errors"
+        explanation: "Correct. A PodMonitor copies the pod label into the metric."
+      - id: d
+        text: "To pick the Gateway"
+        explanation: "The Gateway is not selected by this label."
+    correct_option: c
+    explanation: "An empty result fails the condition, because `len(result) == 1` is false."

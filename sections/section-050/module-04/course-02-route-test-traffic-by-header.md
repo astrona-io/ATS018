@@ -4,7 +4,7 @@ A weight sends a random share of all users to the canary. Before you give real u
 
 ## Managed routes and the header step
 
-An `HTTPRoute` can hold several rules. The first rule is the one from the last part: it splits traffic between `scout` and `scout-canary` by weight. A header rule is a second rule that the plugin creates while the release runs and deletes when it ends. The Rollout lists the rules it may create under `trafficRouting.managedRoutes`, each with a name. The step `setHeaderRoute` creates the rule with that name and gives it a match.
+An `HTTPRoute` can hold several rules. The first rule is the weight rule: it splits traffic between `scout` and `scout-canary` by weight. A header rule is a second rule that the plugin creates while the release runs and deletes when it ends. The Rollout lists the rules it may create under `trafficRouting.managedRoutes`, each with a name. The step `setHeaderRoute` creates the rule with that name and gives it a match.
 
 Two more details matter. First, the step `setCanaryScale` sets how many canary pods run, independent of the weight. A header route needs a canary pod to receive the test requests, but the weight is still 0. In a test without this step, the canary ReplicaSet stayed scaled down at zero pods. Second, the match uses `headerName` and `headerValue`. The value is an exact match here.
 
@@ -191,7 +191,7 @@ The 20% weight and the header rule run at the same time. After the second promot
  scout=100 scout-canary=0 
 ```
 
-The release shows how the plugin treats the route. The weight rule stays for the whole life of the `HTTPRoute`, while a managed rule exists only during the release that needs it. You can now send test requests to a canary before any real user, and you can prove with two `curl` loops that the header decides the backend. The next part lets Prometheus judge the real traffic and stop a bad release without anyone watching.
+The release shows how the plugin treats the route. The weight rule stays for the whole life of the `HTTPRoute`, while a managed rule exists only during the release that needs it. You can now send test requests to a canary before any real user, and you can prove with two `curl` loops that the header decides the backend. A background analysis can let Prometheus judge the real traffic and stop a bad release without anyone watching.
 
 ## Common pitfalls
 

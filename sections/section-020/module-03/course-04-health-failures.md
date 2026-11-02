@@ -101,7 +101,7 @@ scout-path     Synced        Healthy
 scout-reject   Synced        Healthy
 ```
 
-You can now follow a `Degraded` application from Argo CD's health message to the Kubernetes event that explains it, and repair it in Git. Together with the other parts, you can place any failing application at its stage (fetch and render, apply, drift, or health) and fix it where the cause lives.
+You can now follow a `Degraded` application from Argo CD's health message to the Kubernetes event that explains it, and repair it in Git. Together with the checks for the earlier stages, you can place any failing application at its stage (fetch and render, apply, drift, or health) and fix it where the cause lives.
 
 ## Common pitfalls
 

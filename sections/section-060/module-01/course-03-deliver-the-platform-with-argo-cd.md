@@ -75,7 +75,7 @@ apiextensions.crossplane.io  CompositeResourceDefinition                        
 apiextensions.crossplane.io  Composition                                        scoutenvironment                          Synced  Healthy
 ```
 
-Your commit ID differs, and the `MESSAGE` column can differ too. The Argo CD application controller found the XRD, the `Composition` and both XRs in Git. The first three already existed from the last part, so it adopted them. The production XR was new, so it applied that one.
+Your commit ID differs, and the `MESSAGE` column can differ too. The Argo CD application controller found the XRD, the `Composition` and both XRs in Git. The first three already existed in the cluster, so it adopted them. The production XR was new, so it applied that one.
 
 ## Why the order matters
 

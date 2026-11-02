@@ -112,7 +112,7 @@ scout    Synced        Healthy
 
 The children are still there. An `Application` deletes the objects it delivered only when it carries the finalizer `resources-finalizer.argocd.argoproj.io`, and the parent here has none. Without the finalizer, deleting an `Application` deletes only that object and leaves everything it created running. Add the finalizer to `metadata.finalizers` when you want a cascading delete; leave it out when you want to stop managing something without removing it.
 
-You can now bootstrap several applications from one parent and know its limits: the parent does not report its children's health, every child is hand-written, and a delete only cascades with a finalizer. The open question is how to generate the children instead of writing them. The three child applications are still running, and the next part reuses them.
+You can now bootstrap several applications from one parent and know its limits: the parent does not report its children's health, every child is hand-written, and a delete only cascades with a finalizer. The open question is how to generate the children instead of writing them. The three child applications keep running in the playground.
 
 ## Common pitfalls
 

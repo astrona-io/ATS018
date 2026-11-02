@@ -22,15 +22,17 @@ Everything in the earlier sections delivers applications. A platform team also d
 
 ## The Learning Path
 
+The section has the modules below, in reading order. Each module has a playground for practice, and the section ends with a capstone challenge.
+
 ### 1. Deliver Infrastructure Objects With Crossplane And GitOps
-*   **Module Reader:** **[Module 1: Deliver Infrastructure Objects With Crossplane And GitOps](./module-01/course.md)**
+*   **Module Reader:** Deliver Infrastructure Objects With Crossplane And GitOps
 *   **Hands-on Playground:** `sections/section-060/module-01/playground` — kind cluster with Crossplane 2.4.3, Gitea (repository `starfleet/platform-infra`), Argo CD 3.5.4 and Flux 2.9.6. The namespaces `starfleet`, `starfleet-staging` and `starfleet-production` exist, with `shuttle` in `starfleet`. Deliberately absent: no `Provider`, no `Function`, no XRD and no `Composition`. The repository holds a production environment with a wrong image tag.
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-060/module-01/playground
     ```
 
 ### Section Capstone Challenge
-*   **Comprehensive Challenge:** Infrastructure Deployment Through GitOps Capstone — `sections/section-060/capstone/labs/lab-01` *(created in the build phase)*
+*   **Comprehensive Challenge:** Infrastructure Deployment Through GitOps Capstone — `sections/section-060/capstone/labs/lab-01`
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-060/capstone/labs/lab-01
     astrona submit -c .
@@ -41,4 +43,4 @@ Everything in the earlier sections delivers applications. A platform team also d
 
 ## Ready for Assessment?
 
-*   **[Take the Section 060 Knowledge Check](./quiz.md)**
+*   Take the knowledge check for this section.

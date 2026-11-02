@@ -1,0 +1,244 @@
+# Knowledge check for section 040, module 01. Listed in astrona.yaml as a
+# `type: quiz` entry right after the module summary. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats018-040-01
+course_id: ATS018
+exam_code: CNPE
+status: draft
+provenance: "Original practice material written for this course; not official exam questions."
+scope:
+  type: module
+  id: section-040/module-01
+  title: "Build Tekton Tasks And Pipelines"
+questions:
+  - id: ats018-040-01-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Name the containers of a TaskRun pod."
+    source_readings:
+      - sections/section-040/module-01/course-01-tasks-taskruns-and-pods.md
+    prompt: "A Task has two steps, `fetch` and `test`. How does Tekton run one TaskRun of it?"
+    options:
+      - id: a
+        text: "One pod with one container per step, named `step-fetch` and `step-test`, run one after the other"
+        explanation: "Correct. The entrypoint program of Tekton makes the step containers run in order."
+      - id: b
+        text: "Two pods, one for each step"
+        explanation: "One TaskRun creates one pod. The steps are containers in it."
+      - id: c
+        text: "One container that runs both steps as shell commands"
+        explanation: "Each step becomes its own container."
+      - id: d
+        text: "No pod, because the Tekton controller runs the steps itself"
+        explanation: "The controller only creates the pod. The steps run as containers in it."
+    correct_option: a
+    explanation: "A Task is a list of steps and each step is a container. A TaskRun creates one pod with containers named `step-<step name>`."
+
+  - id: ats018-040-01-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Create a TaskRun that uses generateName."
+    source_readings:
+      - sections/section-040/module-01/course-01-tasks-taskruns-and-pods.md
+    prompt: "The file `taskrun-report-version.yaml` sets `metadata.generateName: report-version-`. Which command starts the run?"
+    options:
+      - id: a
+        text: "`kubectl apply -f taskrun-report-version.yaml`"
+        explanation: "`kubectl apply` needs a fixed `metadata.name`, so it fails on `generateName`."
+      - id: b
+        text: "`kubectl apply -f task-report-version.yaml`"
+        explanation: "That file holds the Task, a definition. Applying it only stores the Task and starts nothing."
+      - id: c
+        text: "`kubectl create -f taskrun-report-version.yaml`"
+        explanation: "Correct. The API server adds a random suffix to the name when you create the object."
+      - id: d
+        text: "`kubectl run report-version`"
+        explanation: "`kubectl run` creates a pod from an image, not a TaskRun."
+    correct_option: c
+    explanation: "An object with `generateName` has no fixed name, so you create it. Applying a Task never starts a run; only a TaskRun or a PipelineRun does."
+
+  - id: ats018-040-01-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Write a Task result."
+    source_readings:
+      - sections/section-040/module-01/course-01-tasks-taskruns-and-pods.md
+    prompt: "A step must store the text `scout 6.14.0` in the result `summary` without a trailing newline. What does the step do?"
+    options:
+      - id: a
+        text: "Run `echo` and write the text to `$(results.summary.path)`"
+        explanation: "`echo` adds a newline, and the newline becomes part of the value."
+      - id: b
+        text: "Print the text to the standard output of the step"
+        explanation: "Standard output goes to the log, not to the result."
+      - id: c
+        text: "Set the environment variable `SUMMARY` in the step"
+        explanation: "Tekton does not read environment variables as results."
+      - id: d
+        text: "Run `printf` and write the text to the file `$(results.summary.path)`"
+        explanation: "Correct. `printf` adds no newline, and Tekton stores the file content in the status of the run."
+    correct_option: d
+    explanation: "A step writes a result by writing to the file `$(results.<name>.path)`. Use `printf` because `echo` adds a newline to the value."
+
+  - id: ats018-040-01-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Share files between Tasks of a Pipeline."
+    source_readings:
+      - sections/section-040/module-01/course-02-workspaces-and-pipelines.md
+    prompt: "Task `fetch-source` writes files and Task `run-tests` must read them. How can the files pass between the two Tasks?"
+    options:
+      - id: a
+        text: "Through a workspace backed by a PersistentVolumeClaim"
+        explanation: "Correct. Each Task in a Pipeline runs in its own pod, so a shared volume is the way."
+      - id: b
+        text: "Through the same pod, because a Pipeline uses one pod"
+        explanation: "Each Task in a Pipeline runs in its own pod."
+      - id: c
+        text: "Through `$(results.<name>.path)`, which holds files of any size"
+        explanation: "Results are small named outputs, not file storage."
+      - id: d
+        text: "Through `runAfter`, which copies the files"
+        explanation: "`runAfter` only orders the Tasks."
+    correct_option: a
+    explanation: "Each Task runs in its own pod, so an `emptyDir` workspace is empty for the second Task. A PersistentVolumeClaim workspace carries the files. A `volumeClaimTemplate` creates a fresh claim for each run."
+
+  - id: ats018-040-01-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Order the Tasks of a Pipeline."
+    source_readings:
+      - sections/section-040/module-01/course-02-workspaces-and-pipelines.md
+    prompt: "A Pipeline lists `fetch-source` and `run-tests`. Neither has `runAfter`, and neither uses a result of the other. When do they start?"
+    options:
+      - id: a
+        text: "In the order of the list, one after the other"
+        explanation: "The order of the list does not matter. Only `runAfter` and result references order Tasks."
+      - id: b
+        text: "At the same time"
+        explanation: "Correct. Without `runAfter` or a result reference, Tekton starts all Tasks together."
+      - id: c
+        text: "`run-tests` first, because it has no workspace"
+        explanation: "The workspace does not decide the order."
+      - id: d
+        text: "The Pipeline is rejected until you add `runAfter`"
+        explanation: "Tekton accepts it. The Tasks just run at the same time."
+    correct_option: b
+    explanation: "Two things create an order: `runAfter` and a reference to the result of another Task. With neither, the second Task may read the workspace before the clone is done."
+
+  - id: ats018-040-01-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Read a failed run from the top down."
+    source_readings:
+      - sections/section-040/module-01/course-03-reading-a-failed-taskrun.md
+    prompt: "A PipelineRun failed. In which order do you read the status to find the error itself?"
+    options:
+      - id: a
+        text: "The container log first, then the PipelineRun message"
+        explanation: "Start from the top so you know which step to open."
+      - id: b
+        text: "The EventListener log, then the Task definition"
+        explanation: "The EventListener only starts runs."
+      - id: c
+        text: "The registry, then the TaskRun"
+        explanation: "The registry does not hold the run status."
+      - id: d
+        text: "The PipelineRun message, then the failed TaskRun with its step and exit code, then the container log of that step"
+        explanation: "Correct. The log of the failing step holds the error."
+    correct_option: d
+    explanation: "Read from the top down: PipelineRun message, failed TaskRun and step, container log."
+
+  - id: ats018-040-01-q07
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Read a failed step with kubectl only."
+    source_readings:
+      - sections/section-040/module-01/course-03-reading-a-failed-taskrun.md
+    prompt: "`tkn` is not installed. The TaskRun `scout-ci-2mk48-run-tests` failed. Which command reads the log of the failed step `test`?"
+    options:
+      - id: a
+        text: "`kubectl -n starfleet logs scout-ci-2mk48-run-tests -c test`"
+        explanation: "The pod name ends in `-pod`, and the container name starts with `step-`."
+      - id: b
+        text: "`kubectl -n starfleet logs taskrun/scout-ci-2mk48-run-tests`"
+        explanation: "`kubectl logs` reads pods, not TaskRun objects."
+      - id: c
+        text: "`kubectl -n starfleet logs scout-ci-2mk48-run-tests-pod -c step-test`"
+        explanation: "Correct. The pod is named after the TaskRun with `-pod`, and the container is named `step-<step name>`."
+      - id: d
+        text: "`kubectl -n starfleet describe task run-tests`"
+        explanation: "That shows the Task definition, not the log of one run."
+    correct_option: c
+    explanation: "The TaskRun is a record. The log is in the pod, in the container `step-<step name>`. The exit code is in `status.steps` of the TaskRun."
+
+  - id: ats018-040-01-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Tell a broken definition from a failing step."
+    source_readings:
+      - sections/section-040/module-01/course-03-reading-a-failed-taskrun.md
+    prompt: "A PipelineRun fails with the reason `InvalidWorkspaceBindings` and no pod exists. What does that tell you?"
+    options:
+      - id: a
+        text: "A step exited with a non-zero code"
+        explanation: "That gives a `StepFailed` reason on a TaskRun, and a pod exists."
+      - id: b
+        text: "The registry refused an image"
+        explanation: "That needs a pod that tries to pull the image."
+      - id: c
+        text: "The resolver is turned off"
+        explanation: "A resolver problem shows as `CouldntGetTask`."
+      - id: d
+        text: "The definition is broken, so the run failed before any pod was created"
+        explanation: "Correct. The run did not bind the workspace `shared` that the Pipeline requires."
+    correct_option: d
+    explanation: "Reasons such as `InvalidWorkspaceBindings` and `CouldntGetTask` mean a broken definition, and no pod is created. A finished run never changes: fix the definition and start a new run."
+
+  - id: ats018-040-01-q09
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Read a resolver error."
+    source_readings:
+      - sections/section-040/module-01/course-04-shared-tasks-with-resolvers.md
+    prompt: "A PipelineRun fails with `Failed(CouldntGetTask)` after you mistype `pathInRepo` for the git resolver. Which statement is true?"
+    options:
+      - id: a
+        text: "No TaskRun ran at all, because the controller resolves every Task before it starts the first one"
+        explanation: "Correct. Not even `fetch-source` ran."
+      - id: b
+        text: "`fetch-source` ran and only `run-tests` failed"
+        explanation: "The controller resolves all Tasks first, so no TaskRun started."
+      - id: c
+        text: "A pod exists, and its log holds the error"
+        explanation: "No Task started, so no pod exists. Read the PipelineRun message."
+      - id: d
+        text: "The git resolver is turned off"
+        explanation: "The message says the file does not exist, so the resolver worked and cloned the repository."
+    correct_option: a
+    explanation: "A wrong path fails the whole run before any Task starts. The end of the PipelineRun message comes from the git resolver and names the missing file."
+
+  - id: ats018-040-01-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Pick the right revision for a shared Task."
+    source_readings:
+      - sections/section-040/module-01/course-04-shared-tasks-with-resolvers.md
+    prompt: "The git resolver loads a Task with `revision: main`. The Task must not change between runs. What do you do?"
+    options:
+      - id: a
+        text: "Keep `main`, because a branch is fixed"
+        explanation: "A branch follows new commits, so the next run may get a different Task."
+      - id: b
+        text: "Set `revision` to a tag or a commit ID"
+        explanation: "Correct. A tag or a commit ID names one fixed version of the Task."
+      - id: c
+        text: "Set `gitToken` to a Secret"
+        explanation: "`gitToken` gives access to a private repository. It does not fix the version."
+      - id: d
+        text: "Move the params of the Task under `taskRef.params`"
+        explanation: "Those params belong to the resolver, not to the Task."
+    correct_option: b
+    explanation: "The `provenance` field of the TaskRun records the commit ID that the Task came from. Pin a tag or a commit ID when the Task must stay the same."

@@ -1,0 +1,197 @@
+# Knowledge check for section 030, module 02. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats018-030-02
+course_id: ATS018
+exam_code: CNPE
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: module
+  id: section-030/module-02
+  title: Deliver Helm Releases With Flux
+questions:
+  - id: ats018-030-02-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Separate a Ready source from a failed release."
+    source_readings:
+      - sections/section-030/module-02/course-01-chart-sources-and-helmrelease.md
+    prompt: "The `OCIRepository` `podinfo` is `Ready`, and the `HelmRelease` `scout` shows `Ready=False UpgradeFailed ... timeout waiting for: [Deployment/starfleet/scout-podinfo status: 'InProgress']`. Where is the problem?"
+    options:
+      - id: a
+        text: "The chart download failed, so fix the `OCIRepository` url"
+        explanation: "The source is `Ready`, so the chart was fetched."
+      - id: b
+        text: "The registry is down, so wait for it"
+        explanation: "A registry problem would stop the source from being `Ready`."
+      - id: c
+        text: "The upgrade of the release failed because the new pods did not become ready. Look at the release values and the pods"
+        explanation: "Correct. A Ready source separates a fetch problem from a release problem."
+      - id: d
+        text: "The notification controller dropped the release"
+        explanation: "The notification controller sends notifications. It does not run releases."
+    correct_option: c
+    explanation: "The source fetched the chart. The helm controller upgraded the release, and the Deployment never became ready."
+
+  - id: ats018-030-02-q02
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Say what deleting a HelmRelease does."
+    source_readings:
+      - sections/section-030/module-02/course-01-chart-sources-and-helmrelease.md
+    prompt: "A `HelmRelease` is `Ready=False`. A colleague proposes `kubectl delete helmrelease scout` to clear the failure. What does the deletion normally do?"
+    options:
+      - id: a
+        text: "It uninstalls the release and removes its workloads"
+        explanation: "Correct. Change the values to repair the release. Do not delete the object to clear a status."
+      - id: b
+        text: "It resets the failure counters and keeps the pods"
+        explanation: "`flux reconcile helmrelease --reset` resets counters. A delete does not."
+      - id: c
+        text: "It only removes the status from the object"
+        explanation: "A delete removes the object, not just its status."
+      - id: d
+        text: "It deletes the `OCIRepository` and keeps the release"
+        explanation: "The source is a separate object and is not deleted."
+    correct_option: a
+    explanation: "Deleting a `HelmRelease` normally uninstalls the release. Repair the release through its values instead."
+
+  - id: ats018-030-02-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain the watch label on a values ConfigMap."
+    source_readings:
+      - sections/section-030/module-02/course-02-values-and-release-history.md
+    prompt: "A `HelmRelease` reads its values from a ConfigMap with `valuesFrom`. The ConfigMap does not have the label `reconcile.fluxcd.io/watch: Enabled`. What changes?"
+    options:
+      - id: a
+        text: "The release never reads the ConfigMap"
+        explanation: "The release still reads it. The label only affects when a change is noticed."
+      - id: b
+        text: "A change to the ConfigMap normally waits for the next scheduled reconciliation instead of being applied at once"
+        explanation: "Correct. The label asks Flux to react to changes. The `interval` still gives regular reconciliation."
+      - id: c
+        text: "The ConfigMap is deleted at the next upgrade"
+        explanation: "Flux does not delete the ConfigMap."
+      - id: d
+        text: "The release reads the ConfigMap from another namespace"
+        explanation: "Values references are read from the namespace of the `HelmRelease`."
+    correct_option: b
+    explanation: "The watch label makes Flux react to changes in the referenced object. Without it, the change waits for the interval."
+
+  - id: ats018-030-02-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Read HelmRelease values order."
+    source_readings:
+      - sections/section-030/module-02/course-02-values-and-release-history.md
+    prompt: "A HelmRelease has `valuesFrom` with a ConfigMap and also inline `values` for the same key. Which value wins?"
+    options:
+      - id: a
+        text: "The ConfigMap value"
+        explanation: "The ConfigMap supplies shared defaults, and inline values override them."
+      - id: b
+        text: "The chart default only"
+        explanation: "Chart defaults are the lowest level."
+      - id: c
+        text: "Neither; Flux reports a conflict"
+        explanation: "Flux merges the sources in a fixed order."
+      - id: d
+        text: "The inline value"
+        explanation: "Correct. Inline values override values loaded through `valuesFrom`."
+    correct_option: d
+    explanation: "Inline values override `valuesFrom`. The helm controller renders the merged values and changes the workload."
+
+  - id: ats018-030-02-q05
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Read the release history after a failed upgrade."
+    source_readings:
+      - sections/section-030/module-02/course-02-values-and-release-history.md
+    prompt: "The history of a `HelmRelease` reads `2 failed 6.15.0+ff3d3e14728f` and `1 deployed 6.15.0+ff3d3e14728f`. What does this show?"
+    options:
+      - id: a
+        text: "Revision 2 is deployed, because it has the higher number"
+        explanation: "Read the status of each revision. Revision 2 has the status `failed`."
+      - id: b
+        text: "Revision 1 was deleted, because revision 2 replaced it"
+        explanation: "A failed revision did not erase the previous successful record."
+      - id: c
+        text: "The failed upgrade left the previous successful revision 1 as `deployed`"
+        explanation: "Correct. History shows what each operation did. The Ready condition shows whether the current desired state succeeded."
+      - id: d
+        text: "The chart version changed between the two revisions"
+        explanation: "Both rows show the same chart version. Values changes create revisions too."
+    correct_option: c
+    explanation: "Revision numbers and statuses are read together. A failed upgrade can leave the earlier successful revision as `deployed`."
+
+  - id: ats018-030-02-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Count attempts from the retries field."
+    source_readings:
+      - sections/section-030/module-02/course-03-remediation-and-rollback.md
+    prompt: "A `HelmRelease` has `upgrade.remediation.retries: 1` and a values fault that keeps failing. How many upgrade attempts does the helm controller make, and what does the status say?"
+    options:
+      - id: a
+        text: "One attempt, and `Stalled` is never set"
+        explanation: "`retries` counts extra attempts after the first one."
+      - id: b
+        text: "Three attempts, and the release is deleted"
+        explanation: "One retry means two attempts, and the release is not deleted."
+      - id: c
+        text: "Unlimited attempts, until the values change"
+        explanation: "The controller stops when the retry budget is spent."
+      - id: d
+        text: "Two attempts, and `Stalled=True` with `RetriesExceeded: Failed to upgrade after 2 attempt(s)`"
+        explanation: "Correct. One retry means two failed upgrade attempts."
+    correct_option: d
+    explanation: "`retries` counts attempts after the first. When they are used, the release is `Stalled` with `RetriesExceeded`."
+
+  - id: ats018-030-02-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Describe upgrade remediation."
+    source_readings:
+      - sections/section-030/module-02/course-03-remediation-and-rollback.md
+    prompt: "What can upgrade remediation do for a failed `HelmRelease` upgrade?"
+    options:
+      - id: a
+        text: "Delete the HelmRepository"
+        explanation: "Remediation acts on the release, not on the source."
+      - id: b
+        text: "Roll back to the last successful configuration"
+        explanation: "Correct. Upgrade remediation can roll back, and the retries count extra attempts."
+      - id: c
+        text: "Edit the values in Git"
+        explanation: "Remediation rolls back a release. It does not change the values in Git."
+      - id: d
+        text: "Increase the chart version"
+        explanation: "Remediation does not choose a new chart version."
+    correct_option: b
+    explanation: "Install remediation removes a failed install before retrying. Upgrade remediation can roll back to the last successful configuration."
+
+  - id: ats018-030-02-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Read a HelmRelease that remediated."
+    source_readings:
+      - sections/section-030/module-02/course-03-remediation-and-rollback.md
+    prompt: "A HelmRelease shows `Remediated` as true and client requests succeed, but `Ready` is false. Why?"
+    options:
+      - id: a
+        text: "The current desired values still fail, and the rollback keeps the older successful release running"
+        explanation: "Correct. `Ready` stays false while the desired values fail, even after a rollback."
+      - id: b
+        text: "Flux has a bug; `Ready` ignores remediation"
+        explanation: "The behaviour is by design: `Ready` describes the desired state."
+      - id: c
+        text: "The source is not fetched"
+        explanation: "Source readiness is a separate condition."
+      - id: d
+        text: "The chart version is too old"
+        explanation: "A chart version does not explain a failed upgrade with a working rollback."
+    correct_option: a
+    explanation: "Fix the desired values first. A reset clears failure counters; it does not repair the configuration."

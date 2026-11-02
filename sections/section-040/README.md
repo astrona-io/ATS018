@@ -24,29 +24,31 @@ A GitOps controller only delivers what lands in Git. This section teaches Tekton
 
 ## The Learning Path
 
+The section has the modules below, in reading order. Each module has a playground for practice, and the section ends with a capstone challenge.
+
 ### 1. Build Tekton Tasks And Pipelines
-*   **Module Reader:** **[Module 1: Build Tekton Tasks And Pipelines](./module-01/course.md)**
+*   **Module Reader:** Build Tekton Tasks And Pipelines
 *   **Hands-on Playground:** `sections/section-040/module-01/playground` — kind cluster with Tekton Pipelines 1.17.0, the tkn CLI 0.46.1 and Gitea with repository `starfleet/scout-app` (a small source tree with a Makefile-style test script). A Task `run-tests` is installed and deliberately has a step that fails on a wrong working directory. Deliberately absent: no Pipeline, no Triggers, no registry.
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-040/module-01/playground
     ```
 
 ### 2. Hand Off From A Tekton Pipeline To GitOps
-*   **Module Reader:** **[Module 2: Hand Off From A Tekton Pipeline To GitOps](./module-02/course.md)**
+*   **Module Reader:** Hand Off From A Tekton Pipeline To GitOps
 *   **Hands-on Playground:** `sections/section-040/module-02/playground` — kind cluster with Tekton Pipelines 1.17.0 and Triggers 0.36.4, an in-cluster OCI registry, Gitea with `starfleet/scout-app` and `starfleet/scout-deploy`, and Argo CD 3.5.4 with an Application `scout` that auto-syncs `scout-deploy` into `starfleet`. Deliberately absent: no Gitea webhook, no EventListener and no Git credential Secret for the pipeline.
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-040/module-02/playground
     ```
 
 ### 3. Run CI Workflows With Argo Workflows
-*   **Module Reader:** **[Module 3: Run CI Workflows With Argo Workflows](./module-03/course.md)**
+*   **Module Reader:** Run CI Workflows With Argo Workflows
 *   **Hands-on Playground:** `sections/section-040/module-03/playground` — kind cluster with Argo Workflows v4.1.6, Argo Events v1.9.11 with a one-pod EventBus, and Gitea with `starfleet/scout-app`. A WorkflowTemplate `run-tests` is installed and deliberately has a step with a wrong working directory. Deliberately absent: no Workflow, no EventSource and no Sensor.
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-040/module-03/playground
     ```
 
 ### Section Capstone Challenge
-*   **Comprehensive Challenge:** Continuous Integration Pipelines With Tekton Capstone — `sections/section-040/capstone/labs/lab-01` *(created in the build phase)*
+*   **Comprehensive Challenge:** Continuous Integration Pipelines With Tekton Capstone — `sections/section-040/capstone/labs/lab-01`
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-040/capstone/labs/lab-01
     astrona submit -c .
@@ -57,4 +59,4 @@ A GitOps controller only delivers what lands in Git. This section teaches Tekton
 
 ## Ready for Assessment?
 
-*   **[Take the Section 040 Knowledge Check](./quiz.md)**
+*   Take the knowledge check for this section.
