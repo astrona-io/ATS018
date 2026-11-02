@@ -165,6 +165,26 @@ modules:
         title: "Sync Policy, Drift And Health"
         path: sections/section-020/module-01/course-03-sync-policy-drift-and-health.md
       - type: reading
+        title: Question
+        path: sections/section-020/module-01/labs/lab-01/question.md
+      - type: lab
+        title: "Deliver An Application From Git With Argo CD Lab"
+        path: sections/section-020/module-01/labs/lab-01
+        difficulty: beginner
+        estimated_duration: 25m
+        topic: argocd
+        task_kind: build
+        tags: [argocd-application, repository-credentials, sync-policy, self-heal, prune]
+        learning_goals:
+          - Give Argo CD access to a private Git repository with a repository Secret
+          - Create an Application that syncs a Kustomize overlay and creates its namespace
+          - Turn on automated sync with prune and self-heal and prove a manual scale is reverted
+        resources:
+          - name: "Argo CD declarative setup"
+            url: https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/
+          - name: "Argo CD automated sync policy"
+            url: https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/
+      - type: reading
         title: "Helm Charts As A Source"
         path: sections/section-020/module-01/course-04-helm-charts-as-a-source.md
       - type: reading
@@ -184,6 +204,26 @@ modules:
         title: "AppProjects For A Second Tenant"
         path: sections/section-020/module-02/course-03-appprojects-for-a-second-tenant.md
       - type: reading
+        title: Question
+        path: sections/section-020/module-02/labs/lab-01/question.md
+      - type: lab
+        title: "Generate Applications And Restrict A Team With An AppProject Lab"
+        path: sections/section-020/module-02/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 30m
+        topic: argocd
+        task_kind: build
+        tags: [applicationset, appproject, argocd-application, sync-policy, self-heal]
+        learning_goals:
+          - Create an AppProject that limits repositories, destinations and resource kinds
+          - Generate one Application per environment from an ApplicationSet list generator
+          - Run a team Application inside its project and prove the project rejects another repository
+        resources:
+          - name: "Argo CD ApplicationSet"
+            url: https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/
+          - name: "Argo CD projects"
+            url: https://argo-cd.readthedocs.io/en/stable/user-guide/projects/
+      - type: reading
         title: "Summary"
         path: sections/section-020/module-02/course-04-summary.md
       - type: reading
@@ -201,6 +241,26 @@ modules:
       - type: reading
         title: "Health Failures"
         path: sections/section-020/module-03/course-04-health-failures.md
+      - type: reading
+        title: Question
+        path: sections/section-020/module-03/labs/lab-01/question.md
+      - type: lab
+        title: "Fix Broken Argo CD Applications Lab"
+        path: sections/section-020/module-03/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 30m
+        topic: argocd
+        task_kind: troubleshooting
+        tags: [argocd-application, out-of-sync, health-status, self-heal, sync-policy]
+        learning_goals:
+          - Tell a path error, a rejected manifest and an unhealthy workload apart from Argo CD status
+          - Fix each fault in the right place, in Git or in the Application
+          - Stop a retrying sync operation that is stuck on an old commit
+        resources:
+          - name: "Argo CD automated sync policy"
+            url: https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/
+          - name: "Argo CD sync options"
+            url: https://argo-cd.readthedocs.io/en/stable/user-guide/sync-options/
       - type: reading
         title: "Summary"
         path: sections/section-020/module-03/course-05-summary.md
@@ -304,7 +364,7 @@ modules:
         estimated_duration: 20m
         topic: flux
         task_kind: troubleshooting
-        tags: [helmrelease, helmrelease-remediation, reconcile]
+        tags: [helmrelease, helmrelease-remediation, reconcile, flux-kustomization]
         learning_goals:
           - Read the status and history of a HelmRelease whose upgrade failed
           - Repair the values of the existing release without recreating it
@@ -574,7 +634,7 @@ modules:
         estimated_duration: 25m
         topic: progressive-delivery
         task_kind: migration
-        tags: [argo-rollouts, canary, promotion]
+        tags: [argo-rollouts, canary, promotion, abort-rollback]
         learning_goals:
           - Replace a Deployment with a canary Rollout that pauses at 20 percent and at 60 percent
           - Release a new image through both pauses with promotion
