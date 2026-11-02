@@ -1,40 +1,34 @@
 # Automate Canary Analysis With Flagger
 
-<!-- astrona:playground -->
-> [!NOTE]
-> This module has a playground — a throwaway environment to run the commands in.
-> ```bash
-> astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-050/module-03/playground
-> ```
+A canary release sends a growing share of traffic to a new version and stops when the metrics turn bad. Someone has to move the weight, read the metrics and decide. Flagger is a Kubernetes operator (a controller that manages other resources) that does this loop for you. You write one `Canary` object, and Flagger moves the traffic, queries Prometheus and either promotes the new version or rolls it back.
 
-<!-- TODO(build): opening framing — what this module settles, and the contrast that sharpens its boundary. -->
+Flagger works differently from Argo Rollouts. It does not replace your Deployment with a new resource kind. It keeps the Deployment, creates a copy of it called the primary, and changes the weights of a service mesh (here Istio) between the primary and the canary pods. The `scout` Deployment you already have stays the object you edit.
+
+Keep one sentence in mind for this module: **change the Deployment, and Flagger runs the release.** The module has three parts. The first creates a `Canary` and reads the objects Flagger generates. The second changes the image and follows a canary to promotion. The third deploys a version that returns errors and proves Flagger rolls it back while the old version keeps serving.
 
 ## Learning objectives
 
-- Create a Canary resource that targets a Deployment and read the primary and canary objects Flagger creates
-- Configure the analysis interval, threshold, stepWeight and maxWeight with the built-in request-success-rate metric
-- Trigger a canary by changing the Deployment image and follow it in the Canary status and events
-- Generate test traffic during analysis with the Flagger load tester webhook
-- Compare how Flagger and Argo Rollouts each take over a workload
+After this module you can:
+
+- Create a `Canary` that targets a Deployment and name the primary and canary objects Flagger creates.
+- Set `interval`, `threshold`, `stepWeight` and `maxWeight` and the built-in `request-success-rate` metric.
+- Trigger a canary by changing the Deployment image and follow it in the `Canary` status and events.
+- Generate test traffic during the analysis with the Flagger load tester webhook.
+- Compare how Flagger and Argo Rollouts each take over a workload.
 
 ## Before you start
 
-<!-- TODO(build): assumed knowledge, and what the playground already provides. -->
+You need Kubernetes basics: Deployments, Services, labels and readiness probes. You also need `kubectl apply`, `kubectl get` and `kubectl exec`. Knowing what a canary release is helps, but the first part explains it again.
 
-## Outline
+The playground runs Kubernetes 1.35.8, Istio 1.30.7 (a service mesh that routes requests through sidecar proxies), Flagger 1.45.0 and the Flagger load tester. Istio's bundled Prometheus collects request metrics from the sidecar proxies. Flagger queries that Prometheus.
 
-<!-- TODO(build): each beat below becomes a section of this module (or a deep-dive part via /astrona-course-deep-dive). Delete this Outline section once written. -->
+| Namespace | What is in it |
+| --- | --- |
+| `istio-system` | The Istio control plane (`istiod`), Istio's Prometheus and the Flagger controller |
+| `starfleet` | The `scout` Deployment (podinfo 6.14.0, one replica) with a Service, the `shuttle` client and the `flagger-loadtester` |
 
-- What Flagger does with a Deployment and the objects it generates
-- The Canary resource and its analysis block
-- A promoted and a rolled back canary
-- Load testing webhooks
-- Flagger and Argo Rollouts side by side
+Sidecar injection is on in `starfleet`, so every pod there has an Envoy sidecar proxy. No `Canary` exists yet. The commands in this module use the `kubectl` context of the playground; check it with `kubectl config current-context` if another cluster is running on your machine.
 
-## Diagrams planned
+Write the YAML files in an empty folder on your machine. No GitOps controller manages these objects, so you apply changes directly. In a GitOps environment you would put the same Deployment and `Canary` in Git.
 
-<!-- TODO(build): mermaid `flowchart` — Flagger reading metrics and shifting the mesh traffic weight between the primary and canary Deployments -->
-
-<!-- playground provides: kind cluster with Istio 1.31.1 (minimal profile, sidecar injection on `starfleet`), Flagger 1.45.0 for the Istio provider with its bundled Prometheus, and the flagger-loadtester in `starfleet`. `scout` runs as a plain Deployment with a Service. Deliberately absent: no Canary resource and no Argo Rollouts in this cluster. -->
-
-<!-- module section-050/module-03 (Module 3) — stub written by /astrona-course-domain-scaffold, prose written by /astrona-course-domain-build. -->
+<!-- astrona:playground -->

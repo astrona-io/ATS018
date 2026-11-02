@@ -42,7 +42,10 @@ course:
     tkn: "0.46.1"
     argo_rollouts: "1.10.0"
     flagger: "1.45.0"
-    istio: "1.31.1"
+    istio: "1.30.7"
+    argo_workflows: "pin at build"
+    argo_events: "pin at build"
+    crossplane: "pin at build"
     kube_prometheus_stack_chart: "92.3.0"
     gitea: "28.1.0-rootless (plumbing only, not taught)"
     podinfo: "6.15.0"
@@ -274,6 +277,30 @@ sections:
           is deliberately failing: its values set a readiness probe path that
           never answers, so the upgrade times out. No remediation is
           configured yet.
+      - id: module-03
+        title: Automate Image Updates With Flux
+        objectives:
+          - Create an ImageRepository and an ImagePolicy that select the newest semver tag of scout in the in-cluster registry
+          - Mark a manifest field with an image policy marker comment
+          - Create an ImageUpdateAutomation that commits the new tag to Gitea and read its status
+          - Prove a new tag in the registry becomes a Git commit, a reconcile and a new version served to shuttle
+          - Map the Flux image automation objects to the Tekton hand-off commit
+        outline:
+          - Why the cluster can scan a registry instead of a pipeline pushing a commit
+          - ImageRepository and ImagePolicy
+          - Setter markers in Kustomize files
+          - ImageUpdateAutomation and the commit it pushes
+          - Reading status and fixing a policy that selects no tag
+        diagrams:
+          - type: sequence
+            shows: Registry scan, policy selection, commit to Gitea and Kustomization reconcile
+        playground: true
+        playground_env: >
+          kind cluster with Flux 2.9.6 plus the image reflector and image
+          automation controllers, Gitea with `starfleet/scout-deploy`, and the
+          in-cluster registry holding scout tags 6.14.0 and 6.15.0. A read-write
+          Git credential Secret is ready. Deliberately absent: no ImageRepository,
+          ImagePolicy or ImageUpdateAutomation.
     capstone:
       title: Continuous Delivery With Flux Capstone
       objective: >
@@ -352,6 +379,33 @@ sections:
           tag in the in-cluster registry (for example with crane) instead of
           building a container image; say so in the text. Check the playground
           fits the 10 GiB Podman budget with Argo CD, Tekton and Gitea running.
+      - id: module-03
+        title: Run CI Workflows With Argo Workflows
+        objectives:
+          - Write a Workflow with a DAG of templates and pass parameters and artifacts between them
+          - Store a reusable template as a WorkflowTemplate and start a Workflow from it
+          - Read a Workflow with the argo CLI and kubectl and find the failed node
+          - Start a Workflow from a Git push with an Argo Events EventSource, EventBus and Sensor
+          - Map each Argo Workflows and Argo Events object to its Tekton equivalent
+        outline:
+          - Workflow, template, DAG and the pod each node runs
+          - Parameters, artifacts and the WorkflowTemplate
+          - Reading a failed node
+          - EventSource, EventBus and Sensor
+          - Argo Workflows and Tekton side by side
+        diagrams:
+          - type: flowchart
+            shows: A webhook EventSource, the EventBus and a Sensor creating a Workflow whose DAG nodes run as pods
+        playground: true
+        playground_env: >
+          kind cluster with Argo Workflows (namespaced install, server off), the
+          argo CLI, Argo Events with a NATS EventBus, and Gitea with
+          `starfleet/scout-app`. A WorkflowTemplate `run-tests` is installed and
+          fails on purpose. Deliberately absent: no EventSource and no Sensor.
+        notes: >
+          Compact module for the second CI tool. Pin versions and check the
+          memory budget at build. Keep the artifact repository to a minimum:
+          prefer parameters over MinIO.
     capstone:
       title: Continuous Integration Pipelines With Tekton Capstone
       objective: >
@@ -445,7 +499,7 @@ sections:
             shows: Flagger reading metrics and shifting the mesh traffic weight between the primary and canary Deployments
         playground: true
         playground_env: >
-          kind cluster with Istio 1.31.1 (minimal profile, sidecar injection on
+          kind cluster with Istio 1.30.7 (minimal profile, sidecar injection on
           `starfleet`), Flagger 1.45.0 for the Istio provider with its bundled
           Prometheus, and the flagger-loadtester in `starfleet`. `scout` runs as
           a plain Deployment with a Service. Deliberately absent: no Canary
@@ -453,6 +507,31 @@ sections:
         notes: >
           This is the compact module for the secondary tool. Check the memory
           of Istio plus Flagger and its Prometheus against the Podman budget.
+      - id: module-04
+        title: Shift Canary Traffic With Argo Rollouts And A Traffic Router
+        objectives:
+          - Configure a canary with a Gateway API traffic router, stableService and canaryService
+          - Show that the weight now moves requests, not replica counts
+          - Add a header-based route so only tagged requests reach the canary
+          - Run a background analysis during the canary and abort on a bad metric
+          - Say when a traffic router is needed and which routers Rollouts and Flagger support
+        outline:
+          - Replica weights versus request weights
+          - stableService, canaryService and the generated HTTPRoute weights
+          - Header routing
+          - Background analysis during steps
+          - Traffic routers supported by Rollouts and Flagger
+        diagrams:
+          - type: flowchart
+            shows: HTTPRoute with weighted backends for the stable and canary Services
+        playground: true
+        playground_env: >
+          kind cluster with the gatewayAPI addon, the Argo Rollouts Gateway API
+          plugin, Prometheus from module 2 trimmed, and `scout` as a Rollout
+          with two Services and an HTTPRoute. Deliberately absent: no canary
+          steps with weights.
+        notes: >
+          Verify the Gateway API plugin install and the kind addon at build.
     capstone:
       title: Progressive Delivery Capstone
       objective: >
@@ -460,3 +539,45 @@ sections:
         canary with an analysis step on the Prometheus success rate, prove a
         bad version is aborted automatically while the stable version keeps
         serving `shuttle`, then promote a good version to full traffic.
+
+  - id: section-060
+    title: Infrastructure Deployment Through GitOps
+    curriculum_item: Implementing GitOps Workflows for Application and Infrastructure Deployment
+    description: >
+      The first competency covers infrastructure as well as applications.
+      This section teaches Crossplane, which turns infrastructure into
+      Kubernetes objects, and delivers those objects with Argo CD and Flux so
+      one Git repository drives both. It comes last because it reuses the
+      delivery controllers and packaging from earlier sections.
+    modules:
+      - id: module-01
+        title: Deliver Infrastructure Objects With Crossplane And GitOps
+        objectives:
+          - Install a Crossplane provider and a function with Provider and Function objects and check they are Healthy
+          - Apply a Composition and a CompositeResourceDefinition and create a claim
+          - Read the Synced and Ready conditions of a claim and its managed resources
+          - Deliver the claim from Git with an Argo CD Application and with a Flux Kustomization
+          - Fix a claim that stays not Ready and prove the fix goes through Git
+        outline:
+          - Infrastructure as Kubernetes objects and the reconcile loop
+          - Provider, ProviderConfig and managed resources
+          - XRD, Composition and claim
+          - Delivering claims with Argo CD and Flux, including ordering and health
+          - Diagnosing a claim that is not Ready
+        diagrams:
+          - type: flowchart
+            shows: A claim in Git delivered by the GitOps controller, composed into managed resources
+        playground: true
+        playground_env: >
+          kind cluster with Crossplane, provider-kubernetes, a patch-and-transform
+          function, Argo CD and Gitea with `starfleet/platform-infra`. Managed
+          resources are Kubernetes objects in `starfleet`, so no cloud account is
+          needed. One claim is deliberately broken.
+        notes: >
+          Pin Crossplane and check v2 versus v1 API names at build.
+    capstone:
+      title: Infrastructure Deployment Through GitOps Capstone
+      objective: >
+        Deliver a `scout` environment claim from Git with Argo CD, repair the
+        claim that is not Ready, and prove the composed resources and the
+        application answer from `shuttle`.

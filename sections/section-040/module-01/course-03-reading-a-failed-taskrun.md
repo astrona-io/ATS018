@@ -283,3 +283,27 @@ You can now read a failure at each level: the PipelineRun's message and Task lis
 > - **Looking for a pod when the reason is a validation error.** Reasons such as `InvalidWorkspaceBindings` or `TaskRunValidationFailed` mean no pod was created.
 > - **Hard-coding `/workspace/<name>`.** Use `$(workspaces.<name>.path)`, so the step still works if the path changes.
 > - **Fixing an old run.** A finished run never changes. Fix the Task or the Pipeline and start a new run.
+
+## Your mission: Fix A Failing Tekton Pipeline
+
+You can now follow a failed PipelineRun down to the step log and fix the Task behind it. The mission gives you a Pipeline `scout-ci` whose `run-tests` Task fails. You start a run, find the cause, fix the Task and get a `Succeeded` run with the result `6.15.0`.
+
+Pause the playground, then start the lab and read the task:
+
+```sh
+astrona stop ats-018-playground-040-01
+astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-040/module-01/labs/lab-01
+```
+
+When the run has succeeded, grade your work:
+
+```sh
+astrona submit -c sections/section-040/module-01/labs/lab-01
+```
+
+Then remove the lab and start the playground again:
+
+```sh
+astrona destroy ats-018-lab-040-01
+astrona start ats-018-playground-040-01
+```

@@ -180,3 +180,27 @@ You can now run the whole release with one PipelineRun and prove its result with
 > - **Expecting result order to replace `runAfter`.** `update-deploy` takes no result from `publish-image`, so without `runAfter` both start together and the commit can land before the image exists.
 > - **Checking `shuttle` before the rollout ends.** Wait for `argocd app wait` and `kubectl rollout status`, then ask, and ask again if the old version answers once.
 > - **Changing `scout-deploy` by hand while the pipeline also writes it.** The next run overwrites the tag with the version from `scout-app`.
+
+## Your mission: Hand Off A Release From Tekton To Argo CD
+
+You can now chain publish and commit Tasks in one Pipeline, run it with a service account that holds Git credentials and prove that Argo CD serves the result. The mission gives you the three Tasks, a private GitOps repository and a source repository that says `6.15.0`. You build the Pipeline and the credentials, run the release and prove that `scout` answers with `6.15.0`.
+
+Pause the playground, then start the lab and read the task:
+
+```sh
+astrona stop ats-018-playground-040-02
+astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-040/module-02/labs/lab-01
+```
+
+When Argo CD serves the new version, grade your work:
+
+```sh
+astrona submit -c sections/section-040/module-02/labs/lab-01
+```
+
+Then remove the lab and start the playground again:
+
+```sh
+astrona destroy ats-018-lab-040-02
+astrona start ats-018-playground-040-02
+```

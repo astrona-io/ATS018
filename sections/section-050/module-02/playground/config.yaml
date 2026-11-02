@@ -34,10 +34,6 @@ runtime:
       scheme: http
 
 bootstrap:
-  manifests:
-    - name: lab-start
-      type: file
-      source: manifests/lab-start.yaml
   init:
     - name: install-argo-rollouts
       description: "Installs the Argo Rollouts 1.10.0 controller"

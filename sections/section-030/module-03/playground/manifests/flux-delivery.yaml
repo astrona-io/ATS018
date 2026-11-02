@@ -1,0 +1,27 @@
+# Plumbing: the delivery of scout from Git. The GitRepository carries the
+# read-write credential, so an ImageUpdateAutomation can push through it.
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: scout-deploy
+  namespace: flux-system
+spec:
+  interval: 1m
+  url: http://gitea-http.gitea.svc:3000/starfleet/scout-deploy.git
+  ref:
+    branch: main
+  secretRef:
+    name: scout-git
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: scout
+  namespace: flux-system
+spec:
+  interval: 1m
+  path: ./apps/scout
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: scout-deploy

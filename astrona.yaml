@@ -89,8 +89,52 @@ modules:
         title: "Reading Kustomize Build Errors"
         path: sections/section-010/module-01/course-04-reading-build-errors.md
       - type: reading
+        title: Question
+        path: sections/section-010/module-01/labs/lab-01/question.md
+      - type: lab
+        title: "Fix And Deploy Kustomize Overlays Lab"
+        path: sections/section-010/module-01/labs/lab-01
+        difficulty: beginner
+        estimated_duration: 25m
+        topic: packaging
+        task_kind: troubleshooting
+        tags: [kustomize, overlays, patches, config-generator]
+        learning_goals:
+          - Read a Kustomize build error and fix the resource path and patch name it points to
+          - Find a JSON 6902 patch target that selects nothing and fix it
+          - Apply both overlays and prove each environment answers from shuttle with the right version
+        resources:
+          - name: "Kustomize in kubectl"
+            url: https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/
+          - name: "Kustomize reference"
+            url: https://kubectl.docs.kubernetes.io/references/kustomize/
+      - type: reading
         title: Summary
         path: sections/section-010/module-01/course-05-summary.md
+      - type: reading
+        title: Question
+        path: sections/section-010/capstone/labs/lab-01/question.md
+      - type: lab
+        title: "Packaging Applications For GitOps Capstone"
+        path: sections/section-010/capstone/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 30m
+        topic: packaging
+        task_kind: troubleshooting
+        tags: [kustomize, overlays, patches, config-generator]
+        learning_goals:
+          - Find and fix build errors and silent faults in a Kustomize base and two overlays
+          - Make a configMapGenerator name match the name that a patch refers to
+          - Apply both overlays and prove each environment answers from shuttle with the right version and message
+        resources:
+          - name: "Kustomize in kubectl"
+            url: https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/
+          - name: "Kustomize reference"
+            url: https://kubectl.docs.kubernetes.io/references/kustomize/
+      - type: quiz
+        title: "Knowledge Check: Packaging Applications For GitOps"
+        path: sections/section-010/quiz.yaml
+        pass_score: 70
 
   - id: module-020
     title: "Continuous Delivery With Argo CD"
@@ -160,7 +204,33 @@ modules:
       - type: reading
         title: "Summary"
         path: sections/section-020/module-03/course-05-summary.md
+      - type: reading
+        title: Question
+        path: sections/section-020/capstone/labs/lab-01/question.md
+      - type: lab
+        title: "Continuous Delivery With Argo CD Capstone"
+        path: sections/section-020/capstone/labs/lab-01
+        difficulty: advanced
+        estimated_duration: 40m
+        topic: argocd
+        task_kind: build
+        tags: [argocd-application, sync-policy, self-heal, prune, appproject, applicationset, health-status]
+        learning_goals:
+          - Repair a Degraded Application in Git and turn on automated sync with prune and self-heal
+          - Create an AppProject that limits repository, destination and resource kinds for a second team
+          - Generate the environment Applications with an ApplicationSet and prove each answers from shuttle
+        resources:
+          - name: "Argo CD declarative setup"
+            url: https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/
+          - name: "Argo CD ApplicationSet"
+            url: https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/
+          - name: "Argo CD automated sync"
+            url: https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/
 
+      - type: quiz
+        title: "Knowledge Check: Continuous Delivery With Argo CD"
+        path: sections/section-020/quiz.yaml
+        pass_score: 70
 
   - id: module-030
     title: "Continuous Delivery With Flux"
@@ -189,6 +259,26 @@ modules:
         title: "Reconcile, Suspend And Resume"
         path: sections/section-030/module-01/course-03-reconcile-suspend-and-resume.md
       - type: reading
+        title: Question
+        path: sections/section-030/module-01/labs/lab-01/question.md
+      - type: lab
+        title: "Reconcile A Git Source With Flux Lab"
+        path: sections/section-030/module-01/labs/lab-01
+        difficulty: beginner
+        estimated_duration: 25m
+        topic: flux
+        task_kind: troubleshooting
+        tags: [flux-gitrepository, flux-kustomization, depends-on, reconcile]
+        learning_goals:
+          - Repair a GitRepository that follows a branch that does not exist
+          - Add a platform Kustomization and order the scout Kustomization after it with dependsOn
+          - Deliver a change from Git and prove the shuttle pod receives it
+        resources:
+          - name: "Flux GitRepository"
+            url: https://fluxcd.io/flux/components/source/gitrepositories/
+          - name: "Flux Kustomization"
+            url: https://fluxcd.io/flux/components/kustomize/kustomizations/
+      - type: reading
         title: "Summary"
         path: sections/section-030/module-01/course-04-summary.md
 
@@ -205,10 +295,85 @@ modules:
         title: "Remediation And Rollback"
         path: sections/section-030/module-02/course-03-remediation-and-rollback.md
       - type: reading
+        title: Question
+        path: sections/section-030/module-02/labs/lab-01/question.md
+      - type: lab
+        title: "Repair A Failing HelmRelease And Add Remediation Lab"
+        path: sections/section-030/module-02/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 20m
+        topic: flux
+        task_kind: troubleshooting
+        tags: [helmrelease, helmrelease-remediation, reconcile]
+        learning_goals:
+          - Read the status and history of a HelmRelease whose upgrade failed
+          - Repair the values of the existing release without recreating it
+          - Configure upgrade remediation with rollback and retries
+        resources:
+          - name: "Flux HelmRelease"
+            url: https://fluxcd.io/flux/components/helm/helmreleases/
+      - type: reading
         title: "Summary"
         path: sections/section-030/module-02/course-04-summary.md
+      - type: reading
+        title: "Automate Image Updates With Flux"
+        path: sections/section-030/module-03/course.md
+      - type: reading
+        title: "Select A Tag With ImageRepository And ImagePolicy"
+        path: sections/section-030/module-03/course-01-select-a-tag.md
+      - type: reading
+        title: "Commit The Tag To Git"
+        path: sections/section-030/module-03/course-02-commit-the-tag-to-git.md
+      - type: reading
+        title: "Release A New Tag And Read The Status"
+        path: sections/section-030/module-03/course-03-release-a-new-tag.md
+      - type: reading
+        title: Question
+        path: sections/section-030/module-03/labs/lab-01/question.md
+      - type: lab
+        title: "Automate Image Updates With Flux Lab"
+        path: sections/section-030/module-03/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 30m
+        topic: gitops-handoff
+        task_kind: build
+        tags: [image-tag-update, container-registry, git-credentials, flux-gitrepository]
+        learning_goals:
+          - Create an ImageRepository and an ImagePolicy that select the newest semver tag
+          - Add a setter marker and an ImageUpdateAutomation that commits the tag to Git
+          - Prove the commit from the automation is delivered and the new version answers from shuttle
+        resources:
+          - name: "Flux image automation"
+            url: https://fluxcd.io/flux/guides/image-update/
+      - type: reading
+        title: "Summary"
+        path: sections/section-030/module-03/course-04-summary.md
+      - type: reading
+        title: Question
+        path: sections/section-030/capstone/labs/lab-01/question.md
+      - type: lab
+        title: "Continuous Delivery With Flux Capstone"
+        path: sections/section-030/capstone/labs/lab-01
+        difficulty: advanced
+        estimated_duration: 40m
+        topic: flux
+        task_kind: troubleshooting
+        tags: [flux-gitrepository, flux-kustomization, helmrelease, helmrelease-remediation, depends-on, reconcile]
+        learning_goals:
+          - Repair a GitRepository, add a platform Kustomization and order the scout Kustomization with dependsOn
+          - Deliver a change from Git and prove the shuttle pod receives it
+          - Repair a failed HelmRelease upgrade and add rollback remediation without recreating the release
+        resources:
+          - name: "Flux Kustomization"
+            url: https://fluxcd.io/flux/components/kustomize/kustomizations/
+          - name: "Flux HelmRelease"
+            url: https://fluxcd.io/flux/components/helm/helmreleases/
 
 
+      - type: quiz
+        title: "Knowledge Check: Continuous Delivery With Flux"
+        path: sections/section-030/quiz.yaml
+        pass_score: 70
 
   - id: module-040
     title: "Continuous Integration Pipelines With Tekton"
@@ -238,6 +403,26 @@ modules:
         title: "Reading A Failed TaskRun"
         path: sections/section-040/module-01/course-03-reading-a-failed-taskrun.md
       - type: reading
+        title: Question
+        path: sections/section-040/module-01/labs/lab-01/question.md
+      - type: lab
+        title: "Fix A Failing Tekton Pipeline Lab"
+        path: sections/section-040/module-01/labs/lab-01
+        difficulty: beginner
+        estimated_duration: 20m
+        topic: ci-pipelines
+        task_kind: troubleshooting
+        tags: [tekton-task, tekton-pipeline, workspaces, params-results]
+        learning_goals:
+          - Read a failed TaskRun and find the step and the error
+          - Fix the working directory of a Task so it runs from the shared workspace
+          - Run the Pipeline and prove it Succeeded with the version result
+        resources:
+          - name: "Tekton Tasks"
+            url: https://tekton.dev/docs/pipelines/tasks/
+          - name: "Tekton Workspaces"
+            url: https://tekton.dev/docs/pipelines/workspaces/
+      - type: reading
         title: "Shared Tasks With Resolvers"
         path: sections/section-040/module-01/course-04-shared-tasks-with-resolvers.md
       - type: reading
@@ -257,13 +442,95 @@ modules:
         title: "One Pipeline From Source To Commit"
         path: sections/section-040/module-02/course-03-one-pipeline-from-source-to-commit.md
       - type: reading
+        title: Question
+        path: sections/section-040/module-02/labs/lab-01/question.md
+      - type: lab
+        title: "Hand Off A Release From Tekton To Argo CD Lab"
+        path: sections/section-040/module-02/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 30m
+        topic: ci-pipelines
+        task_kind: build
+        tags: [tekton-pipeline, git-credentials, container-registry, image-tag-update, argocd-application]
+        learning_goals:
+          - Give a Pipeline Git credentials through a Secret and a service account
+          - Publish an image and commit the new tag to the deploy repository
+          - Prove Argo CD syncs the commit and the scout Service serves the new version
+        resources:
+          - name: "Tekton Pipelines"
+            url: https://tekton.dev/docs/pipelines/pipelines/
+          - name: "Tekton authentication"
+            url: https://tekton.dev/docs/pipelines/auth/
+      - type: reading
         title: "Start The Pipeline From A Git Push"
         path: sections/section-040/module-02/course-04-start-the-pipeline-from-a-git-push.md
       - type: reading
         title: "Summary"
         path: sections/section-040/module-02/course-05-summary.md
+      - type: reading
+        title: "Run CI Workflows With Argo Workflows"
+        path: sections/section-040/module-03/course.md
+      - type: reading
+        title: "A Workflow With A DAG"
+        path: sections/section-040/module-03/course-01-a-workflow-with-a-dag.md
+      - type: reading
+        title: "Reuse A Workflow With A WorkflowTemplate"
+        path: sections/section-040/module-03/course-02-reuse-a-workflow-with-a-workflowtemplate.md
+      - type: reading
+        title: "Read A Failed Workflow"
+        path: sections/section-040/module-03/course-03-read-a-failed-workflow.md
+      - type: reading
+        title: "Start A Workflow From A Git Push"
+        path: sections/section-040/module-03/course-04-start-a-workflow-from-a-git-push.md
+      - type: reading
+        title: Question
+        path: sections/section-040/module-03/labs/lab-01/question.md
+      - type: lab
+        title: "Start A Workflow From A Git Push With Argo Events Lab"
+        path: sections/section-040/module-03/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 30m
+        topic: ci-pipelines
+        task_kind: troubleshooting
+        tags: [argo-workflows, argo-events, workflowtemplate, webhook, params-results]
+        learning_goals:
+          - Fix a WorkflowTemplate whose container starts in the wrong folder
+          - Receive a Git push with an EventSource and filter it with a Sensor
+          - Prove the push started a Succeeded Workflow for the pushed commit
+        resources:
+          - name: "Argo Workflows WorkflowTemplates"
+            url: https://argo-workflows.readthedocs.io/en/stable/workflow-templates/
+          - name: "Argo Events Sensor"
+            url: https://argoproj.github.io/argo-events/concepts/sensor/
+      - type: reading
+        title: "Summary"
+        path: sections/section-040/module-03/course-05-summary.md
+      - type: reading
+        title: Question
+        path: sections/section-040/capstone/labs/lab-01/question.md
+      - type: lab
+        title: "Continuous Integration Pipelines Capstone"
+        path: sections/section-040/capstone/labs/lab-01
+        difficulty: advanced
+        estimated_duration: 40m
+        topic: ci-pipelines
+        task_kind: troubleshooting
+        tags: [tekton-task, tekton-pipeline, workspaces, params-results, git-credentials, image-tag-update]
+        learning_goals:
+          - Find and fix the faults that stop a Tekton release pipeline (working directory, shared workspace, task order, Git credentials)
+          - Run the pipeline so it publishes the image and pushes the new tag to Git
+          - Prove Argo CD syncs the commit and scout answers from shuttle with the new version
+        resources:
+          - name: "Tekton Pipelines documentation"
+            url: https://tekton.dev/docs/pipelines/
+          - name: "Tekton authentication"
+            url: https://tekton.dev/docs/pipelines/auth/
 
 
+      - type: quiz
+        title: "Knowledge Check: Continuous Integration Pipelines"
+        path: sections/section-040/quiz.yaml
+        pass_score: 70
 
   - id: module-050
     title: "Progressive Delivery"
@@ -282,3 +549,260 @@ modules:
 
 
 
+      - type: reading
+        title: "Roll Out A Canary With Argo Rollouts"
+        path: sections/section-050/module-01/course.md
+      - type: reading
+        title: "Convert A Deployment Into A Rollout"
+        path: sections/section-050/module-01/course-01-convert-a-deployment.md
+      - type: reading
+        title: "Canary Steps And Replica Weights"
+        path: sections/section-050/module-01/course-02-canary-steps-and-weights.md
+      - type: reading
+        title: "Promote And Pause A Canary"
+        path: sections/section-050/module-01/course-03-promote-and-pause.md
+      - type: reading
+        title: "Abort And Retry A Release"
+        path: sections/section-050/module-01/course-04-abort-and-retry.md
+      - type: reading
+        title: Question
+        path: sections/section-050/module-01/labs/lab-01/question.md
+      - type: lab
+        title: "Release A New Version With A Canary Rollout Lab"
+        path: sections/section-050/module-01/labs/lab-01
+        difficulty: beginner
+        estimated_duration: 25m
+        topic: progressive-delivery
+        task_kind: migration
+        tags: [argo-rollouts, canary, promotion]
+        learning_goals:
+          - Replace a Deployment with a canary Rollout that pauses at 20 percent and at 60 percent
+          - Release a new image through both pauses with promotion
+          - Prove the new version answers from the shuttle pod
+        resources:
+          - name: "Argo Rollouts canary strategy"
+            url: https://argo-rollouts.readthedocs.io/en/stable/features/canary/
+          - name: "Argo Rollouts kubectl plugin"
+            url: https://argo-rollouts.readthedocs.io/en/stable/features/kubectl-plugin/
+      - type: reading
+        title: "Summary"
+        path: sections/section-050/module-01/course-05-summary.md
+
+      - type: reading
+        title: "Gate A Blue/Green Release With Analysis"
+        path: sections/section-050/module-02/course.md
+      - type: reading
+        title: "Active And Preview Services"
+        path: sections/section-050/module-02/course-01-active-and-preview-services.md
+      - type: reading
+        title: "Promote And Measure The Candidate"
+        path: sections/section-050/module-02/course-02-promote-and-measure-the-candidate.md
+      - type: reading
+        title: "Pre-Promotion Analysis With Prometheus"
+        path: sections/section-050/module-02/course-03-pre-promotion-analysis.md
+      - type: reading
+        title: "Abort A Release On Failed Analysis"
+        path: sections/section-050/module-02/course-04-abort-on-failed-analysis.md
+      - type: reading
+        title: Question
+        path: sections/section-050/module-02/labs/lab-01/question.md
+      - type: lab
+        title: "Gate A Blue/Green Release With Analysis Lab"
+        path: sections/section-050/module-02/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 35m
+        topic: progressive-delivery
+        task_kind: build
+        tags: [argo-rollouts, blue-green, analysistemplate, promql, prometheus, abort-rollback]
+        learning_goals:
+          - Write an AnalysisTemplate that queries Prometheus for the success rate of one pod template hash
+          - Attach it as a pre-promotion analysis and promote a good release
+          - Let a faulty release fail the analysis and restore the good version
+        resources:
+          - name: "Argo Rollouts blue/green strategy"
+            url: https://argo-rollouts.readthedocs.io/en/stable/features/bluegreen/
+          - name: "Argo Rollouts analysis"
+            url: https://argo-rollouts.readthedocs.io/en/stable/features/analysis/
+      - type: reading
+        title: "Summary"
+        path: sections/section-050/module-02/course-05-summary.md
+
+      - type: reading
+        title: "Automate Canary Analysis With Flagger"
+        path: sections/section-050/module-03/course.md
+      - type: reading
+        title: "What Flagger Creates For A Deployment"
+        path: sections/section-050/module-03/course-01-what-flagger-creates.md
+      - type: reading
+        title: "Analysis And A Promoted Canary"
+        path: sections/section-050/module-03/course-02-analysis-and-a-promoted-canary.md
+      - type: reading
+        title: "Roll Back A Failing Canary"
+        path: sections/section-050/module-03/course-03-roll-back-a-failing-canary.md
+      - type: reading
+        title: Question
+        path: sections/section-050/module-03/labs/lab-01/question.md
+      - type: lab
+        title: "Release And Roll Back A Canary With Flagger Lab"
+        path: sections/section-050/module-03/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 40m
+        topic: progressive-delivery
+        task_kind: build
+        tags: [flagger, canary, istio, prometheus, abort-rollback, promotion]
+        learning_goals:
+          - Create a Flagger Canary with step weights, a success-rate check and a load-test webhook
+          - Promote a new image and read the events of the promotion
+          - Roll back a faulty release and promote a fixed template
+        resources:
+          - name: "Flagger how it works"
+            url: https://docs.flagger.app/usage/how-it-works
+          - name: "Flagger with Istio"
+            url: https://docs.flagger.app/tutorials/istio-progressive-delivery
+      - type: reading
+        title: "Summary"
+        path: sections/section-050/module-03/course-04-summary.md
+      - type: reading
+        title: "Shift Canary Traffic With Argo Rollouts And A Traffic Router"
+        path: sections/section-050/module-04/course.md
+      - type: reading
+        title: "Split Traffic With The Gateway API Plugin"
+        path: sections/section-050/module-04/course-01-split-traffic-with-the-gateway-api-plugin.md
+      - type: reading
+        title: "Route Test Traffic By Header"
+        path: sections/section-050/module-04/course-02-route-test-traffic-by-header.md
+      - type: reading
+        title: "Stop A Bad Canary With Background Analysis"
+        path: sections/section-050/module-04/course-03-stop-a-bad-canary-with-background-analysis.md
+      - type: reading
+        title: Question
+        path: sections/section-050/module-04/labs/lab-01/question.md
+      - type: lab
+        title: "Route And Guard A Canary Through The Gateway API Lab"
+        path: sections/section-050/module-04/labs/lab-01
+        difficulty: advanced
+        estimated_duration: 40m
+        topic: progressive-delivery
+        task_kind: build
+        tags: [argo-rollouts, canary, analysistemplate, promql, abort-rollback, prometheus]
+        learning_goals:
+          - Add a managed header route and a header test step to a canary Rollout
+          - Run a background analysis on the canary pods that starts after the first weight step
+          - Abort a faulty release automatically and prove the Gateway serves the good version
+        resources:
+          - name: "Argo Rollouts traffic management"
+            url: https://argo-rollouts.readthedocs.io/en/stable/features/traffic-management/
+          - name: "Argo Rollouts analysis"
+            url: https://argo-rollouts.readthedocs.io/en/stable/features/analysis/
+      - type: reading
+        title: "Summary"
+        path: sections/section-050/module-04/course-04-summary.md
+      - type: reading
+        title: Question
+        path: sections/section-050/capstone/labs/lab-01/question.md
+      - type: lab
+        title: "Progressive Delivery Capstone"
+        path: sections/section-050/capstone/labs/lab-01
+        difficulty: advanced
+        estimated_duration: 40m
+        topic: progressive-delivery
+        task_kind: troubleshooting
+        tags: [argo-rollouts, canary, analysistemplate, promql, prometheus, abort-rollback, promotion]
+        learning_goals:
+          - Repair a background analysis that judges the wrong template and queries the wrong label
+          - Show that a faulty canary is aborted on real measurements while the stable pods keep serving
+          - Promote a good canary only after its analysis succeeds and prove every request returns the new version
+        resources:
+          - name: "Argo Rollouts analysis"
+            url: https://argo-rollouts.readthedocs.io/en/stable/features/analysis/
+          - name: "Argo Rollouts canary strategy"
+            url: https://argo-rollouts.readthedocs.io/en/stable/features/canary/
+      - type: quiz
+        title: "Knowledge Check: Progressive Delivery"
+        path: sections/section-050/quiz.yaml
+        pass_score: 70
+
+  - id: module-060
+    title: "Infrastructure Deployment Through GitOps"
+    description: >
+      A platform team also delivers the infrastructure and the platform APIs
+      that applications use. This section teaches Crossplane, which turns
+      Kubernetes into a control plane for any resource, and delivers its
+      objects from Git with Argo CD or Flux.
+
+    content:
+      - type: reading
+        title: Section Overview
+        path: sections/section-060/README.md
+
+      - type: reading
+        title: "Deliver Infrastructure Objects With Crossplane And GitOps"
+        path: sections/section-060/module-01/course.md
+      - type: reading
+        title: "Install A Provider And A Function"
+        path: sections/section-060/module-01/course-01-providers-and-functions.md
+      - type: reading
+        title: "Define An API With An XRD And A Composition"
+        path: sections/section-060/module-01/course-02-define-an-api-with-an-xrd-and-a-composition.md
+      - type: reading
+        title: "Deliver The Platform With Argo CD"
+        path: sections/section-060/module-01/course-03-deliver-the-platform-with-argo-cd.md
+      - type: reading
+        title: "Diagnose A Composite Resource That Is Not Ready"
+        path: sections/section-060/module-01/course-04-diagnose-a-composite-resource-that-is-not-ready.md
+      - type: reading
+        title: Question
+        path: sections/section-060/module-01/labs/lab-01/question.md
+      - type: lab
+        title: "Deliver The Platform With Argo CD And Repair Production Lab"
+        path: sections/section-060/module-01/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 30m
+        topic: argocd
+        task_kind: troubleshooting
+        tags: [argocd-application, sync-policy, self-heal, prune, sync-waves, health-status]
+        learning_goals:
+          - Deliver a Crossplane platform repository with an automated Argo CD Application
+          - Add an Argo CD health check so a not-Ready ScoutEnvironment shows as Degraded
+          - Trace a not-Ready environment to its pods and fix the cause in Git
+        resources:
+          - name: "Argo CD resource health"
+            url: https://argo-cd.readthedocs.io/en/stable/operator-manual/health/
+          - name: "Argo CD sync waves"
+            url: https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/
+          - name: "Crossplane compositions"
+            url: https://docs.crossplane.io/latest/composition/compositions/
+      - type: reading
+        title: "Deliver The Platform With Flux"
+        path: sections/section-060/module-01/course-05-deliver-the-platform-with-flux.md
+      - type: reading
+        title: "Summary"
+        path: sections/section-060/module-01/course-06-summary.md
+      - type: reading
+        title: Question
+        path: sections/section-060/capstone/labs/lab-01/question.md
+      - type: lab
+        title: "Infrastructure Deployment Through GitOps Capstone"
+        path: sections/section-060/capstone/labs/lab-01
+        difficulty: advanced
+        estimated_duration: 45m
+        topic: gitops-handoff
+        task_kind: troubleshooting
+        tags: [argocd-application, sync-policy, self-heal, prune, health-status, out-of-sync]
+        learning_goals:
+          - Deliver a Crossplane platform API and its environments with an automated Argo CD Application
+          - Add an Argo CD health check that reports the Ready condition of a ScoutEnvironment
+          - Fix a rejected field type and a wrong Service port in Git and prove all three environments answer from shuttle
+        resources:
+          - name: "Argo CD resource health"
+            url: https://argo-cd.readthedocs.io/en/stable/operator-manual/health/
+          - name: "Crossplane Compositions"
+            url: https://docs.crossplane.io/latest/composition/compositions/
+      - type: quiz
+        title: "Knowledge Check: Infrastructure Deployment Through GitOps"
+        path: sections/section-060/quiz.yaml
+        pass_score: 70
+      - type: quiz
+        title: "Final Quiz: GitOps and Continuous Delivery"
+        path: sections/final-domain-quiz.yaml
+        pass_score: 70

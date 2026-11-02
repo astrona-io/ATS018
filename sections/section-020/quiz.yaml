@@ -1,0 +1,188 @@
+schema_version: 1
+kind: question_bank
+id: ats018-section-020-quiz
+course_id: ATS018
+exam_code: CNPE
+status: draft
+provenance: "Original practice material written for this course; not official exam questions."
+scope:
+  type: section
+  id: section-020
+  title: "Continuous Delivery With Argo CD"
+questions:
+  - id: ats018-020-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Say which Argo CD component reports a Git or rendering error."
+    source_readings:
+      - sections/section-020/module-01/course-01-gitops-and-argo-cd-components.md
+    prompt: "An `Application` shows an error about cloning its repository. Which Argo CD component produced it?"
+    options:
+      - id: a
+        text: "The repo server"
+        explanation: "Correct. The repo server clones and renders. Errors about Git and rendering come from it."
+      - id: b
+        text: "The application controller"
+        explanation: "The application controller compares, applies and checks health. Its errors are about applying objects."
+      - id: c
+        text: "Redis"
+        explanation: "Redis only caches."
+      - id: d
+        text: "The API server"
+        explanation: "The API server serves the web page and the `argocd` tool."
+    correct_option: a
+    explanation: "Git and rendering errors come from the repo server. Errors about applying objects come from the application controller."
+  - id: ats018-020-q02
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Connect a private repository with a repository Secret."
+    source_readings:
+      - sections/section-020/module-01/course-02-the-application-resource.md
+    prompt: "An `Application` for a private repository shows a `ComparisonError` and the sync status `Unknown`. No repository credentials exist. What is missing?"
+    options:
+      - id: a
+        text: "A `ClusterRoleBinding` for the application controller"
+        explanation: "Rights in the cluster do not give access to a Git server."
+      - id: b
+        text: "A Secret in the `argocd` namespace with the label `argocd.argoproj.io/secret-type: repository` and a `url` that matches `repoURL`"
+        explanation: "Correct. Without it Argo CD cannot read the repository."
+      - id: c
+        text: "`CreateNamespace=true` in the sync options"
+        explanation: "That option creates the destination namespace and does not give repository access."
+      - id: d
+        text: "An `AppProject` for the repository"
+        explanation: "A project limits repositories; it does not hold credentials."
+    correct_option: b
+    explanation: "A private repository needs a repository Secret. The `url` must match `repoURL` of the `Application`."
+  - id: ats018-020-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Tell sync status from health status."
+    source_readings:
+      - sections/section-020/module-01/course-03-sync-policy-drift-and-health.md
+    prompt: "An application is `Synced` and `Degraded`. The Deployment uses an image tag that does not exist. How do you fix it?"
+    options:
+      - id: a
+        text: "Run `kubectl edit deployment` to change the tag"
+        explanation: "With self-heal on, Argo CD reverts the change. The fix belongs in Git."
+      - id: b
+        text: "Run `argocd app sync` again"
+        explanation: "Git and the cluster already match, so a sync changes nothing."
+      - id: c
+        text: "Commit a valid image tag to Git"
+        explanation: "Correct. Git already matches the cluster, so the fix is another commit."
+      - id: d
+        text: "Delete the `Application`"
+        explanation: "That removes the symptom and the application with it."
+    correct_option: c
+    explanation: "`Synced` says Git equals the cluster. `Degraded` says the objects do not work. The fix is a commit."
+  - id: ats018-020-q04
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Define `selfHeal` and `prune`."
+    source_readings:
+      - sections/section-020/module-01/course-03-sync-policy-drift-and-health.md
+    prompt: "Someone deletes a file from the Git folder of an `Application` with `automated` sync. Which setting deletes the matching object from the cluster?"
+    options:
+      - id: a
+        text: "`selfHeal`"
+        explanation: "`selfHeal` reverts manual changes in the cluster. It does not delete objects that left Git."
+      - id: b
+        text: "`CreateNamespace=true`"
+        explanation: "That option creates the destination namespace."
+      - id: c
+        text: "`RespectIgnoreDifferences=true`"
+        explanation: "That option keeps a sync from overwriting ignored fields."
+      - id: d
+        text: "`prune`"
+        explanation: "Correct. `prune` deletes objects that left Git."
+    correct_option: d
+    explanation: "`automated` syncs new commits, `selfHeal` reverts manual changes and `prune` deletes objects that left Git."
+  - id: ats018-020-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain deletion in an `ApplicationSet`."
+    source_readings:
+      - sections/section-020/module-02/course-02-applicationsets-and-generators.md
+    prompt: "A Git directory generator makes one `Application` per folder. A team deletes the folder `outpost-scout` from the repository. What happens by default?"
+    options:
+      - id: a
+        text: "Argo CD deletes the generated `Application` and its workloads"
+        explanation: "Correct. Removing a folder removes the generated application unless `preserveResourcesOnDeletion` is set."
+      - id: b
+        text: "Nothing; generated applications stay until deleted by hand"
+        explanation: "An `ApplicationSet` owns what it generates and removes it."
+      - id: c
+        text: "Only the `Application` is deleted; the workloads stay"
+        explanation: "The workloads stay only when `preserveResourcesOnDeletion` is set."
+      - id: d
+        text: "The `ApplicationSet` fails and stops generating"
+        explanation: "The other folders keep generating applications."
+    correct_option: a
+    explanation: "An `ApplicationSet` owns the applications it generates. Removing an element or a folder deletes the application and its workloads unless `preserveResourcesOnDeletion` is set."
+  - id: ats018-020-q06
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Read the two kinds of AppProject errors."
+    source_readings:
+      - sections/section-020/module-02/course-03-appprojects-for-a-second-tenant.md
+    prompt: "An `Application` in a project has a valid repository and destination, but it contains a `ClusterRole`. The project does not whitelist it. What does Argo CD report?"
+    options:
+      - id: a
+        text: "The whole application is invalid with an `InvalidSpecError` condition"
+        explanation: "That happens when the repository or destination is outside the project rules."
+      - id: b
+        text: "Only that object is blocked, with `resource rbac.authorization.k8s.io:ClusterRole is not permitted in project`"
+        explanation: "Correct. A kind that is not whitelisted blocks only that object."
+      - id: c
+        text: "Argo CD syncs the object because the `default` project allows it"
+        explanation: "The application is in a project that does not whitelist it."
+      - id: d
+        text: "A `ComparisonError` from the repo server"
+        explanation: "The repo server renders the object; the project check comes after."
+    correct_option: b
+    explanation: "A repository or destination outside the rules invalidates the whole application. A kind that is not whitelisted blocks only that object."
+  - id: ats018-020-q07
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Use `ignoreDifferences` with `RespectIgnoreDifferences`."
+    source_readings:
+      - sections/section-020/module-03/course-03-permanent-drift-and-ignore-differences.md
+    prompt: "A HorizontalPodAutoscaler changes `spec.replicas`, and self-heal keeps setting it back. You add `ignoreDifferences` for that field, but a sync still overwrites it. What is missing?"
+    options:
+      - id: a
+        text: "The sync option `Prune=true`"
+        explanation: "Pruning deletes objects; it does not protect a field."
+      - id: b
+        text: "A second `Application`"
+        explanation: "A second application does not stop the sync from writing the field."
+      - id: c
+        text: "The sync option `RespectIgnoreDifferences=true`"
+        explanation: "Correct. Without it the comparison ignores the field but the sync still writes it."
+      - id: d
+        text: "A longer `progressDeadlineSeconds`"
+        explanation: "That setting controls Deployment health, not drift."
+    correct_option: c
+    explanation: "`ignoreDifferences` removes a field from the comparison. `RespectIgnoreDifferences=true` also keeps the sync from overwriting it."
+  - id: ats018-020-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Recover from a retry that uses the old commit."
+    source_readings:
+      - sections/section-020/module-03/course-02-sync-failures-waves-and-hooks.md
+    prompt: "You fixed a bad manifest in Git, but the automated sync still retries the old commit. Which command ends the failing operation?"
+    options:
+      - id: a
+        text: "`argocd app diff`"
+        explanation: "It shows the difference and does not end an operation."
+      - id: b
+        text: "`kubectl rollout restart`"
+        explanation: "That restarts pods and does not change a sync operation."
+      - id: c
+        text: "`argocd app get --refresh`"
+        explanation: "It compares again but does not end the running operation."
+      - id: d
+        text: "`argocd app terminate-op`"
+        explanation: "Correct. Argo CD 3.5 retries a failed automated sync on the same revision until you terminate it."
+    correct_option: d
+    explanation: "Check `operationState.operation.sync.revision`. If it is still the old commit, run `argocd app terminate-op`."

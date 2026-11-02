@@ -1,0 +1,454 @@
+schema_version: 1
+kind: question_bank
+id: ats018-final-domain-quiz
+course_id: ATS018
+exam_code: CNPE
+status: draft
+provenance: "Original practice material written for this course; not official exam questions."
+scope:
+  type: domain
+  id: final
+  title: "Final Quiz: GitOps and Continuous Delivery"
+questions:
+  - id: ats018-final-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Define drift and the right fix in a GitOps setup."
+    source_readings:
+      - sections/section-020/module-01/course-03-sync-policy-drift-and-health.md
+    prompt: "Someone changes the replica count of a delivered Deployment with `kubectl scale`. Argo CD has `selfHeal` on. What happens, and where does a lasting change belong?"
+    options:
+      - id: a
+        text: "Argo CD reverts the change; a lasting change belongs in Git"
+        explanation: "Correct. Self-heal reverts manual changes in the cluster."
+      - id: b
+        text: "Argo CD keeps the change and marks the Application `Healthy`"
+        explanation: "Self-heal reverts the difference."
+      - id: c
+        text: "Argo CD deletes the Deployment"
+        explanation: "Pruning deletes objects that left Git, and this object is still in Git."
+      - id: d
+        text: "Argo CD copies the change into Git"
+        explanation: "Argo CD never writes to Git."
+    correct_option: a
+    explanation: "Change Git, not the cluster."
+  - id: ats018-final-q02
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Choose the Kustomize field that gives a rollout on a config change."
+    source_readings:
+      - sections/section-010/module-01/course-03-generators-diff-and-apply.md
+    prompt: "A team wants a new rollout whenever the data of a ConfigMap changes. Which Kustomize feature does this without extra tooling?"
+    options:
+      - id: a
+        text: "`commonLabels`, because labels restart pods"
+        explanation: "Labels do not restart pods."
+      - id: b
+        text: "`configMapGenerator`, because the name carries a hash and the pod template changes"
+        explanation: "Correct. Kustomize rewrites every reference to the new name."
+      - id: c
+        text: "A strategic merge patch on the Deployment name"
+        explanation: "A patch would need a manual edit for each change."
+      - id: d
+        text: "`kubectl apply -k` with `--prune`"
+        explanation: "Pruning removes objects; it does not change the pod template."
+    correct_option: b
+    explanation: "A changed generator literal changes the ConfigMap name, the pod template and starts a rollout."
+  - id: ats018-final-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Choose Argo CD or Flux feature for Helm charts."
+    source_readings:
+      - sections/section-020/module-01/course-04-helm-charts-as-a-source.md
+      - sections/section-030/module-02/course-04-summary.md
+    prompt: "An administrator says: \"I want a numbered release history I can read.\" Which tool installs a Helm release and keeps that history?"
+    options:
+      - id: a
+        text: "Argo CD, through a chart source"
+        explanation: "Argo CD renders and syncs manifests and installs no Helm release."
+      - id: b
+        text: "Kustomize, through `kubectl kustomize`"
+        explanation: "Kustomize renders files; it keeps no release history."
+      - id: c
+        text: "The Flux helm controller, through a `HelmRelease`"
+        explanation: "Correct. Argo CD renders the chart and applies the manifests; no Helm release is installed."
+      - id: d
+        text: "Crossplane, through a `Provider`"
+        explanation: "A Provider adds kinds for one system."
+    correct_option: c
+    explanation: "Flux release management has history and remediation. Argo CD chart delivery renders and syncs."
+  - id: ats018-final-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Pick the Argo CD object for many similar applications."
+    source_readings:
+      - sections/section-020/module-02/course-02-applicationsets-and-generators.md
+    prompt: "A platform team has one folder per application in `platform-apps` and wants one Argo CD application per folder without writing each by hand. What do they use?"
+    options:
+      - id: a
+        text: "An `AppProject` per folder"
+        explanation: "A project limits what applications may use."
+      - id: b
+        text: "A parent `Application` with hand-written children only"
+        explanation: "That is app of apps; every child is still hand-written."
+      - id: c
+        text: "A `Kustomization` with `dependsOn`"
+        explanation: "That is a Flux object."
+      - id: d
+        text: "An `ApplicationSet` with a Git directory generator"
+        explanation: "Correct. The generator makes one parameter set per matching folder."
+    correct_option: d
+    explanation: "An `ApplicationSet` combines a generator with a template and owns what it generates."
+  - id: ats018-final-q05
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Find the stage of an Argo CD failure."
+    source_readings:
+      - sections/section-020/module-03/course-01-where-argo-cd-reports-a-problem.md
+    prompt: "An Application shows sync status `Unknown` and a condition that says `app path does not exist`. Which stage failed, and which field is wrong?"
+    options:
+      - id: a
+        text: "Fetch and render; the `path` of the `source`"
+        explanation: "Correct. The words at the end of a `ComparisonError` name the source field."
+      - id: b
+        text: "Apply; the `destination` namespace"
+        explanation: "An apply failure shows a refused object in the object table."
+      - id: c
+        text: "Health; `progressDeadlineSeconds`"
+        explanation: "Health problems show on a synced application."
+      - id: d
+        text: "Drift; `ignoreDifferences`"
+        explanation: "Drift shows `OutOfSync` on a rendered application."
+    correct_option: a
+    explanation: "`app path does not exist` points to `path`. Read conditions first, then operation state, then the object table."
+  - id: ats018-final-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Read what Flux status proves."
+    source_readings:
+      - sections/section-030/module-01/course-04-summary.md
+    prompt: "A Flux Kustomization is `Ready`, with `wait: true`. What must you still do before you call the release done?"
+    options:
+      - id: a
+        text: "Nothing; `Ready` proves the application serves the new version"
+        explanation: "Status and behaviour can differ; a request proves the behaviour."
+      - id: b
+        text: "Send a request from the client and check that it returns the expected version"
+        explanation: "Correct. Controller status should agree with real behaviour."
+      - id: c
+        text: "Suspend and resume the Kustomization"
+        explanation: "That repeats the reconciliation and proves nothing new."
+      - id: d
+        text: "Delete and recreate the `GitRepository`"
+        explanation: "The source is not the question."
+    correct_option: b
+    explanation: "Source readiness does not prove behaviour. A request from the client does."
+  - id: ats018-final-q07
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Trace an automatic image release."
+    source_readings:
+      - sections/section-030/module-03/course-02-commit-the-tag-to-git.md
+      - sections/section-030/module-03/course-03-release-a-new-tag.md
+    prompt: "A new tag appears in the registry. In which order do Flux objects act until the pods run the new tag?"
+    options:
+      - id: a
+        text: "`ImageUpdateAutomation` pulls the image, then restarts the Deployment"
+        explanation: "The automation commits to Git and never touches the Deployment."
+      - id: b
+        text: "`ImagePolicy` edits the Deployment, then the kustomize controller reports"
+        explanation: "The policy records the tag only."
+      - id: c
+        text: "`ImageRepository` scans, `ImagePolicy` chooses, `ImageUpdateAutomation` commits, then source and kustomize controllers deliver the commit"
+        explanation: "Correct. The release ends in a commit that the GitOps controller delivers, so a revert in Git is a rollback."
+      - id: d
+        text: "The helm controller scans the registry, then the source controller commits"
+        explanation: "The helm controller installs charts and does not scan registries."
+    correct_option: c
+    explanation: "When a release does not arrive, read the objects in the order of the flow."
+  - id: ats018-final-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Order a Crossplane platform in GitOps."
+    source_readings:
+      - sections/section-060/module-01/course-06-summary.md
+    prompt: "A Git repository holds an XRD and an XR of that kind. A first sync fails because the kind does not exist yet. Which fix works in Argo CD?"
+    options:
+      - id: a
+        text: "Use `dependsOn` in the `Application`"
+        explanation: "`dependsOn` is a Flux field of a `Kustomization`."
+      - id: b
+        text: "Turn on `prune`"
+        explanation: "Pruning removes objects and does not order them."
+      - id: c
+        text: "Create the XR by hand with `kubectl`"
+        explanation: "That moves the object out of Git."
+      - id: d
+        text: "Put the XRD in an earlier sync wave and set `SkipDryRunOnMissingResource=true` on the XR"
+        explanation: "Correct. The definition must exist before its instances."
+    correct_option: d
+    explanation: "Argo CD orders with sync waves. Flux orders with `dependsOn` between two Kustomizations."
+  - id: ats018-final-q09
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Name the unit of a Tekton run."
+    source_readings:
+      - sections/section-040/module-01/course-01-tasks-taskruns-and-pods.md
+    prompt: "You apply a Tekton `Task` and nothing runs. Why?"
+    options:
+      - id: a
+        text: "A Task does nothing until a TaskRun starts it"
+        explanation: "Correct. The same holds for a Pipeline and a PipelineRun."
+      - id: b
+        text: "The Tekton controller needs a restart"
+        explanation: "Definitions are not run by a restart."
+      - id: c
+        text: "The Task needs a Service"
+        explanation: "A Task needs no Service."
+      - id: d
+        text: "A Task runs only from an EventListener"
+        explanation: "An EventListener creates runs; so can you."
+    correct_option: a
+    explanation: "A Task and a Pipeline do nothing until a run starts them."
+  - id: ats018-final-q10
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Start a run with a generated name."
+    source_readings:
+      - sections/section-040/module-01/course-02-workspaces-and-pipelines.md
+    prompt: "A PipelineRun manifest uses `generateName`. Which command creates it?"
+    options:
+      - id: a
+        text: "`kubectl apply -f pipelinerun.yaml`"
+        explanation: "`apply` needs a fixed `name`."
+      - id: b
+        text: "`kubectl create -f pipelinerun.yaml`"
+        explanation: "Correct. `kubectl apply` needs a fixed name."
+      - id: c
+        text: "`kubectl replace -f pipelinerun.yaml`"
+        explanation: "`replace` needs an existing object."
+      - id: d
+        text: "`tkn task start`"
+        explanation: "That starts a Task, not this manifest."
+    correct_option: b
+    explanation: "Use `kubectl create` for a run that has `generateName`. The same holds for an Argo Workflow."
+  - id: ats018-final-q11
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Find a pipeline fault from the status."
+    source_readings:
+      - sections/section-040/module-01/course-03-reading-a-failed-taskrun.md
+    prompt: "A TaskRun has the reason `StepFailed` and an exit code of `1`. Where is the error text?"
+    options:
+      - id: a
+        text: "In the `ResolutionRequest`"
+        explanation: "That records the fetch of a Task."
+      - id: b
+        text: "In the `EventListener` Service"
+        explanation: "It does not hold step output."
+      - id: c
+        text: "In the container log of the step that failed"
+        explanation: "Correct. The TaskRun names the step and the log holds the error."
+      - id: d
+        text: "In the registry"
+        explanation: "A registry holds images."
+    correct_option: c
+    explanation: "Read from the PipelineRun down to the step log."
+  - id: ats018-final-q12
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Describe the hand-off from CI to GitOps."
+    source_readings:
+      - sections/section-040/module-02/course-05-summary.md
+    prompt: "Which two results prove a pipeline release end to end?"
+    options:
+      - id: a
+        text: "`tkn pipelinerun describe` shows `Succeeded`, and nothing else"
+        explanation: "That proves only the CI half."
+      - id: b
+        text: "The registry lists the tag, and the Gitea page loads"
+        explanation: "Neither proves that the cluster runs the new version."
+      - id: c
+        text: "`argocd app sync` exits with `0`"
+        explanation: "A request must prove behaviour."
+      - id: d
+        text: "`tkn pipelinerun describe` shows `Succeeded` with the commit, and `argocd app get` shows `Synced` and `Healthy` followed by a request that returns the new version"
+        explanation: "Correct. The proof has two halves: CI and CD."
+    correct_option: d
+    explanation: "The pipeline never applies to the cluster; it commits to Git, and Argo CD syncs."
+  - id: ats018-final-q13
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Name the Argo Events chain."
+    source_readings:
+      - sections/section-040/module-03/course-04-start-a-workflow-from-a-git-push.md
+    prompt: "Which chain starts an Argo Workflow from a Git push?"
+    options:
+      - id: a
+        text: "An `EventSource` of type `webhook`, an `EventBus` and a `Sensor` whose trigger creates a Workflow"
+        explanation: "Correct. The Sensor uses its own ServiceAccount with a Role in the Workflow namespace."
+      - id: b
+        text: "An `EventListener`, a `TriggerBinding` and a `TriggerTemplate`"
+        explanation: "Those are Tekton Triggers objects."
+      - id: c
+        text: "A `GitRepository`, a `Kustomization` and a `Receiver`"
+        explanation: "Those are Flux objects."
+      - id: d
+        text: "A `Provider`, a `Function` and a `Composition`"
+        explanation: "Those are Crossplane objects."
+    correct_option: a
+    explanation: "An `EventSource` with a `Sensor` is like an `EventListener` with a trigger."
+  - id: ats018-final-q14
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Reuse a Workflow graph."
+    source_readings:
+      - sections/section-040/module-03/course-02-reuse-a-workflow-with-a-workflowtemplate.md
+    prompt: "How does a Workflow use a graph that a `WorkflowTemplate` holds?"
+    options:
+      - id: a
+        text: "It copies the template into its own `spec` and edits it"
+        explanation: "A reference avoids the copy."
+      - id: b
+        text: "It refers to it with `workflowTemplateRef` and gives only the arguments that change"
+        explanation: "Correct. The template holds the graph once."
+      - id: c
+        text: "It lists the template in `dependsOn`"
+        explanation: "`depends` orders tasks inside a DAG."
+      - id: d
+        text: "It needs a Pipeline object that wraps the template"
+        explanation: "A Pipeline is a Tekton object."
+    correct_option: b
+    explanation: "A `WorkflowTemplate` is like a Pipeline, and a Workflow is like a PipelineRun."
+  - id: ats018-final-q15
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Decide what an abort leaves."
+    source_readings:
+      - sections/section-050/module-01/course-04-abort-and-retry.md
+    prompt: "A canary Rollout was aborted and reports `Degraded`. The bad image is still in the Rollout template. What do users get?"
+    options:
+      - id: a
+        text: "Responses from the canary pods"
+        explanation: "The canary is scaled down."
+      - id: b
+        text: "Errors, because the Rollout is `Degraded`"
+        explanation: "The stable pods keep serving."
+      - id: c
+        text: "Responses from the stable pods; the fix is a new template or a retry of the same template"
+        explanation: "Correct. An abort keeps the stable version serving and does not change the desired template."
+      - id: d
+        text: "The previous template is restored by Argo Rollouts"
+        explanation: "An abort does not change the desired pod template."
+    correct_option: c
+    explanation: "A new template starts a new release. `retry` allows another attempt at the same aborted template."
+  - id: ats018-final-q16
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Choose blue/green behaviour."
+    source_readings:
+      - sections/section-050/module-02/course-01-active-and-preview-services.md
+    prompt: "In a blue/green Rollout, what makes the active Service send users to the new version?"
+    options:
+      - id: a
+        text: "A change of the Service name"
+        explanation: "Names do not move traffic."
+      - id: b
+        text: "A `setWeight` step"
+        explanation: "Weights belong to canary steps."
+      - id: c
+        text: "The AnalysisRun, which edits the selector when it starts"
+        explanation: "Analysis checks the candidate. Promotion changes the selector."
+      - id: d
+        text: "Promotion changes the pod template hash in the active Service selector"
+        explanation: "Correct. The preview Service selects the candidate before that."
+    correct_option: d
+    explanation: "A scale-down delay keeps old replicas available while networking updates propagate."
+  - id: ats018-final-q17
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Handle a post-promotion failure."
+    source_readings:
+      - sections/section-050/module-02/course-04-abort-on-failed-analysis.md
+    prompt: "A post-promotion analysis fails. What happens to the active selector?"
+    options:
+      - id: a
+        text: "It switches back to the old pods, which are still available during the analysis window"
+        explanation: "Correct. Old replicas must stay available for the whole post-promotion analysis window."
+      - id: b
+        text: "It stays on the new pods"
+        explanation: "A failed post-promotion analysis switches it back."
+      - id: c
+        text: "It points to no pods"
+        explanation: "The old pods are available."
+      - id: d
+        text: "It stays unchanged until an operator edits it"
+        explanation: "The controller switches it back."
+    correct_option: a
+    explanation: "A pre-promotion failure keeps the stable selector. A post-promotion failure switches it back."
+  - id: ats018-final-q18
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Choose between Flagger and Rollouts."
+    source_readings:
+      - sections/section-050/module-03/course-04-summary.md
+    prompt: "A team wants to keep its Deployment and let a controller create a primary copy and move Istio weights. Which tool fits?"
+    options:
+      - id: a
+        text: "Argo Rollouts, which keeps the Deployment object as it is"
+        explanation: "Argo Rollouts replaces the Deployment with a `Rollout`."
+      - id: b
+        text: "Flagger, with a `Canary` object"
+        explanation: "Correct. Flagger keeps the Deployment and needs a traffic provider."
+      - id: c
+        text: "Flux, with a `HelmRelease`"
+        explanation: "Flux delivers; it does not run a canary."
+      - id: d
+        text: "Tekton, with a `Pipeline`"
+        explanation: "Tekton runs CI work."
+    correct_option: b
+    explanation: "Flagger runs the loop from its `Canary` analysis block. Argo Rollouts uses steps and an `AnalysisTemplate`."
+  - id: ats018-final-q19
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Read a Flagger rollback."
+    source_readings:
+      - sections/section-050/module-03/course-03-roll-back-a-failing-canary.md
+    prompt: "A `Canary` shows `Failed`. Which pods served users during the release?"
+    options:
+      - id: a
+        text: "The canary pods only"
+        explanation: "The weight was raised in steps and set to 0 on failure."
+      - id: b
+        text: "No pods, because the Deployment was deleted"
+        explanation: "Flagger does not delete the Deployment."
+      - id: c
+        text: "The primary pods, which keep the last good version"
+        explanation: "Correct. Flagger sets the canary weight to 0 and scales the canary down."
+      - id: d
+        text: "The load tester pods"
+        explanation: "The load tester only sends requests."
+    correct_option: c
+    explanation: "When all steps pass, Flagger copies the canary template into the primary and marks the `Canary` `Succeeded`."
+  - id: ats018-final-q20
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Prove a header route."
+    source_readings:
+      - sections/section-050/module-04/course-02-route-test-traffic-by-header.md
+    prompt: "A Rollout sends requests that carry a chosen header to the canary only. Which fields make that work?"
+    options:
+      - id: a
+        text: "`stableService` and `canaryService` only"
+        explanation: "They name the two Services and do not create a header rule."
+      - id: b
+        text: "`autoPromotionEnabled` and `scaleDownDelaySeconds`"
+        explanation: "Those belong to blue/green."
+      - id: c
+        text: "`interval` and `threshold`"
+        explanation: "Those belong to Flagger."
+      - id: d
+        text: "`managedRoutes`, the step `setCanaryScale` and the step `setHeaderRoute`"
+        explanation: "Correct. The plugin removes the rule when the release ends, and requests without the header keep using stable pods."
+    correct_option: d
+    explanation: "The `Rollout` lists the rule under `managedRoutes`, `setCanaryScale` keeps a canary pod and `setHeaderRoute` creates the rule."

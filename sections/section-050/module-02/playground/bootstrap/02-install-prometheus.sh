@@ -5,8 +5,10 @@
 set -euo pipefail
 HELM_VERSION="v4.3.0"
 CHART_VERSION="92.3.0"
-BIN_DIR="/usr/local/bin"
-[ -w "$BIN_DIR" ] || BIN_DIR="$HOME/.local/bin"
+BIN_DIR="$HOME/.astrona/bin"
+export HELM_CACHE_HOME="$HOME/.astrona/helm/cache"
+export HELM_CONFIG_HOME="$HOME/.astrona/helm/config"
+export HELM_DATA_HOME="$HOME/.astrona/helm/data"
 mkdir -p "$BIN_DIR"
 export PATH="$BIN_DIR:$PATH"
 if ! command -v helm >/dev/null 2>&1; then

@@ -258,3 +258,27 @@ You can now let Argo CD keep the cluster equal to Git on its own: `automated` fo
 > - **Reading `Synced` as "working".** Sync status only compares Git with the cluster; check the health status too.
 > - **Looking for per-object health in the `Application` YAML.** Argo CD 3 keeps it out of the resource; use `argocd app get`.
 > - **Fixing a `Degraded` application in the cluster.** Self-heal reverts it. Commit the fix.
+
+## Your mission: Deliver An Application From Git With Argo CD
+
+You can now connect a private repository to Argo CD, create an `Application` with automated sync, prune and self-heal, and read its sync status and health status. The mission gives you a cluster with Argo CD and a private `scout-deploy` repository, but no repository Secret and no `Application`. You deliver the staging overlay from Git and prove that Argo CD reverts a manual change.
+
+Pause the playground first, so it does not compete for memory with the lab cluster:
+
+```sh
+astrona stop ats-018-playground-020-01
+```
+
+Start the lab and submit your work:
+
+```sh
+astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-020/module-01/labs/lab-01
+astrona submit -c sections/section-020/module-01/labs/lab-01
+```
+
+When you finish, remove the lab and resume the playground:
+
+```sh
+astrona destroy ats-018-lab-020-01
+astrona start ats-018-playground-020-01
+```

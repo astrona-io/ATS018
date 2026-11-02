@@ -26,13 +26,13 @@ items:
 - key: section-010/quiz
   kind: quiz
   what: 'knowledge check for section-010: Packaging Applications For GitOps'
-  status: pending
-  note: ''
+  status: done
+  note: '8 questions, quiz.yaml'
 - key: section-010/capstone
   kind: capstone
   what: 'capstone lab: Packaging Applications For GitOps Capstone'
-  status: pending
-  note: ''
+  status: done
+  note: 'astrona test passed; unsolved start scores 0'
 - key: section-020/module-01/playground
   kind: playground
   what: 'playground for module 1: Deploy An Application With Argo CD'
@@ -67,13 +67,13 @@ items:
 - key: section-020/quiz
   kind: quiz
   what: 'knowledge check for section-020: Continuous Delivery With Argo CD'
-  status: pending
-  note: ''
+  status: done
+  note: '8 questions, quiz.yaml'
 - key: section-020/capstone
   kind: capstone
   what: 'capstone lab: Continuous Delivery With Argo CD Capstone'
-  status: pending
-  note: ''
+  status: done
+  note: 'astrona test passed; unsolved start scores 0'
 - key: section-030/module-01/playground
   kind: playground
   what: 'playground for module 1: Reconcile Git Sources With Flux Kustomizations'
@@ -101,13 +101,13 @@ items:
 - key: section-030/quiz
   kind: quiz
   what: 'knowledge check for section-030: Continuous Delivery With Flux'
-  status: pending
-  note: ''
+  status: done
+  note: '8 questions, quiz.yaml'
 - key: section-030/capstone
   kind: capstone
   what: 'capstone lab: Continuous Delivery With Flux Capstone'
-  status: pending
-  note: ''
+  status: done
+  note: 'astrona test passed; unsolved start scores 0'
 - key: section-040/module-01/playground
   kind: playground
   what: 'playground for module 1: Build Tekton Tasks And Pipelines'
@@ -135,55 +135,185 @@ items:
 - key: section-040/quiz
   kind: quiz
   what: 'knowledge check for section-040: Continuous Integration Pipelines With Tekton'
-  status: pending
-  note: ''
+  status: done
+  note: '9 questions, quiz.yaml'
 - key: section-040/capstone
   kind: capstone
   what: 'capstone lab: Continuous Integration Pipelines With Tekton Capstone'
-  status: pending
-  note: ''
+  status: done
+  note: 'astrona test passed; unsolved start scores 0'
 - key: section-050/module-01/playground
   kind: playground
   what: 'playground for module 1: Roll Out A Canary With Argo Rollouts'
-  status: pending
-  note: ''
+  status: done
+  note: Booted Kubernetes 1.35.8 / Argo Rollouts 1.10.0; 5-replica Deployment start verified; guide helpers
+    checked; node about 1.05 GB
 - key: section-050/module-01/course
   kind: course
   what: 'chapter for module 1: Roll Out A Canary With Argo Rollouts'
-  status: pending
-  note: ''
+  status: done
+  note: Landing + 4 parts + summary; reset and ran every lesson command; 20/60 replica splits, explicit
+    pause, abort, corrected template and retry verified; validators pass
 - key: section-050/module-02/playground
   kind: playground
   what: 'playground for module 2: Gate A Blue/Green Release With Analysis'
-  status: pending
-  note: ''
+  status: done
+  note: astrona CLI developer; clean boot Kubernetes 1.35.8 / Argo Rollouts 1.10.0 / kube-prometheus-stack
+    92.3.0; dedicated metrics port; initialization ordering fixed; node about 1.6 GB
 - key: section-050/module-02/course
   kind: course
   what: 'chapter for module 2: Gate A Blue/Green Release With Analysis'
-  status: pending
-  note: ''
+  status: done
+  note: Landing + 4 parts + summary; 19 command blocks and 25 output blocks match live evidence; manual
+    promotion, passing gate, automatic abort, recovery, post-promotion rollback and empty/NaN guards verified;
+    validators pass
 - key: section-050/module-03/playground
   kind: playground
   what: 'playground for module 3: Automate Canary Analysis With Flagger'
-  status: pending
-  note: ''
+  status: done
+  note: 'Booted 2026-11-01 Kubernetes 1.35.8 / Istio 1.30.7 (1.31.x charts not published) / Flagger 1.45.0; apply lab-start inside init script'
 - key: section-050/module-03/course
   kind: course
   what: 'chapter for module 3: Automate Canary Analysis With Flagger'
-  status: pending
-  note: ''
+  status: done
+  note: 'Landing + 3 parts + summary; promotion, rollback at 88.04% and fix verified live'
 - key: section-050/quiz
   kind: quiz
   what: 'knowledge check for section-050: Progressive Delivery'
-  status: pending
-  note: ''
+  status: done
+  note: '9 questions, quiz.yaml'
 - key: section-050/capstone
   kind: capstone
   what: 'capstone lab: Progressive Delivery Capstone'
-  status: pending
+  status: done
+  note: 'astrona test passed; unsolved start scores 0'
+- key: section-030/module-03/playground
+  kind: playground
+  what: 'playground for module 3: Automate Image Updates With Flux'
+  status: done
   note: ''
+- key: section-030/module-03/course
+  kind: course
+  what: 'chapter for module 3: Automate Image Updates With Flux'
+  status: done
+  note: ''
+- key: section-040/module-03/playground
+  kind: playground
+  what: 'playground for module 3: Run CI Workflows With Argo Workflows'
+  status: done
+  note: ''
+- key: section-040/module-03/course
+  kind: course
+  what: 'chapter for module 3: Run CI Workflows With Argo Workflows'
+  status: done
+  note: ''
+- key: section-050/module-04/playground
+  kind: playground
+  what: 'playground for module 4: Shift Canary Traffic With Argo Rollouts And A Traffic Router'
+  status: done
+  note: ''
+- key: section-050/module-04/course
+  kind: course
+  what: 'chapter for module 4: Shift Canary Traffic With Argo Rollouts And A Traffic Router'
+  status: done
+  note: ''
+- key: section-060/module-01/playground
+  kind: playground
+  what: 'playground for module 1: Deliver Infrastructure Objects With Crossplane And GitOps'
+  status: done
+  note: ''
+- key: section-060/module-01/course
+  kind: course
+  what: 'chapter for module 1: Deliver Infrastructure Objects With Crossplane And GitOps'
+  status: done
+  note: ''
+- key: section-060/quiz
+  kind: quiz
+  what: 'knowledge check for section-060: Infrastructure Deployment Through GitOps'
+  status: done
+  note: '7 questions, quiz.yaml'
+- key: section-060/capstone
+  kind: capstone
+  what: 'capstone lab: Infrastructure Deployment Through GitOps Capstone'
+  status: done
+  note: 'astrona test passed; unsolved start scores 0'
+- key: section-010/module-01/lab
+  kind: lab
+  what: 'graded lab for section-010 module 01'
+  status: done
+  note: 'astrona test 2/2 passed; Kustomize troubleshooting lab, mission added to part 4'
+- key: section-020/module-01/lab
+  kind: lab
+  what: 'graded lab for section-020 module 01'
+  status: done
+  note: 'astrona test passed'
+- key: section-020/module-02/lab
+  kind: lab
+  what: 'graded lab for section-020 module 02'
+  status: done
+  note: 'astrona test passed'
+- key: section-020/module-03/lab
+  kind: lab
+  what: 'graded lab for section-020 module 03'
+  status: done
+  note: 'astrona test passed'
+- key: section-030/module-01/lab
+  kind: lab
+  what: 'graded lab for section-030 module 01'
+  status: done
+  note: 'astrona test 2/2 passed'
+- key: section-030/module-02/lab
+  kind: lab
+  what: 'graded lab for section-030 module 02'
+  status: done
+  note: 'astrona test 2/2 passed'
+- key: section-030/module-03/lab
+  kind: lab
+  what: 'graded lab for section-030 module 03'
+  status: done
+  note: 'astrona test 2/2 passed'
+- key: section-040/module-01/lab
+  kind: lab
+  what: 'graded lab for section-040 module 01'
+  status: done
+  note: 'astrona test passed; unsolved start scores 0'
+- key: section-040/module-02/lab
+  kind: lab
+  what: 'graded lab for section-040 module 02'
+  status: done
+  note: 'astrona test passed; unsolved start scores 0'
+- key: section-040/module-03/lab
+  kind: lab
+  what: 'graded lab for section-040 module 03'
+  status: done
+  note: 'astrona test passed; unsolved start scores 0'
+- key: section-050/module-01/lab
+  kind: lab
+  what: 'graded lab for section-050 module 01'
+  status: done
+  note: 'astrona test 2/2; unsolved start fails'
+- key: section-050/module-02/lab
+  kind: lab
+  what: 'graded lab for section-050 module 02'
+  status: done
+  note: 'astrona test 2/2; unsolved start fails'
+- key: section-050/module-03/lab
+  kind: lab
+  what: 'graded lab for section-050 module 03'
+  status: done
+  note: 'astrona test 2/2; unsolved start fails'
+- key: section-050/module-04/lab
+  kind: lab
+  what: 'graded lab for section-050 module 04'
+  status: done
+  note: 'astrona test 2/2; unsolved start fails'
+- key: section-060/module-01/lab
+  kind: lab
+  what: 'graded lab for section-060 module 01'
+  status: done
+  note: 'astrona test 2/2; unsolved start fails'
 - key: course/final-quiz
   kind: quiz
-  what: final domain quiz across every section
-  status: pending
-  note: ''
+  what: 'final domain quiz across every section'
+  status: done
+  note: '20 questions, sections/final-domain-quiz.yaml'

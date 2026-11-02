@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Plumbing: put Helm 4.3.0 on the PATH if it is missing, then install
-#   1. Istio 1.31.1 (base and istiod, no gateways) from the Istio Helm charts,
+#   1. Istio 1.30.7 (base and istiod, no gateways) from the Istio Helm charts,
 #   2. Istio's Prometheus add-on (the Prometheus Flagger queries),
 #   3. Flagger 1.45.0 for the Istio provider in istio-system,
 #   4. the Flagger load tester 0.39.0 in starfleet.
 set -euo pipefail
 HELM_VERSION="v4.3.0"
-ISTIO_VERSION="1.31.1"
+ISTIO_VERSION="1.30.7"
 BIN_DIR="/usr/local/bin"
 [ -w "$BIN_DIR" ] || BIN_DIR="$HOME/.local/bin"
 mkdir -p "$BIN_DIR"
@@ -19,6 +19,9 @@ if ! command -v helm >/dev/null 2>&1; then
   curl -fsSL "https://get.helm.sh/helm-${HELM_VERSION}-${OS}-${ARCH}.tar.gz" | tar -xz -C "$WORK"
   install -m 0755 "$WORK/${OS}-${ARCH}/helm" "$BIN_DIR/helm"
 fi
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Starting workloads first: the namespace must exist before Istio injection is turned on.
+kubectl apply -f "$SCRIPT_DIR/../manifests/lab-start.yaml" >/dev/null
 ISTIO_REPO="https://istio-release.storage.googleapis.com/charts"
 helm upgrade --install istio-base base --repo "$ISTIO_REPO" --version "$ISTIO_VERSION" \
   --namespace istio-system --create-namespace --wait

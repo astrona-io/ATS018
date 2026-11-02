@@ -4,29 +4,17 @@ The `scout-deploy` repository is private. Flux needs to fetch it before it can r
 
 ## Install and check the controllers
 
-The playground already installed Flux 2.9.6. Repeating the pinned install makes the installation command concrete without creating a second installation. `flux install` applies controller Deployments and custom resource definitions. A custom resource definition adds a new kind of object to the Kubernetes application programming interface (API).
+The playground already installed Flux 2.9.6 with the pinned release manifest. That manifest applies the controller Deployments and the custom resource definitions. A custom resource definition adds a new kind of object to the Kubernetes application programming interface (API).
 
 <!-- astrona:playground:renew -->
 
-Run these commands on your machine against the playground:
+Run this command on your machine against the playground:
 
 ```sh
-flux install --version=v2.9.6
 flux check
 ```
 
-The install ends with this output, shortened to its readiness checks:
-
-```text
-◎ verifying installation
-✔ helm-controller: deployment ready
-✔ kustomize-controller: deployment ready
-✔ notification-controller: deployment ready
-✔ source-controller: deployment ready
-✔ install finished
-```
-
-`flux check` checks Kubernetes compatibility, installed controller versions and custom resource definitions. Its output is shortened here:
+The `flux check` command checks Kubernetes compatibility, installed controller versions and custom resource definitions. Its output is shortened here:
 
 ```text
 ► checking prerequisites

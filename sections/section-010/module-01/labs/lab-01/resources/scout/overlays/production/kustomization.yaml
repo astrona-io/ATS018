@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: starfleet-production
+resources:
+  - ../../base
+labels:
+  - pairs:
+      environment: production
+replicas:
+  - name: scout
+    count: 3
+patches:
+  - target:
+      kind: Deployment
+      name: scout
+      namespace: starfleet-production
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: 64Mi
+      - op: add
+        path: /spec/template/spec/containers/0/resources/limits
+        value:
+          memory: 128Mi

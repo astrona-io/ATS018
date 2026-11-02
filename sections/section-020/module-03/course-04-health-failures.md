@@ -110,3 +110,27 @@ You can now follow a `Degraded` application from Argo CD's health message to the
 > - **Stopping at Argo CD's health message.** It says what failed; the pod events and logs say why.
 > - **Fixing the Deployment with `kubectl`.** Self-heal reverts it within seconds. Commit the fix.
 > - **Waiting ten minutes for `Degraded`.** Without a shorter `progressDeadlineSeconds`, a failed rollout stays `Progressing` for the default ten minutes.
+
+## Your mission: Fix Broken Argo CD Applications
+
+You can now read where Argo CD reports a problem, tell a sync failure from a health failure, and decide whether the fix belongs in Git or in the `Application`. The mission gives you three broken `Applications`: a wrong path, a manifest the API server rejects and a missing image tag. You fix each one and prove it is `Synced` and `Healthy`.
+
+Pause the playground first, so it does not compete for memory with the lab cluster:
+
+```sh
+astrona stop ats-018-playground-020-03
+```
+
+Start the lab and submit your work:
+
+```sh
+astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-020/module-03/labs/lab-01
+astrona submit -c sections/section-020/module-03/labs/lab-01
+```
+
+When you finish, remove the lab and resume the playground:
+
+```sh
+astrona destroy ats-018-lab-020-03
+astrona start ats-018-playground-020-03
+```

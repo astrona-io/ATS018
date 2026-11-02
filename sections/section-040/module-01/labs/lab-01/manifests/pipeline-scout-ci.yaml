@@ -1,0 +1,33 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: scout-ci
+  namespace: starfleet
+spec:
+  params:
+    - name: repo-url
+      type: string
+      default: http://gitea-http.gitea.svc:3000/starfleet/scout-app.git
+  workspaces:
+    - name: shared
+  tasks:
+    - name: fetch-source
+      taskRef:
+        name: fetch-source
+      params:
+        - name: url
+          value: $(params.repo-url)
+      workspaces:
+        - name: source
+          workspace: shared
+    - name: run-tests
+      runAfter:
+        - fetch-source
+      taskRef:
+        name: run-tests
+      workspaces:
+        - name: source
+          workspace: shared
+  results:
+    - name: version
+      value: $(tasks.run-tests.results.version)

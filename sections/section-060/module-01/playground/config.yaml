@@ -1,0 +1,72 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Deliver Infrastructure Objects With Crossplane And GitOps (PLAYGROUND) —
+# playground environment. Crossplane 2.4.3 (core and RBAC manager only), Argo CD
+# 3.5.4, Flux 2.9.6 (source and kustomize controllers) and a private Git
+# repository (in-cluster Gitea, plumbing only) named platform-infra. No
+# Provider, Function, XRD or Composition is installed, on purpose. No task, no
+# grading.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-018-playground-060-01
+  docs:
+    guide: docs/overview.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - curlimages/curl:8.22.0
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - gitea/gitea:28.1.0-rootless
+      - quay.io/argoproj/argocd:v3.5.4
+      - public.ecr.aws/docker/library/redis:8.2.3-alpine
+  portForwards:
+    - name: argocd
+      description: "Argo CD API server and web page"
+      namespace: argocd
+      resource: svc/argocd-server
+      targetPort: 443
+      hostPort: 8080
+      scheme: https
+    - name: gitea
+      description: "The Git server (git over HTTP)"
+      namespace: gitea
+      resource: svc/gitea-http
+      targetPort: 3000
+      hostPort: 3000
+      scheme: http
+
+bootstrap:
+  init:
+    - name: lab-start
+      description: "Creates the namespaces and the shuttle client"
+      type: file
+      source: bootstrap/00-lab-start.sh
+    - name: install-gitea
+      description: "Starts the in-cluster Git server"
+      type: file
+      source: bootstrap/01-install-gitea.sh
+    - name: install-argocd
+      description: "Installs Argo CD 3.5.4 (non-HA, without Dex and notifications)"
+      type: file
+      source: bootstrap/02-install-argocd.sh
+    - name: install-crossplane
+      description: "Installs Crossplane 2.4.3 (core and RBAC manager only)"
+      type: file
+      source: bootstrap/03-install-crossplane.sh
+    - name: install-flux
+      description: "Installs the Flux 2.9.6 source and kustomize controllers"
+      type: file
+      source: bootstrap/04-install-flux.sh
+    - name: seed
+      description: "Pushes the platform-infra repository into Git"
+      type: file
+      source: bootstrap/05-seed.sh
+  waitFor:
+    - resource: deploy/shuttle
+      namespace: starfleet
+
+teardown:
+  keepCluster: false

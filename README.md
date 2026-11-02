@@ -16,7 +16,7 @@ Each section ends with a **capstone lab** combining its modules and a knowledge-
 
 [`astrona.yaml`](astrona.yaml) is the manifest: every section, module, reading, playground, lab and capstone in the order they are meant to be taken.
 
-Everything targets **kind 0.33.0**, **kind_node_image kindest/node:v1.35.8**, **kubernetes 1.35**, **kustomize 5.7.1 (embedded in kubectl 1.35)**, **helm 4.3.0 (bootstrap plumbing only, not taught)**, **argocd 3.5.4**, **flux 2.9.6**, **tekton_pipelines 1.17.0**, **tekton_triggers 0.36.4**, **tkn 0.46.1**, **argo_rollouts 1.10.0**, **flagger 1.45.0**, **istio 1.31.1**, **kube_prometheus_stack_chart 92.3.0**, **gitea 28.1.0-rootless (plumbing only, not taught)**, **podinfo 6.15.0**, **go_httpbin 2.25.0** on `kind`.
+Everything targets **kind 0.33.0**, **kind_node_image kindest/node:v1.35.8**, **kubernetes 1.35**, **kustomize 5.7.1 (embedded in kubectl 1.35)**, **helm 4.3.0 (bootstrap plumbing only, not taught)**, **argocd 3.5.4**, **flux 2.9.6**, **tekton_pipelines 1.17.0**, **tekton_triggers 0.36.4**, **tkn 0.46.1**, **argo_rollouts 1.10.0**, **flagger 1.45.0**, **istio 1.30.7**, **kube_prometheus_stack_chart 92.3.0**, **gitea 28.1.0-rootless (plumbing only, not taught)**, **podinfo 6.15.0**, **go_httpbin 2.25.0** on `kind`.
 
 ---
 
@@ -26,9 +26,10 @@ Everything targets **kind 0.33.0**, **kind_node_image kindest/node:v1.35.8**, **
 | --- | --- | --- | --- |
 | [010](sections/section-010) | Packaging Applications For GitOps | 1 | Implementing GitOps Workflows for Application and Infrastructure Deployment |
 | [020](sections/section-020) | Continuous Delivery With Argo CD | 3 | Implementing GitOps Workflows for Application and Infrastructure Deployment |
-| [030](sections/section-030) | Continuous Delivery With Flux | 2 | Implementing GitOps Workflows for Application and Infrastructure Deployment |
-| [040](sections/section-040) | Continuous Integration Pipelines With Tekton | 2 | Building and Configuring CI/CD Pipelines Integrated with Kubernetes |
-| [050](sections/section-050) | Progressive Delivery | 3 | Deploying Applications Using Progressive Delivery Strategies (for example Blue/Green or Canary) |
+| [030](sections/section-030) | Continuous Delivery With Flux | 3 | Implementing GitOps Workflows for Application and Infrastructure Deployment |
+| [040](sections/section-040) | Continuous Integration Pipelines (Tekton, Argo Workflows and Events) | 3 | Building and Configuring CI/CD Pipelines Integrated with Kubernetes |
+| [050](sections/section-050) | Progressive Delivery | 4 | Deploying Applications Using Progressive Delivery Strategies (for example Blue/Green or Canary) |
+| [060](sections/section-060) | Infrastructure Deployment Through GitOps (Crossplane) | 1 | Implementing GitOps Workflows for Application and Infrastructure Deployment |
 
 ---
 

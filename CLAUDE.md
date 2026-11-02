@@ -249,8 +249,9 @@ section is only true for this one.
   | 010 | Packaging Applications For GitOps (Kustomize only) | Implementing GitOps Workflows |
   | 020 | Continuous Delivery With Argo CD | Implementing GitOps Workflows |
   | 030 | Continuous Delivery With Flux | Implementing GitOps Workflows |
-  | 040 | Continuous Integration Pipelines With Tekton | Building and Configuring CI/CD Pipelines |
+  | 040 | Continuous Integration Pipelines (Tekton, Argo Workflows and Events) | Building and Configuring CI/CD Pipelines |
   | 050 | Progressive Delivery | Deploying Applications Using Progressive Delivery Strategies |
+  | 060 | Infrastructure Deployment Through GitOps (Crossplane) | Implementing GitOps Workflows |
 
   The full design (modules, objectives, playground environments, capstones)
   is in `.astrona/blueprint.yaml`.
@@ -268,7 +269,11 @@ section is only true for this one.
   | Tekton Pipelines / Triggers / `tkn` | 1.17.0 / 0.36.4 / 0.46.1 |
   | Argo Rollouts | 1.10.0 |
   | Flagger | 1.45.0 |
-  | Istio (Flagger module only) | 1.31.1 |
+  | Istio (Flagger module only) | 1.30.7 |
+  | Argo Workflows / Argo Events | v4.1.6 / v1.9.11 (NATS 2.10.29 JetStream EventBus) |
+  | Argo Rollouts Gateway API plugin | argoproj-labs/gatewayAPI v0.17.0 (Envoy Gateway v1.9.2 from the kind addon) |
+  | Crossplane / provider-kubernetes / function-patch-and-transform | 2.4.3 / v1.4.1 / v0.11.2 |
+  | Flux image controllers (image-reflector, image-automation) | v1.2.5 (source and kustomize v1.9.6, notification v1.9.4) |
   | kube-prometheus-stack chart | 92.3.0 |
   | Gitea (plumbing only, not taught) | `gitea/gitea:28.1.0-rootless` |
   | podinfo / go-httpbin | 6.15.0 / 2.25.0 |
@@ -384,13 +389,37 @@ content: `starfleet/scout-deploy` (Kustomize base and overlays, Helm values),
   - Helm 4.3.0 (bootstrap only, checked 2026-10-10): `--wait` defaults to
     `hookOnly` when omitted, `--atomic` is now `--rollback-on-failure`, and
     new installs use server-side apply by default.
-  - podinfo's metric names, labels and its option for returning random
-    errors, before writing PromQL or an `AnalysisTemplate`.
+  - podinfo 6.15.0 metrics and faults (verified 2026-10-12):
+    `http_requests_total` has only a `status` application label. The
+    histogram's `http_request_duration_seconds_count` also has `method`
+    and `path`; requests to `/` use `path="root"`. `--random-error` returns
+    400, 409 or 500 responses and affects the application-port `/metrics`
+    and `/readyz` too. Use `--port-metrics=9797` for a separate scrape
+    endpoint without injected errors. Count 2xx responses as success when
+    checking this fault. A PodMonitor's `podTargetLabels` copies
+    `rollouts-pod-template-hash` as `rollouts_pod_template_hash` in Prometheus.
   - podinfo chart 6.15.0 readiness (verified 2026-10-10): its probe path
     is fixed at `/readyz`; a `readinessProbe.httpGet.path` value has no
     effect. Use `faults.unready: true` for the deliberate Flux upgrade
     failure, then `false` to repair it. The failed upgrade leaves the
     previous successful revision in release history as `deployed`.
+  - Argo Rollouts 1.10.0 (verified 2026-10-12): initial creation skips
+    canary steps and establishes the stable ReplicaSet. Without a traffic
+    router, weight uses replica counts rather than measured requests.
+    `promote` first clears `spec.paused` when explicitly paused; a canary
+    step pause can require another promotion. Abort leaves the desired
+    image unchanged and keeps stable pods serving. A new template clears
+    abort and starts a release; `retry rollout` retries the same template.
+    After Healthy, allow terminating pods and Service endpoints to settle
+    before checking the response version.
+  - Argo Rollouts 1.10.0 blue/green (verified 2026-10-12): a passing
+    pre-promotion AnalysisRun still pauses when `autoPromotionEnabled` is
+    false. With `failureLimit: 1`, the second failed measurement aborts
+    before the third scheduled sample. Pre-promotion failure retains the
+    stable active selector; post-promotion failure switches it back. Keep
+    old replicas available for the entire post-promotion analysis window.
+    Empty Prometheus results fail the guarded condition used here; NaN
+    satisfies neither comparison and yields Inconclusive, not Successful.
   - Which Flagger provider settings and bundled Prometheus the Istio
     install of Flagger 1.45 uses.
   - The `kubectl` embedded Kustomize version on Kubernetes 1.35.
@@ -492,7 +521,8 @@ this order:
 - Flux: `flux-gitrepository`, `flux-kustomization`, `helmrelease`,
   `helmrelease-remediation`, `depends-on`, `reconcile`
 - Tekton: `tekton-task`, `tekton-pipeline`, `workspaces`, `params-results`,
-  `resolvers`, `tekton-triggers`, `eventlistener`, `webhook`
+  `resolvers`, `tekton-triggers`, `eventlistener`, `webhook`, `argo-workflows`,
+  `argo-events`, `workflowtemplate`
 - Hand-off: `image-tag-update`, `git-credentials`, `container-registry`
 - Progressive delivery: `argo-rollouts`, `canary`, `blue-green`,
   `analysistemplate`, `promotion`, `abort-rollback`, `flagger`, `istio`,

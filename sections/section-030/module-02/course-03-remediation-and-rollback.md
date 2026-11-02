@@ -160,3 +160,27 @@ You can now set a retry budget, distinguish recovery from successful delivery, a
 > - **Counting `retries: 1` as one total attempt.** It permits one retry after the first attempt.
 > - **Expecting install remediation to roll back.** A failed first install has no good revision to restore.
 > - **Resetting failure counters without fixing the fault.** Reset permits another attempt; it does not repair values.
+
+## Your mission: Repair A Failing HelmRelease And Add Remediation
+
+You can now read why a HelmRelease upgrade failed, configure rollback remediation and tell recovery apart from a successful delivery. The mission gives you a `scout` HelmRelease whose last upgrade failed. You repair its values, add upgrade remediation and prove the `shuttle` pod gets a response from the chart.
+
+Pause the playground, then start the lab and read the task:
+
+```sh
+astrona stop ats-018-playground-030-02
+astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-030/module-02/labs/lab-01
+```
+
+When you are done, grade your work:
+
+```sh
+astrona submit -c sections/section-030/module-02/labs/lab-01
+```
+
+Then remove the lab and start the playground again:
+
+```sh
+astrona destroy ats-018-lab-030-02
+astrona start ats-018-playground-030-02
+```

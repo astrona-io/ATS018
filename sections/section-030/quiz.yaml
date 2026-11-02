@@ -1,0 +1,189 @@
+schema_version: 1
+kind: question_bank
+id: ats018-section-030-quiz
+course_id: ATS018
+exam_code: CNPE
+status: draft
+provenance: "Original practice material written for this course; not official exam questions."
+scope:
+  type: section
+  id: section-030
+  title: "Continuous Delivery With Flux"
+questions:
+  - id: ats018-030-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "State what a GitRepository `Ready` condition proves."
+    source_readings:
+      - sections/section-030/module-01/course-01-fetch-git-with-a-flux-source.md
+    prompt: "A `GitRepository` is `Ready`, but requests from the client return the old version. What does `Ready` prove?"
+    options:
+      - id: a
+        text: "Only that the source controller fetched the repository and published an artifact"
+        explanation: "Correct. The fetch worked. The Kustomization and the application are separate questions."
+      - id: b
+        text: "That the application runs the new commit"
+        explanation: "The Kustomization applies the files, and only a request proves the behaviour."
+      - id: c
+        text: "That the Kustomization applied every object"
+        explanation: "The Kustomization has its own Ready condition."
+      - id: d
+        text: "That the Deployment is healthy"
+        explanation: "Health belongs to the Kustomization with `wait: true` and to the application itself."
+    correct_option: a
+    explanation: "Source readiness proves the fetch. A request from the client proves the behaviour."
+  - id: ats018-030-q02
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Order Kustomizations with `dependsOn`."
+    source_readings:
+      - sections/section-030/module-01/course-02-apply-paths-and-order-dependencies.md
+    prompt: "A Kustomization sets `targetNamespace: starfleet`, but the Namespace does not exist and apply fails. What is the right fix?"
+    options:
+      - id: a
+        text: "Add `createNamespace: true` to `targetNamespace`"
+        explanation: "`targetNamespace` changes the destination of namespaced objects and does not create it."
+      - id: b
+        text: "Let a dependency Kustomization create the Namespace and add `dependsOn` for it"
+        explanation: "Correct. `targetNamespace` does not create a Namespace, and `dependsOn` waits for the dependency's Ready condition."
+      - id: c
+        text: "Suspend the Kustomization"
+        explanation: "Suspending pauses reconciliation and creates nothing."
+      - id: d
+        text: "Set `prune: true`"
+        explanation: "Pruning deletes objects; it does not create a Namespace."
+    correct_option: b
+    explanation: "`dependsOn` waits for the Ready condition of another Kustomization, so the Namespace can exist first."
+  - id: ats018-030-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Suspend and resume a Kustomization."
+    source_readings:
+      - sections/section-030/module-01/course-03-reconcile-suspend-and-resume.md
+    prompt: "A Kustomization is suspended and the repository has a new commit. After you resume it, you want a fresh fetch before apply. Which flag does that?"
+    options:
+      - id: a
+        text: "`--prune`"
+        explanation: "Pruning deletes objects that left the rendered files. It does not request a fresh fetch."
+      - id: b
+        text: "`--wait`"
+        explanation: "`wait` adds health checks to readiness. It does not request a fresh fetch."
+      - id: c
+        text: "`--with-source`"
+        explanation: "Correct. Resuming restores reconciliation, and `--with-source` requests a fresh fetch before applying."
+      - id: d
+        text: "`--force`"
+        explanation: "Forcing an apply does not request a fresh fetch."
+    correct_option: c
+    explanation: "Suspension pauses reconciliation while the objects keep running. `flux resume ... --with-source` also fetches the source again."
+  - id: ats018-030-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Read HelmRelease values order."
+    source_readings:
+      - sections/section-030/module-02/course-02-values-and-release-history.md
+    prompt: "A HelmRelease has `valuesFrom` with a ConfigMap and also inline `values` for the same key. Which value wins?"
+    options:
+      - id: a
+        text: "The ConfigMap value"
+        explanation: "The ConfigMap supplies shared defaults, and inline values override them."
+      - id: b
+        text: "The chart default only"
+        explanation: "Chart defaults are the lowest level."
+      - id: c
+        text: "Neither; Flux reports a conflict"
+        explanation: "Flux merges the sources in a fixed order."
+      - id: d
+        text: "The inline value"
+        explanation: "Correct. Inline values override values loaded through `valuesFrom`."
+    correct_option: d
+    explanation: "Inline values override `valuesFrom`. The helm controller renders the merged values and changes the workload."
+  - id: ats018-030-q05
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Read a HelmRelease that remediated."
+    source_readings:
+      - sections/section-030/module-02/course-03-remediation-and-rollback.md
+    prompt: "A HelmRelease shows `Remediated` as true and client requests succeed, but `Ready` is false. Why?"
+    options:
+      - id: a
+        text: "The current desired values still fail, and the rollback keeps the older successful release running"
+        explanation: "Correct. `Ready` stays false while the desired values fail, even after a rollback."
+      - id: b
+        text: "Flux has a bug; `Ready` ignores remediation"
+        explanation: "The behaviour is by design: `Ready` describes the desired state."
+      - id: c
+        text: "The source is not fetched"
+        explanation: "Source readiness is a separate condition."
+      - id: d
+        text: "The chart version is too old"
+        explanation: "A chart version does not explain a failed upgrade with a working rollback."
+    correct_option: a
+    explanation: "Fix the desired values first. A reset clears failure counters; it does not repair the configuration."
+  - id: ats018-030-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Describe upgrade remediation."
+    source_readings:
+      - sections/section-030/module-02/course-03-remediation-and-rollback.md
+    prompt: "What can upgrade remediation do for a failed `HelmRelease` upgrade?"
+    options:
+      - id: a
+        text: "Delete the HelmRepository"
+        explanation: "Remediation acts on the release, not on the source."
+      - id: b
+        text: "Roll back to the last successful configuration"
+        explanation: "Correct. Upgrade remediation can roll back, and the retries count extra attempts."
+      - id: c
+        text: "Edit the values in Git"
+        explanation: "Remediation rolls back a release. It does not change the values in Git."
+      - id: d
+        text: "Increase the chart version"
+        explanation: "Remediation does not choose a new chart version."
+    correct_option: b
+    explanation: "Install remediation removes a failed install before retrying. Upgrade remediation can roll back to the last successful configuration."
+  - id: ats018-030-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Name the three image automation objects and their jobs."
+    source_readings:
+      - sections/section-030/module-03/course-01-select-a-tag.md
+      - sections/section-030/module-03/course-02-commit-the-tag-to-git.md
+    prompt: "Which Flux object turns the tag chosen by a policy into a commit in Git?"
+    options:
+      - id: a
+        text: "`ImageRepository`"
+        explanation: "It scans a registry and stores the tag list in its status."
+      - id: b
+        text: "`ImagePolicy`"
+        explanation: "It chooses one tag and records it. It never edits Git."
+      - id: c
+        text: "`ImageUpdateAutomation`"
+        explanation: "Correct. It clones the repository, replaces marked values and pushes a commit."
+      - id: d
+        text: "`HelmRelease`"
+        explanation: "It installs a chart and does not write to Git."
+    correct_option: c
+    explanation: "`ImageRepository` scans, `ImagePolicy` chooses, `ImageUpdateAutomation` writes the commit."
+  - id: ats018-030-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Read an `ImagePolicy` that is not Ready."
+    source_readings:
+      - sections/section-030/module-03/course-01-select-a-tag.md
+    prompt: "An `ImagePolicy` is not Ready with the message `unable to determine latest version from provided list`, but its `ImageRepository` is Ready. What is the cause?"
+    options:
+      - id: a
+        text: "The registry is not reachable"
+        explanation: "Then the `ImageRepository` would not be Ready."
+      - id: b
+        text: "The `ImageUpdateAutomation` has no write access"
+        explanation: "Write access matters later, when the automation pushes."
+      - id: c
+        text: "The Deployment has no marker comment"
+        explanation: "Markers are read by the automation, not by the policy."
+      - id: d
+        text: "The semver range matches no tag in the list"
+        explanation: "Correct. The scan worked, and no tag satisfies the range."
+    correct_option: d
+    explanation: "An `ImagePolicy` picks the highest version inside its range. A range that no tag satisfies leaves it not Ready while the scan stays Ready."

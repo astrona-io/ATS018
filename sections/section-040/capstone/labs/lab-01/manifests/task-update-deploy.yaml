@@ -1,0 +1,34 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: update-deploy
+  namespace: starfleet
+spec:
+  params:
+    - name: version
+      type: string
+      description: The image tag to deploy
+    - name: url
+      type: string
+      default: http://gitea-http.gitea.svc:3000/starfleet/scout-deploy.git
+  results:
+    - name: commit
+      description: The commit ID pushed to the GitOps repository
+  steps:
+    - name: commit-tag
+      image: alpine/git:2.52.0
+      workingDir: /tmp/scout-deploy
+      script: |
+        #!/bin/sh
+        set -eu
+        git clone --quiet "$(params.url)" .
+        sed -i "s/newTag: .*/newTag: $(params.version)/" kustomization.yaml
+        if git diff --quiet; then
+          echo "scout-deploy already uses $(params.version)"
+        else
+          git -c user.name=tekton -c user.email=tekton@starfleet.local \
+            commit --quiet -am "Deploy scout $(params.version)"
+          git push --quiet origin HEAD:main
+          echo "Pushed $(git rev-parse --short HEAD): Deploy scout $(params.version)"
+        fi
+        printf '%s' "$(git rev-parse HEAD)" > "$(results.commit.path)"

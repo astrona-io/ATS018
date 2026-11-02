@@ -1,41 +1,36 @@
 # Roll Out A Canary With Argo Rollouts
 
-<!-- astrona:playground -->
-> [!NOTE]
-> This module has a playground — a throwaway environment to run the commands in.
-> ```bash
-> astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-050/module-01/playground
-> ```
+A Kubernetes Deployment replaces old pods as new pods become ready. That proves the containers can start, but it gives you no planned stop to test a small release before replacing the rest. A canary release sends some traffic to a new version while a stable version still serves the remaining traffic.
 
-<!-- TODO(build): opening framing — what this module settles, and the contrast that sharpens its boundary. -->
+Argo Rollouts adds those stops. Its `Rollout` resource replaces a Deployment and tells the Argo Rollouts controller how to change the replica counts. A replica is one copy of a pod. A ReplicaSet is the Kubernetes resource that keeps those copies running from one pod template.
+
+Keep one sentence in mind for this module: **without a traffic router, Argo Rollouts approximates canary weight by changing replica counts.** A traffic router is a component that controls the share of requests sent to each version. This playground has one Service and no traffic router, so the replica split matters more than any short request sample.
+
+The module has four parts. **Convert A Deployment Into A Rollout** replaces the starting Deployment and establishes a stable version. **Canary Steps And Replica Weights** changes the image, watches a pause and checks both versions through one Service. **Promote And Pause A Canary** advances the steps and tests an explicit pause. **Abort And Retry A Release** stops an invalid image, proves the stable version still serves requests, and retries a corrected release.
 
 ## Learning objectives
 
-- Convert a Deployment into a Rollout with canary steps (setWeight and pause)
-- Follow a canary with kubectl argo rollouts get rollout --watch
-- Promote, pause and abort a rollout and name the ReplicaSet that serves traffic
-- Explain how Argo Rollouts approximates a weight with replica counts when no traffic router is configured
-- Retry an aborted rollout after the image is fixed
+After this module you can:
+
+- Convert a Deployment into a Rollout with `setWeight` and `pause` steps.
+- Follow a release with `kubectl argo rollouts get rollout --watch`.
+- Promote, pause and abort a release, and identify the ReplicaSet serving traffic.
+- Explain why replica counts approximate a weight without a traffic router.
+- Correct an image and retry an aborted release.
 
 ## Before you start
 
-<!-- TODO(build): assumed knowledge, and what the playground already provides. -->
+You need Kubernetes basics: namespaces, Deployments, Services, labels, selectors and readiness probes. A readiness probe is a check that tells Kubernetes whether a pod can receive Service traffic. You also need `kubectl get`, `kubectl apply` and `kubectl exec`.
 
-## Outline
+The playground runs Kubernetes 1.35.8 with the Argo Rollouts 1.10.0 controller in `argo-rollouts`. Use `kubectl` 1.35.8 and the `kubectl-argo-rollouts` plugin version 1.10.0 on your machine. A plugin is an executable that `kubectl` finds on your shell's `PATH`; this one provides the `kubectl argo rollouts` commands. The controller runs the releases in the cluster even when the plugin is closed.
 
-<!-- TODO(build): each beat below becomes a section of this module (or a deep-dive part via /astrona-course-deep-dive). Delete this Outline section once written. -->
+| Namespace | What is in it |
+| --- | --- |
+| `argo-rollouts` | The Argo Rollouts controller and its custom resource definitions |
+| `starfleet` | `scout`, a Deployment with five podinfo 6.14.0 replicas; the `scout` Service; and the `shuttle` request client |
 
-- Why a Deployment rolling update is not a canary
-- The Rollout resource and the canary strategy steps
-- The kubectl argo rollouts plugin and its status view
-- Promote, pause, abort and retry
-- Weights without a traffic router
+podinfo is a small web application that returns a JavaScript Object Notation (JSON) response with its version. The node already holds images 6.14.0 and 6.15.0. No Rollout, traffic router or metrics provider exists. No GitOps controller manages these objects, so you change them directly with `kubectl`. A GitOps controller reads desired state from Git and applies it to the cluster; in that environment, also record workload changes in Git.
 
-## Diagrams planned
+Write the manifest in a folder on your machine and keep the playground running while you read the parts. Every command uses the playground's Kubernetes context.
 
-<!-- TODO(build): mermaid `state` — Rollout phases (Progressing, Paused, Healthy, Degraded) through promote and abort -->
-<!-- TODO(build): mermaid `flowchart` — Stable and canary ReplicaSets behind one Service and the replica split per step -->
-
-<!-- playground provides: kind cluster with the Argo Rollouts 1.10.0 controller and the kubectl argo rollouts plugin. Namespace `starfleet` holds `scout` as a Deployment (podinfo 6.14.x) with 5 replicas and a Service, and `shuttle`. Deliberately absent: no Rollout, no traffic router, no metrics provider. -->
-
-<!-- module section-050/module-01 (Module 1) — stub written by /astrona-course-domain-scaffold, prose written by /astrona-course-domain-build. -->
+<!-- astrona:playground -->

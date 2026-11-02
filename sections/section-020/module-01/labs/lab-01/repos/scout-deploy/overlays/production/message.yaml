@@ -1,0 +1,12 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scout
+spec:
+  template:
+    spec:
+      containers:
+        - name: scout
+          env:
+            - name: PODINFO_UI_MESSAGE
+              value: production

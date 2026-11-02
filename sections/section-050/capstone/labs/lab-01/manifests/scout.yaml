@@ -1,0 +1,114 @@
+# scout as an Argo Rollouts canary with a background analysis that does not
+# work yet. The Rollout starts the AnalysisTemplate `scout-success` at step 1
+# but judges the stable template (podTemplateHashValue: Stable) instead of the
+# candidate, and the template queries path="/" while podinfo labels requests
+# to / with path="root".
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: scout
+  namespace: starfleet
+spec:
+  replicas: 4
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: scout
+  template:
+    metadata:
+      labels:
+        app: scout
+    spec:
+      containers:
+        - name: scout
+          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          command: ["./podinfo", "--port=9898", "--port-metrics=9797"]
+          env:
+            - name: PODINFO_UI_MESSAGE
+              value: stable
+          ports:
+            - name: http
+              containerPort: 9898
+            - name: metrics
+              containerPort: 9797
+          readinessProbe:
+            tcpSocket:
+              port: http
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+  strategy:
+    canary:
+      maxUnavailable: 0
+      analysis:
+        startingStep: 1
+        templates:
+          - templateName: scout-success
+        args:
+          - name: candidate-hash
+            valueFrom:
+              podTemplateHashValue: Stable
+      steps:
+        - setWeight: 25
+        - pause: {}
+        - setWeight: 50
+        - pause:
+            duration: 20s
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: scout-success
+  namespace: starfleet
+spec:
+  args:
+    - name: candidate-hash
+  metrics:
+    - name: success-rate
+      initialDelay: 45s
+      interval: 20s
+      count: 3
+      failureLimit: 1
+      successCondition: len(result) == 1 && result[0] >= 0.99
+      failureCondition: len(result) != 1 || result[0] < 0.99
+      provider:
+        prometheus:
+          address: http://kps-prometheus.monitoring.svc:9090
+          query: |
+            sum(rate(http_request_duration_seconds_count{namespace="starfleet",path="/",rollouts_pod_template_hash="{{args.candidate-hash}}",status=~"2.."}[2m]))
+            /
+            sum(rate(http_request_duration_seconds_count{namespace="starfleet",path="/",rollouts_pod_template_hash="{{args.candidate-hash}}"}[2m]))
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scout
+  namespace: starfleet
+  labels:
+    app: scout
+spec:
+  selector:
+    app: scout
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: scout
+  namespace: starfleet
+spec:
+  selector:
+    matchLabels:
+      app: scout
+  podTargetLabels:
+    - rollouts-pod-template-hash
+  podMetricsEndpoints:
+    - port: metrics
+      path: /metrics
+      interval: 15s
