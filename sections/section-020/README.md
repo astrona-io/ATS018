@@ -11,6 +11,7 @@ Argo CD is the primary GitOps controller in this course. The section teaches the
 
 - Create an Application that points at a Git repository path, a target revision and a destination namespace
 - Read the sync status and the health status of an Application with argocd app get and kubectl
+- Create a second Application from another Git branch into another namespace, and copy settings from an existing one
 - Turn on automated sync with prune and selfHeal and prove that a manual change in the cluster is reverted
 - Tell OutOfSync from Degraded on the same Application and name which component reports each
 - Register a private Git repository with a repository Secret

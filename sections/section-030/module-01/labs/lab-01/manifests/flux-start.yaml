@@ -29,3 +29,33 @@ spec:
   sourceRef:
     kind: GitRepository
     name: scout
+---
+# A second delivery of the same repository, with its own source. It works when
+# it is created. The bootstrap script then changes its state.
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: scout-production
+  namespace: flux-system
+spec:
+  interval: 1m
+  url: http://gitea-http.gitea.svc:3000/starfleet/scout-deploy.git
+  ref:
+    branch: main
+  secretRef:
+    name: scout-readonly
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: scout-production
+  namespace: flux-system
+spec:
+  interval: 1m
+  path: ./overlays/production
+  prune: true
+  wait: true
+  timeout: 2m
+  sourceRef:
+    kind: GitRepository
+    name: scout-production

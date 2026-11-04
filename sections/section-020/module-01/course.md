@@ -6,7 +6,7 @@ Argo CD reads a path in a Git repository, renders it with Kustomize or Helm, com
 
 Keep one sentence in mind for this module: **sync status says whether the cluster matches Git, and health status says whether what runs actually works.** The two are reported separately, by different checks, and an application can be perfectly in sync and still broken.
 
-The module has four parts. **GitOps And The Argo CD Components** explains the GitOps principles and the four Argo CD components that carry them out, and logs you in with the `argocd` command-line tool. **The Application Resource** writes the first `Application`, fixes a private repository it cannot read, and syncs it into a namespace that does not exist yet. **Sync Policy, Drift And Health** turns on automated sync with prune and self-heal, proves a manual change is reverted, and breaks the application in Git to show the difference between `OutOfSync` and `Degraded`. **Helm Charts As A Source** delivers the same service from a Helm chart with values set in the `Application`.
+The module has four parts. **GitOps And The Argo CD Components** explains the GitOps principles and the four Argo CD components that carry them out, and logs you in with the `argocd` command-line tool. **The Application Resource** writes the first `Application`, fixes a private repository it cannot read, syncs it into a namespace that does not exist yet, and creates a second `Application` from another Git branch. **Sync Policy, Drift And Health** turns on automated sync with prune and self-heal, proves a manual change is reverted, and breaks the application in Git to show the difference between `OutOfSync` and `Degraded`. **Helm Charts As A Source** delivers the same service from a Helm chart with values set in the `Application`.
 
 ## Learning objectives
 
@@ -14,6 +14,7 @@ After this module you can:
 
 - Create an `Application` that points at a Git repository path, a target revision and a destination namespace.
 - Read the sync status and the health status of an `Application` with `argocd app get` and `kubectl`.
+- Create a second `Application` from another Git branch into another namespace, with `argocd app create` and with YAML, and copy settings from an existing one with `argocd app get -o yaml`.
 - Register a private Git repository with a repository Secret.
 - Turn on automated sync with prune and self-heal, and prove that a manual change in the cluster is reverted.
 - Tell `OutOfSync` from `Degraded` on the same `Application`, and name which check reports each.

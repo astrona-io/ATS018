@@ -405,9 +405,9 @@ modules:
         task_kind: troubleshooting
         tags: [flux-gitrepository, flux-kustomization, depends-on, reconcile]
         learning_goals:
-          - Repair a GitRepository that follows a branch that does not exist
-          - Add a platform Kustomization and order the scout Kustomization after it with dependsOn
+          - Repair a GitRepository that follows a missing branch, then order the scout Kustomization after a new platform Kustomization with dependsOn
           - Deliver a change from Git and prove the shuttle pod receives it
+          - Find a suspended Kustomization, resume it with flux resume and prove its drift is corrected
         resources:
           - name: "Flux GitRepository"
             url: https://fluxcd.io/flux/components/source/gitrepositories/

@@ -42,8 +42,7 @@ items:
   kind: course
   what: 'chapter for module 1: Deploy An Application With Argo CD'
   status: done
-  note: landing + 4 parts + summary; Argo CD 3.x facts verified (annotation tracking, per-resource health
-    not in CR)
+  note: 'untested: built without booting 2026-11-04: the passage on a second Application from another branch; earlier: landing + 4 parts + summary; Argo CD 3.x facts verified (annotation tracking, per-resource health not in CR)'
 - key: section-020/module-02/playground
   kind: playground
   what: 'playground for module 2: Manage Many Applications With ApplicationSets'
@@ -262,7 +261,7 @@ items:
   kind: lab
   what: 'graded lab for section-030 module 01'
   status: done
-  note: 'astrona test 2/2 passed'
+  note: 'untested: built without booting 2026-11-04: start state now has a suspended Kustomization with drift and a third validator; the earlier version passed astrona test 2/2'
 - key: section-030/module-02/lab
   kind: lab
   what: 'graded lab for section-030 module 02'

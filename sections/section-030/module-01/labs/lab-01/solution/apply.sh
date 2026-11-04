@@ -68,3 +68,17 @@ for obj in gitrepository/scout kustomization/platform kustomization/scout; do
   kubectl -n flux-system annotate "$obj" --overwrite "reconcile.fluxcd.io/requestedAt=$STAMP"
 done
 kubectl -n flux-system wait kustomization/platform kustomization/scout --for=condition=Ready --timeout=180s
+
+# Resume the suspended Kustomization. This clears the same field as
+# `flux resume kustomization scout-production`; `astrona test` does not need the
+# flux command-line tool. Its Ready condition is stale until the controller
+# reconciles, so wait for the corrected value and the rollout instead.
+kubectl -n flux-system patch kustomization scout-production --type=merge -p '{"spec":{"suspend":false}}'
+for i in $(seq 1 90); do
+  live="$(kubectl -n starfleet-production get deploy scout -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="PODINFO_UI_MESSAGE")].value}')"
+  [[ "$live" == "production" ]] && break
+  sleep 2
+done
+[[ "$live" == "production" ]] || { echo "the drift was not corrected, live message is '$live'"; exit 1; }
+kubectl -n starfleet-production rollout status deployment/scout --timeout=180s
+kubectl -n flux-system wait kustomization/scout-production --for=condition=Ready --timeout=180s

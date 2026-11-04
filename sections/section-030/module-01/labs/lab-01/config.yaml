@@ -47,7 +47,7 @@ bootstrap:
       type: file
       source: bootstrap/03-seed.sh
     - name: flux-start
-      description: Creates the broken GitRepository and Kustomization
+      description: Creates the broken GitRepository and Kustomization and the rest of the starting Flux objects
       type: file
       source: bootstrap/04-seed-flux-objects.sh
   waitFor:
@@ -71,6 +71,10 @@ validation:
       description: The staging message changed in Git, Flux applied that exact commit and shuttle receives the new message
       type: file
       source: validation/validate-change-from-git.sh
+    - name: resumed-kustomization
+      description: No Kustomization in flux-system is suspended, all are Ready, and the drifted workload matches Git again
+      type: file
+      source: validation/validate-resumed-kustomization.sh
 
 teardown:
   keepCluster: false

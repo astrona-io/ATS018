@@ -228,6 +228,81 @@ scout-staging   Synced        Healthy
 
 `Synced` means the live objects match the commit, and `Healthy` means they work. The version and message come from the staging overlay in Git; nobody applied a manifest by hand.
 
+## A second Application from another branch
+
+Sometimes you want to run another branch next to staging, without touching `scout-staging`. A second `Application` does this. It points at the same repository with another `targetRevision` and deploys to another namespace.
+
+The overlay in this repository sets its own `namespace` in `kustomization.yaml`. A namespace in the rendered manifests wins over `destination.namespace`, so the new branch must change that line too. Clone the repository into a new folder and create the branch `candidate`:
+
+```sh
+git clone http://platform:starfleet-gitops@127.0.0.1:3000/starfleet/scout-deploy.git scout-deploy-candidate
+cd scout-deploy-candidate
+git switch -c candidate
+```
+
+In `overlays/staging/kustomization.yaml`, change `namespace: starfleet-staging` to `namespace: starfleet-candidate`. In `overlays/staging/message.yaml`, change `value: staging` to `value: candidate`. Then commit the two files and push the branch. The commands set the commit identity for this example:
+
+```sh
+git add overlays/staging
+git -c user.name=platform -c user.email=platform@starfleet.local commit -m "Move the candidate branch to its own namespace"
+git push origin candidate
+cd ..
+```
+
+The `argocd app create` command creates the `Application` from flags. The `--revision` flag sets `targetRevision`, and `--dest-namespace` sets `destination.namespace`. Create it, sync it and send a request to the new namespace:
+
+```sh
+argocd app create scout-candidate --project default --repo http://gitea-http.gitea.svc:3000/starfleet/scout-deploy.git --revision candidate --path overlays/staging --dest-server https://kubernetes.default.svc --dest-namespace starfleet-candidate --sync-option CreateNamespace=true
+argocd app sync scout-candidate
+argocd app wait scout-candidate --health
+kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.starfleet-candidate
+```
+
+The `message` field in the response is `candidate`, and `scout-staging` still serves `staging`.
+
+You do not have to type the settings of a new `Application` from memory. The `argocd` tool prints an existing one as YAML, so you can copy its settings:
+
+```sh
+argocd app get scout-staging -o yaml
+```
+
+The output has the whole object, including `status` and the `metadata` fields that the cluster sets. Copy only `spec`, and write `apiVersion`, `kind` and `metadata` yourself. Then change the values that make the new `Application` different: here `targetRevision` and `destination.namespace`. Save this as `application-scout-candidate.yaml`:
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: scout-candidate
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: http://gitea-http.gitea.svc:3000/starfleet/scout-deploy.git
+    targetRevision: candidate
+    path: overlays/staging
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: starfleet-candidate
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+```
+
+This YAML describes the same object as the flags did, so applying it changes no setting. `kubectl` can print a warning about a missing `last-applied-configuration` annotation, because the `argocd` tool created the object. It fixes that annotation by itself. Apply it:
+
+```sh
+kubectl apply -f application-scout-candidate.yaml
+```
+
+Then check the result, and delete this `Application` and the objects it created, because the rest of the module does not use them:
+
+```sh
+argocd app get scout-candidate
+argocd app delete scout-candidate -y
+```
+
+The output of `argocd app get` shows `candidate` under `Target` and `starfleet-candidate` under `Namespace`.
+
 You can now write an `Application`, give Argo CD access to a private repository, and read the three places a first deployment can fail: the `ComparisonError` condition from the repo server, the failed sync operation from the application controller, and the per-object messages. The application still only changes when someone runs `argocd app sync`. The open question is how to make Argo CD keep the cluster equal to Git on its own.
 
 ## Common pitfalls
@@ -238,3 +313,5 @@ You can now write an `Application`, give Argo CD access to a private repository,
 > - **A `repoURL` that differs from the Secret's `url`.** A missing `.git` or a different host name means the credentials do not apply.
 > - **Trusting `Healthy` while the sync status is `Unknown`.** With nothing rendered, there is nothing to be unhealthy. Read the conditions first.
 > - **Expecting Argo CD to create namespaces.** Add `CreateNamespace=true`, or put the Namespace in Git.
+> - **Changing only `destination.namespace` when the overlay sets `namespace`.** The rendered manifests keep their own namespace, so two `Application` objects can fight over the same objects.
+> - **Copying `status` from `argocd app get -o yaml`.** Copy only `spec`, then change what differs.

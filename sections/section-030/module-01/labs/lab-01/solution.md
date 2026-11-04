@@ -7,7 +7,7 @@ flux get sources git -n flux-system
 flux get kustomizations -n flux-system
 ```
 
-The `GitRepository` `scout` is not `Ready`, and the `Kustomization` `scout` waits for a source artifact. Read the reason:
+The `GitRepository` `scout` is not `Ready`, and the `Kustomization` `scout` waits for a source artifact. The other objects in the list come back in a later step. Read the reason:
 
 ```sh
 kubectl -n flux-system describe gitrepository scout
@@ -101,7 +101,7 @@ Then check the result:
 flux get kustomizations -n flux-system
 ```
 
-Both objects become `Ready`. The `kustomize-controller` applies `platform` first and applies `scout` only after `platform` is `Ready`.
+The `platform` and `scout` objects become `Ready`. The `kustomize-controller` applies `platform` first and applies `scout` only after `platform` is `Ready`.
 
 ## Step 4: change the message in Git
 
@@ -124,10 +124,47 @@ Ask Flux to fetch the commit now instead of waiting for the interval:
 flux reconcile kustomization scout -n flux-system --with-source
 ```
 
-## Step 5: prove the result
+## Step 5: prove the staging result
 
 ```sh
 kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.starfleet-staging/
 ```
 
-The response shows `"message": "staging-v2"`. Run `astrona submit` to grade.
+The response shows `"message": "staging-v2"`.
+
+## Step 6: find the suspended Kustomization
+
+A suspended `Kustomization` is a Flux object that the `kustomize-controller` no longer reconciles. It keeps the objects it applied, but it stops applying changes and correcting drift. Drift is a difference between the live cluster and Git. List every `Kustomization`:
+
+```sh
+flux get kustomizations -n flux-system
+```
+
+Read the `SUSPENDED` column. The row for `scout-production` says `True`. Its `READY` column can still say `True`, because that value records the last completed reconciliation. It does not prove the live objects match Git.
+
+Compare the live workload with Git. The Git value is in `overlays/production/message.yaml` in your clone, and the live value comes from the running pods:
+
+```sh
+cat overlays/production/message.yaml
+kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.starfleet-production/
+```
+
+Git says `production`. The `message` field in the response has a different value, so the live Deployment has drifted.
+
+## Step 7: resume it and prove the drift is gone
+
+Do not change Git to match the drift, because Git holds the desired state. Clear the suspension instead, so the controller reconciles again:
+
+```sh
+flux resume kustomization scout-production -n flux-system
+```
+
+The `flux resume` command clears `spec.suspend` and waits for the reconciliation to finish. The `kustomize-controller` applies the desired state from Git over the changed value. That starts a rollout of new pods, so wait for it and send the request again:
+
+```sh
+kubectl -n starfleet-production rollout status deployment/scout
+kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.starfleet-production/
+flux get kustomizations -n flux-system
+```
+
+The response shows `"message": "production"`. All three `Kustomization` objects show `False` under `SUSPENDED` and `True` under `READY`. Run `astrona submit` to grade.
