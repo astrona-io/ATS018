@@ -46,7 +46,7 @@ Both faults are in files in the repository. A manual change to the live objects 
 kubectl -n gitea port-forward svc/gitea-http 3000:3000
 ```
 
-Keep the port-forward running and open a second terminal:
+Keep the port-forward running and open another terminal:
 
 ```sh
 git clone http://platform:starfleet-gitops@127.0.0.1:3000/starfleet/scout-faults.git
