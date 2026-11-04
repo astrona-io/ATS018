@@ -581,7 +581,7 @@ modules:
         estimated_duration: 25m
         topic: ci-pipelines
         task_kind: build
-        tags: [tekton-task, tekton-pipeline, params-results]
+        tags: [tekton-task, tekton-pipeline, params-results, tkn]
         learning_goals:
           - Add a Task that runs in parallel with another and pass it a result and a param
           - Start a Pipeline twice with tkn, with different param values and the right ServiceAccount

@@ -540,7 +540,7 @@ this order:
   `helmrelease-remediation`, `depends-on`, `reconcile`
 - Tekton: `tekton-task`, `tekton-pipeline`, `workspaces`, `params-results`,
   `resolvers`, `tekton-triggers`, `eventlistener`, `webhook`, `argo-workflows`,
-  `argo-events`, `workflowtemplate`
+  `argo-events`, `workflowtemplate`, `argo-cli`, `tkn`
 - Hand-off: `image-tag-update`, `git-credentials`, `container-registry`
 - Infrastructure: `opentofu`, `kubernetes-provider`, `state`, `execution-plan`
 - Progressive delivery: `argo-rollouts`, `canary`, `blue-green`,
