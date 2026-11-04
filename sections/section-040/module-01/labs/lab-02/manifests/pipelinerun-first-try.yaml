@@ -1,0 +1,12 @@
+# Fails on purpose: without a ServiceAccount the pods run as default, which has no rights.
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: outpost-onboard-first-try
+  namespace: starfleet
+spec:
+  pipelineRef:
+    name: outpost-onboard
+  params:
+    - name: site
+      value: vega

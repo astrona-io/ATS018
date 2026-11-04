@@ -14,6 +14,9 @@ A GitOps controller only delivers what lands in Git. This section teaches Tekton
 - Start a PipelineRun with a PersistentVolumeClaim workspace and read its logs with tkn
 - Reference a shared Task through the cluster or git resolver instead of copying it
 - Diagnose a failed TaskRun from its step status and the pod logs
+- Run a Task in parallel with another and pass it a result and a param
+- Start a Pipeline several times with tkn and different param values, save a run log to a file and delete a failed run
+- Give a Pipeline that changes the cluster the right ServiceAccount and RBAC rights
 - Push a newly tagged image to the in-cluster registry from a pipeline Task
 - Update the image tag in a GitOps repository from a pipeline with a Git commit
 - Give a Task Git credentials through a Secret and a service account
@@ -32,6 +35,7 @@ The section has the modules below, in reading order. Each module has a playgroun
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-040/module-01/playground
     ```
+*   **tkn and cluster access lab:** Run A Pipeline That Changes The Cluster With tkn — `sections/section-040/module-01/labs/lab-02`. Read a failed run, add a Task that runs in parallel with another, extend a ClusterRole, start the Pipeline for two sites with `tkn` and the right ServiceAccount, save one log to a file, and delete the failed run.
 
 ### 2. Hand Off From A Tekton Pipeline To GitOps
 *   **Module Reader:** Hand Off From A Tekton Pipeline To GitOps

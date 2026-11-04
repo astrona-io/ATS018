@@ -10,12 +10,18 @@ A workspace is a volume that Tekton mounts into the steps, at `$(workspaces.<nam
 
 A failure is read from the top down. The PipelineRun message counts the failed and skipped Tasks. The failed TaskRun names the step and its exit code, with a reason such as `StepFailed`. The container log of that step holds the error itself. A run with a broken definition, such as a missing workspace binding or a Task a resolver cannot find, fails on the PipelineRun with a reason such as `InvalidWorkspaceBindings` or `CouldntGetTask`, and no pod is created.
 
-Resolvers fetch a Task from somewhere other than the namespace of the run. All five resolvers (`cluster`, `git`, `bundles`, `http` and `hub`) are on by default in Tekton Pipelines 1.17. The cluster resolver reads a Task from another namespace, and the git resolver reads a file from a Git repository at a branch, tag or commit. Each fetch leaves a ResolutionRequest, and the TaskRun records the exact source in `status.provenance`. The key facts to remember are these:
+Resolvers fetch a Task from somewhere other than the namespace of the run. All five resolvers (`cluster`, `git`, `bundles`, `http` and `hub`) are on by default in Tekton Pipelines 1.17. The cluster resolver reads a Task from another namespace, and the git resolver reads a file from a Git repository at a branch, tag or commit. Each fetch leaves a ResolutionRequest, and the TaskRun records the exact source in `status.provenance`.
+
+Two Tasks run in parallel when neither waits for the other, so give them the same `runAfter`. `tkn pipeline start` creates a run: `-p` sets a Pipeline param, `-s` sets the ServiceAccount, and `-o name` prints the name of the new run. `tkn pipelinerun logs` prints the log of a run, which you save with a redirect after the run has ended. `tkn pipelinerun delete` removes a run together with its TaskRuns and pods. A Task that calls the Kubernetes API runs with the rights of the ServiceAccount of its run, and a namespace is cluster-scoped, so its rights need a ClusterRole and a ClusterRoleBinding. `kubectl label` needs the verb `patch`.
+
+The key facts to remember are these:
 
 - A Task and a Pipeline do nothing until a TaskRun or a PipelineRun starts them.
 - Use `kubectl create` for a run that has `generateName`; `kubectl apply` needs a fixed name.
 - Two Tasks share files only through a PersistentVolumeClaim workspace.
 - A finished run never changes: fix the definition and start a new run.
 - The hub resolver defaults to Artifact Hub, because Tekton Hub is shut down.
+- A run without `-s` uses the ServiceAccount `default`, which has no rights in the Kubernetes API.
+- Deleting a run does not delete the namespace that its Tasks created.
 
 <!-- astrona:playground:destroy -->

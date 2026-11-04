@@ -269,6 +269,7 @@ section is only true for this one.
   | Argo CD | 3.5.4 |
   | Flux | 2.9.6 |
   | Tekton Pipelines / Triggers / `tkn` | 1.17.0 / 0.36.4 / 0.46.1 |
+  | `alpine/kubectl` (Tekton steps that call the Kubernetes API) | 1.35.4 |
   | Argo Rollouts | 1.10.0 |
   | Flagger / Flagger load tester | 1.45.0 / 0.39.0 |
   | Istio (Flagger module only) | 1.30.7 |
@@ -431,6 +432,11 @@ content: `starfleet/scout-deploy` (Kustomize base and overlays, Helm values),
     `--full` sets `status.promoteFull` until completion. Editing steps on a
     stable template starts no release; editing them mid-release restarts
     from step 0. The plugin `set` command has only `image`.
+  - The `tkn` 0.46.1 behaviour used by `section-040/module-01` (read from
+    the source 2026-11-04, not run). `pipeline start` asks for every param
+    not set with `-p` unless `--use-param-defaults` is set; `-o` cannot join
+    `--showlog`; `--showlog` follows the status of the run only with `-E`.
+    Log lines start with `[task : step]`, without the `step-` prefix.
   - Which Flagger provider settings and bundled Prometheus the Istio
     install of Flagger 1.45 uses.
   - The `kubectl` embedded Kustomize version on Kubernetes 1.35.

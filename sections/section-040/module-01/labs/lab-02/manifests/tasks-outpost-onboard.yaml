@@ -1,0 +1,93 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: plan-namespace
+  namespace: starfleet
+spec:
+  params:
+    - name: site
+      type: string
+  results:
+    - name: namespace
+      description: The name of the namespace for this site
+  steps:
+    - name: plan
+      image: alpine:3.23
+      env:
+        - name: SITE
+          value: $(params.site)
+      script: |
+        #!/bin/sh
+        set -eu
+        printf 'outpost-%s' "$SITE" > "$(results.namespace.path)"
+---
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: create-namespace
+  namespace: starfleet
+spec:
+  params:
+    - name: namespace
+      type: string
+  steps:
+    - name: create
+      image: alpine/kubectl:1.35.4
+      env:
+        - name: TARGET_NAMESPACE
+          value: $(params.namespace)
+      script: |
+        #!/bin/sh
+        set -eu
+        kubectl get namespace "$TARGET_NAMESPACE" >/dev/null 2>&1 || kubectl create namespace "$TARGET_NAMESPACE"
+---
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: report-namespace
+  namespace: starfleet
+spec:
+  params:
+    - name: namespace
+      type: string
+  steps:
+    - name: report
+      image: alpine/kubectl:1.35.4
+      env:
+        - name: TARGET_NAMESPACE
+          value: $(params.namespace)
+        - name: TASKRUN_NAME
+          value: $(context.taskRun.name)
+      script: |
+        #!/bin/sh
+        set -eu
+        kubectl get namespace "$TARGET_NAMESPACE" -o name
+        echo "Namespace $TARGET_NAMESPACE is ready, reported by $TASKRUN_NAME"
+---
+# Not part of the Pipeline yet.
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: label-namespace
+  namespace: starfleet
+spec:
+  params:
+    - name: namespace
+      type: string
+    - name: tier
+      type: string
+  steps:
+    - name: label
+      image: alpine/kubectl:1.35.4
+      env:
+        - name: TARGET_NAMESPACE
+          value: $(params.namespace)
+        - name: TIER
+          value: $(params.tier)
+        - name: TASKRUN_NAME
+          value: $(context.taskRun.name)
+      script: |
+        #!/bin/sh
+        set -eu
+        kubectl label namespace "$TARGET_NAMESPACE" "tier=$TIER" "onboarded-by=$TASKRUN_NAME" --overwrite
+        echo "Namespace $TARGET_NAMESPACE has tier $TIER, labelled by $TASKRUN_NAME"

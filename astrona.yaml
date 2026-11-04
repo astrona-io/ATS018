@@ -569,8 +569,34 @@ modules:
         title: "Shared Tasks With Resolvers"
         path: sections/section-040/module-01/course-04-shared-tasks-with-resolvers.md
       - type: reading
+        title: "Parallel Tasks, tkn Runs And Cluster Access"
+        path: sections/section-040/module-01/course-05-parallel-tasks-tkn-runs-and-cluster-access.md
+      - type: reading
+        title: Question
+        path: sections/section-040/module-01/labs/lab-02/question.md
+      - type: lab
+        title: "Run A Pipeline That Changes The Cluster With tkn"
+        path: sections/section-040/module-01/labs/lab-02
+        difficulty: intermediate
+        estimated_duration: 25m
+        topic: ci-pipelines
+        task_kind: build
+        tags: [tekton-task, tekton-pipeline, params-results]
+        learning_goals:
+          - Add a Task that runs in parallel with another and pass it a result and a param
+          - Start a Pipeline twice with tkn, with different param values and the right ServiceAccount
+          - Extend a ClusterRole so a Pipeline can label a namespace it created
+          - Save a run log to a named file and delete a failed PipelineRun
+        resources:
+          - name: "Tekton Pipelines"
+            url: https://tekton.dev/docs/pipelines/pipelines/
+          - name: "Tekton command-line tool"
+            url: https://tekton.dev/docs/cli/
+          - name: "Kubernetes RBAC"
+            url: https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+      - type: reading
         title: "Summary"
-        path: sections/section-040/module-01/course-05-summary.md
+        path: sections/section-040/module-01/course-06-summary.md
       - type: quiz
         title: "Knowledge Check: Build Tekton Tasks And Pipelines"
         path: sections/section-040/module-01/quiz.yaml

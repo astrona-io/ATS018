@@ -1,0 +1,32 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: outpost-onboard
+  namespace: starfleet
+spec:
+  params:
+    - name: site
+      type: string
+  tasks:
+    - name: plan-namespace
+      taskRef:
+        name: plan-namespace
+      params:
+        - name: site
+          value: $(params.site)
+    - name: create-namespace
+      runAfter:
+        - plan-namespace
+      taskRef:
+        name: create-namespace
+      params:
+        - name: namespace
+          value: $(tasks.plan-namespace.results.namespace)
+    - name: report-namespace
+      runAfter:
+        - create-namespace
+      taskRef:
+        name: report-namespace
+      params:
+        - name: namespace
+          value: $(tasks.plan-namespace.results.namespace)

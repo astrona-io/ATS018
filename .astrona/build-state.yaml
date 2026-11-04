@@ -118,7 +118,7 @@ items:
   kind: course
   what: 'chapter for module 1: Build Tekton Tasks And Pipelines'
   status: done
-  note: landing + 4 parts + summary; all resolvers on by default, hub defaults to Artifact Hub, Tekton
+  note: landing + 5 parts + summary; all resolvers on by default, hub defaults to Artifact Hub, Tekton
     Hub gone; git resolver gitToken verified in docs
 - key: section-040/module-02/playground
   kind: playground
@@ -386,3 +386,9 @@ items:
   what: Run and repair Workflows with the argo command-line tool
   status: done
   note: 'untested: built without booting 2026-11-04; Argo Workflows and argo CLI v4.1.6; static checks and astrona validate only; CLI flags, StepGroup nodes and resource templates read from the v4.1.6 source'
+
+- key: section-040/module-01/labs/lab-02
+  kind: lab
+  what: Run a Pipeline that changes the cluster with tkn, with a new reading part
+  status: done
+  note: 'untested: built without booting 2026-11-04; Tekton 1.17.0, tkn 0.46.1, alpine/kubectl:1.35.4 (also added to the module playground preloads); static checks and astrona validate only; tkn flags, log line format and status.pipelineSpec read from the source'

@@ -1,0 +1,72 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-018-lab-040-01-02
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - curlimages/curl:8.22.0
+      - alpine:3.23
+      - alpine/kubectl:1.35.4
+
+bootstrap:
+  manifests:
+    - name: lab-start
+      type: file
+      source: manifests/lab-start.yaml
+  init:
+    - name: install-tkn
+      description: Installs the tkn command-line tool 0.46.1 in ~/.astrona/bin unless tkn is already on the PATH
+      type: file
+      source: bootstrap/00-install-tkn.sh
+    - name: install-tekton
+      description: Installs Tekton Pipelines 1.17.0
+      type: file
+      source: bootstrap/01-install-tekton.sh
+    - name: seed
+      description: Installs the Tasks and the Pipeline outpost-onboard and leaves one failed run
+      type: file
+      source: bootstrap/02-seed.sh
+  waitFor:
+    - resource: deploy/shuttle
+      namespace: starfleet
+
+testing:
+  init:
+    - name: solution
+      description: Reference solution applied by `astrona test`
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: pipeline-task
+      description: The Pipeline runs label-namespace in parallel with report-namespace and passes it a result and a param
+      type: file
+      source: validation/validate-pipeline-task.sh
+    - name: rbac
+      description: outpost-provisioner has the rights the Tasks need on namespaces and no more
+      type: file
+      source: validation/validate-rbac.sh
+    - name: site-runs
+      description: The sites vega and rigel each have a Succeeded run with their own values, and that run labelled the namespace
+      type: file
+      source: validation/validate-site-runs.sh
+    - name: saved-log
+      description: The file /tmp/outpost-rigel-run.log holds the tkn log of a Succeeded run for the site rigel
+      type: file
+      source: validation/validate-saved-log.sh
+    - name: failed-run-deleted
+      description: No failed run of outpost-onboard remains, and the Succeeded runs stay
+      type: file
+      source: validation/validate-failed-run-deleted.sh
+
+teardown:
+  keepCluster: false

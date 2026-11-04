@@ -8,7 +8,7 @@ This is a **playground**, not a lab. It starts a cluster with Tekton Pipelines, 
 - **Tekton Pipelines 1.17.0**: the controller and the admission webhook in `tekton-pipelines`, and the remote resolvers (`cluster`, `git`, `bundles`, `http` and `hub`, all on) in `tekton-pipelines-resolvers`. A Task is a list of steps that run as containers in one pod; a Pipeline is an ordered graph of Tasks.
 - The Task **`run-tests`** in `starfleet`. It runs the test script of `scout` and fails on purpose: its step works in the wrong folder.
 - A **public Git repository** at `http://gitea-http.gitea.svc:3000/starfleet/scout-app.git` (from your machine: `http://127.0.0.1:3000/starfleet/scout-app.git`). It holds `VERSION` (`6.15.0`), the test script `test.sh`, and a shared Task in `tekton/run-tests.yaml`. To push to it, use the user `platform` with the password `starfleet-gitops`.
-- `shuttle`, a client pod with `curl`, in `starfleet`. The node already holds the step images `alpine:3.23` and `alpine/git:2.52.0`.
+- `shuttle`, a client pod with `curl`, in `starfleet`. The node already holds the step images `alpine:3.23`, `alpine/git:2.52.0` and `alpine/kubectl:1.35.4`.
 - Deliberately absent: no Pipeline, no Tekton Triggers and no container registry. Install `tkn` 0.46 on your machine to read runs and logs.
 
 ## Helpers
