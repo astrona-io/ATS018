@@ -40,6 +40,10 @@ bootstrap:
       type: file
       source: manifests/lab-start.yaml
   init:
+    - name: install-argo-cli
+      description: "Installs the argo command-line tool v4.1.6 in ~/.astrona/bin unless argo is already on the PATH"
+      type: file
+      source: bootstrap/00-install-argo-cli.sh
     - name: install-gitea
       description: "Starts the in-cluster Git server"
       type: file

@@ -654,8 +654,33 @@ modules:
           - name: "Argo Events Sensor"
             url: https://argoproj.github.io/argo-events/concepts/sensor/
       - type: reading
+        title: "Run Workflows With The argo Command-Line Tool"
+        path: sections/section-040/module-03/course-05-run-workflows-with-the-argo-command-line-tool.md
+      - type: reading
+        title: Question
+        path: sections/section-040/module-03/labs/lab-02/question.md
+      - type: lab
+        title: "Run And Repair Workflows With The argo Command-Line Tool"
+        path: sections/section-040/module-03/labs/lab-02
+        difficulty: intermediate
+        estimated_duration: 25m
+        topic: ci-pipelines
+        task_kind: troubleshooting
+        tags: [argo-workflows, argo-cli, workflowtemplate, params-results]
+        learning_goals:
+          - Find why a Workflow failed with the argo command-line tool and fix its WorkflowTemplate
+          - Run a copied step in parallel in a steps list and prove both ran in one group
+          - Start a run with a namespace parameter and the right ServiceAccount, then keep one success per template
+        resources:
+          - name: "Argo Workflows command-line reference"
+            url: https://argo-workflows.readthedocs.io/en/stable/cli/argo/
+          - name: "Argo Workflows steps"
+            url: https://argo-workflows.readthedocs.io/en/stable/walk-through/steps/
+          - name: "Argo Workflows Kubernetes resources"
+            url: https://argo-workflows.readthedocs.io/en/stable/walk-through/kubernetes-resources/
+      - type: reading
         title: "Summary"
-        path: sections/section-040/module-03/course-05-summary.md
+        path: sections/section-040/module-03/course-06-summary.md
       - type: quiz
         title: "Knowledge Check: Run CI Workflows With Argo Workflows"
         path: sections/section-040/module-03/quiz.yaml

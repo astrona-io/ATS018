@@ -8,6 +8,8 @@ Reading a failure always follows the same path. The Workflow phase and message c
 
 Argo Events connects the outside world to the Workflow. An `EventSource` of type `webhook` receives the HTTP request from Git, an `EventBus` carries the event, and a `Sensor` filters it and runs a trigger that creates a Workflow. The Sensor uses its own ServiceAccount, which needs a Role in the namespace of the Workflow. A one-pod JetStream bus needs a stream with one replica.
 
+The `argo` command-line tool does the same work in short commands and needs no web server, only your kubeconfig. `argo submit --from workflowtemplate/<name>` starts a run, with `-p` for a parameter and `--serviceaccount` for the account of that run. `argo list`, `argo get` and `argo logs` read the phase, the failed step and the log. `argo template update` changes a template, and `argo delete` removes runs by name, label or status. In a `steps` list each `- -` opens a group that waits for the group before it, and the steps of one group start together. A DAG has no groups, because each task names what it waits for in `depends`.
+
 For readers who know Tekton: a Workflow is like a `PipelineRun`, a `WorkflowTemplate` is like a `Pipeline`, a DAG task with `depends` is like a pipeline task with `runAfter`, `volumeClaimTemplates` is like a workspace, and an `EventSource` with a `Sensor` is like an `EventListener` with a trigger.
 
 Key facts:
@@ -15,6 +17,8 @@ Key facts:
 - A Workflow with `generateName` is created with `kubectl create`, not `kubectl apply`.
 - `kubectl logs -l workflows.argoproj.io/workflow=<name>` reads all pods of one Workflow.
 - The phases are `Pending`, `Running`, `Succeeded`, `Failed` and `Error`; a node can also be `Omitted`.
+- `@latest` stands for the newest run in `argo get` and `argo logs`.
+- A `resource` template applies its manifest with the ServiceAccount of its pod, and deleting the run leaves the object in place.
 - A Sensor filter reads event data under `body`, for example `body.ref`.
 
 <!-- astrona:playground:destroy -->

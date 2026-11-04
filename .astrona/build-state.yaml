@@ -380,3 +380,9 @@ items:
   what: Gate a canary with a web analysis step
   status: done
   note: 'untested: built without booting 2026-11-04; Argo Rollouts 1.10.0 and podinfo 6.15.0; static checks and astrona validate only; web provider behaviour read from the v1.10.0 source'
+
+- key: section-040/module-03/labs/lab-02
+  kind: lab
+  what: Run and repair Workflows with the argo command-line tool
+  status: done
+  note: 'untested: built without booting 2026-11-04; Argo Workflows and argo CLI v4.1.6; static checks and astrona validate only; CLI flags, StepGroup nodes and resource templates read from the v4.1.6 source'

@@ -6,7 +6,8 @@
 - **Type:** Astrona playground — clean environment, no task, no grading
 
 A single-node kind cluster (Kubernetes 1.35, `kindest/node:v1.35.8`) with
-Argo Workflows v4.1.6 (namespace install in `starfleet`, no web server), Argo
+Argo Workflows v4.1.6 (namespace install in `starfleet`, no web server) and its
+`argo` command-line tool, Argo
 Events v1.9.11 with a one-pod JetStream `EventBus` in `argo-events`, and Gitea
 with the public repository `starfleet/scout-app`. Nothing to submit.
 
@@ -38,6 +39,7 @@ astrona destroy ats-018-playground-040-03
 | Path | Purpose |
 | --- | --- |
 | `config.yaml` | Environment definition (runtime, preloaded images, bootstrap order, port forward) |
+| `bootstrap/00-install-argo-cli.sh` | Installs the `argo` command-line tool v4.1.6 in `~/.astrona/bin` unless an `argo` is already on the `PATH` |
 | `bootstrap/01-install-gitea.sh` | Starts Gitea and creates the user `platform` |
 | `bootstrap/02-install-argo-workflows.sh` | Installs Argo Workflows v4.1.6 |
 | `bootstrap/03-install-argo-events.sh` | Installs Argo Events v1.9.11, the `EventBus` and the Sensor RBAC |

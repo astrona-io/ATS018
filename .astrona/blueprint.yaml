@@ -417,12 +417,14 @@ sections:
           - Read a Workflow with the argo CLI and kubectl and find the failed node
           - Start a Workflow from a Git push with an Argo Events EventSource, EventBus and Sensor
           - Map each Argo Workflows and Argo Events object to its Tekton equivalent
+          - Start, read, repair and delete runs with the argo CLI, and run steps in parallel
         outline:
           - Workflow, template, DAG and the pod each node runs
           - Parameters, artifacts and the WorkflowTemplate
           - Reading a failed node
           - EventSource, EventBus and Sensor
           - Argo Workflows and Tekton side by side
+          - The argo CLI, parallel step groups and a run with a namespace parameter
         diagrams:
           - type: flowchart
             shows: A webhook EventSource, the EventBus and a Sensor creating a Workflow whose DAG nodes run as pods
@@ -435,7 +437,9 @@ sections:
         notes: >
           Compact module for the second CI tool. Pin versions and check the
           memory budget at build. Keep the artifact repository to a minimum:
-          prefer parameters over MinIO.
+          prefer parameters over MinIO. A later reading part teaches the argo CLI
+          (v4.1.6, installed in ~/.astrona/bin unless an argo exists), and
+          labs/lab-02 grades it.
     capstone:
       title: Continuous Integration Pipelines With Tekton Capstone
       objective: >

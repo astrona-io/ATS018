@@ -1,0 +1,81 @@
+# scout-check reads the wrong file on purpose, so its first run fails.
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: scout-check
+  namespace: starfleet
+spec:
+  entrypoint: main
+  serviceAccountName: workflow-runner
+  arguments:
+    parameters:
+      - name: expected-version
+        value: "6.15.0"
+  volumes:
+    - name: release
+      configMap:
+        name: scout-release
+  templates:
+    - name: main
+      steps:
+        - - name: prepare
+            template: prepare
+        - - name: check-version
+            template: check-version
+    - name: prepare
+      container:
+        image: alpine:3.23
+        command: [echo, preparing the release check]
+    - name: check-version
+      container:
+        image: alpine:3.23
+        command: [sh, -c]
+        args:
+          - grep -Fqx "{{workflow.parameters.expected-version}}" /release/VERSIONS && echo release check passed
+        volumeMounts:
+          - name: release
+            mountPath: /release
+---
+# outpost-config names no ServiceAccount and writes where its parameter says.
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: outpost-config
+  namespace: starfleet
+spec:
+  entrypoint: main
+  arguments:
+    parameters:
+      - name: target-namespace
+        value: starfleet
+  templates:
+    - name: main
+      steps:
+        - - name: settings
+            template: settings
+        - - name: account
+            template: account
+    - name: settings
+      resource:
+        action: apply
+        manifest: |
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: scout-settings
+            namespace: "{{workflow.parameters.target-namespace}}"
+            labels:
+              created-by-workflow: "{{workflow.name}}"
+          data:
+            LOG_LEVEL: info
+    - name: account
+      resource:
+        action: apply
+        manifest: |
+          apiVersion: v1
+          kind: ServiceAccount
+          metadata:
+            name: scout
+            namespace: "{{workflow.parameters.target-namespace}}"
+            labels:
+              created-by-workflow: "{{workflow.name}}"

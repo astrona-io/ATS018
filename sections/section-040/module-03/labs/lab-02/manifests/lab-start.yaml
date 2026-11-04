@@ -1,0 +1,125 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: starfleet
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: outpost
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shuttle
+  namespace: starfleet
+  labels:
+    app: shuttle
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shuttle
+  template:
+    metadata:
+      labels:
+        app: shuttle
+    spec:
+      containers:
+        - name: shuttle
+          image: curlimages/curl:8.22.0
+          command: ["sh", "-c", "while true; do sleep 30; done"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 32Mi
+---
+# The release record that scout-check reads.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scout-release
+  namespace: starfleet
+data:
+  VERSION: "6.15.0"
+---
+# The executor in a Workflow pod writes the node result into a
+# WorkflowTaskResult object, so every account that runs a Workflow needs this.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: workflow-executor
+  namespace: starfleet
+rules:
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflowtaskresults"]
+    verbs: ["create", "patch"]
+---
+# Runs scout-check. It has only the executor rights.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: workflow-runner
+  namespace: starfleet
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: workflow-executor
+  namespace: starfleet
+subjects:
+  - kind: ServiceAccount
+    name: workflow-runner
+    namespace: starfleet
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: workflow-executor
+---
+# Runs outpost-config. It has the executor rights in starfleet and may write
+# ConfigMaps and ServiceAccounts only in outpost.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: outpost-provisioner
+  namespace: starfleet
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: outpost-provisioner-executor
+  namespace: starfleet
+subjects:
+  - kind: ServiceAccount
+    name: outpost-provisioner
+    namespace: starfleet
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: workflow-executor
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: outpost-writer
+  namespace: outpost
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps", "serviceaccounts"]
+    verbs: ["get", "create", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: outpost-provisioner
+  namespace: outpost
+subjects:
+  - kind: ServiceAccount
+    name: outpost-provisioner
+    namespace: starfleet
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: outpost-writer

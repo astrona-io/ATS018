@@ -6,7 +6,7 @@ Together they do the same job as a Tekton pipeline with Tekton Triggers. A push 
 
 Keep one sentence in mind for this module: **a Workflow is a graph of templates, each node of the graph is a pod, and the status of the Workflow tells you which node failed and why.**
 
-The module has four parts. **A Workflow With A DAG** writes a Workflow with a directed acyclic graph (DAG) of tasks, passes a parameter and shared files between them, and shows the pod each task creates. **Reuse A Workflow With A WorkflowTemplate** moves the same graph into a `WorkflowTemplate` and starts runs from it with arguments. **Read A Failed Workflow** breaks runs on purpose and finds each cause with `kubectl`. **Start A Workflow From A Git Push** adds an Argo Events `EventSource`, `EventBus` and `Sensor` so a push to the source repository starts the tests.
+The module has five parts. **A Workflow With A DAG** writes a Workflow with a directed acyclic graph (DAG) of tasks, passes a parameter and shared files between them, and shows the pod each task creates. **Reuse A Workflow With A WorkflowTemplate** moves the same graph into a `WorkflowTemplate` and starts runs from it with arguments. **Read A Failed Workflow** breaks runs on purpose and finds each cause with `kubectl`. **Start A Workflow From A Git Push** adds an Argo Events `EventSource`, `EventBus` and `Sensor` so a push to the source repository starts the tests. **Run Workflows With The argo Command-Line Tool** starts, reads, repairs and cleans up runs with `argo`, and runs steps in parallel in a `steps` list.
 
 ## Learning objectives
 
@@ -17,6 +17,9 @@ After this module you can:
 - Give Workflow pods a ServiceAccount with the permission the executor needs.
 - Find the failed node of a Workflow and read its pod logs with `kubectl`.
 - Start a Workflow from a Git push with an `EventSource`, an `EventBus` and a `Sensor`.
+- Start, read and delete runs and update templates with the `argo` command-line tool.
+- Run steps in parallel in a `steps` list and explain how a DAG differs.
+- Start a run with a namespace parameter and the ServiceAccount that has the rights to create objects there.
 
 ## Before you start
 
@@ -27,6 +30,7 @@ Your playground is a single-node `kind` cluster running Kubernetes 1.35 with the
 | Part | What it is |
 | --- | --- |
 | Argo Workflows v4.1.6 | The Workflow controller, installed in `starfleet` in namespace mode. It only watches `starfleet`. The Argo Workflows web server is not installed |
+| `argo` v4.1.6 | The command-line tool in `~/.astrona/bin`, unless you already have an `argo`. It talks to the Kubernetes API through your kubeconfig |
 | Argo Events v1.9.11 | The Events controller manager in `argo-events` |
 | An `EventBus` | The object `default` in `argo-events`: one NATS JetStream pod that carries events from event sources to sensors |
 | A Git repository | `starfleet/scout-app` in Gitea, a small Git server in the cluster, at `http://gitea-http.gitea.svc:3000`. It holds a `VERSION` file that says `6.15.0` and a script `test.sh` that checks it. The repository is public |
