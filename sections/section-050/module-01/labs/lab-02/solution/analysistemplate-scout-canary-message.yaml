@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: scout-canary-message
+  namespace: starfleet
+spec:
+  metrics:
+    - name: message
+      initialDelay: 15s
+      count: 3
+      interval: 10s
+      successCondition: result == "canary-ready"
+      provider:
+        web:
+          url: http://scout-canary.starfleet/
+          timeoutSeconds: 5
+          jsonPath: "{$.message}"

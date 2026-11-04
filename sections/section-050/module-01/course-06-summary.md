@@ -10,4 +10,6 @@ Promotion advances a pause. An explicit `spec.paused` field and a canary pause a
 
 An abort reports Degraded, scales the canary down and keeps the stable version serving. It does not correct the desired pod template. A new template starts a new release, while retry allows another attempt at the same aborted template. Read the release status, the ReplicaSet counts and the application response together before deciding that recovery is complete.
 
+An inline analysis step replaces a person at a stop in the release. An AnalysisTemplate defines the check, and the `web` provider measures it with one HTTP (Hypertext Transfer Protocol) request, so it needs no metrics system. A canary Service lets that request reach only the new version. `jsonPath` selects a field of the JSON (JavaScript Object Notation) response, and `successCondition` compares it. Each check creates an AnalysisRun that records its phase and measurements. A failed check aborts the release. A normal promotion leaves later checks in place, while a full promotion skips analysis, pauses and steps together. A response that is not JSON passes without any comparison, so check what the request really returns.
+
 <!-- astrona:playground:destroy -->

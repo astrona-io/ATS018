@@ -152,8 +152,9 @@ items:
   kind: course
   what: 'chapter for module 1: Roll Out A Canary With Argo Rollouts'
   status: done
-  note: Landing + 4 parts + summary; reset and ran every lesson command; 20/60 replica splits, explicit
-    pause, abort, corrected template and retry verified; validators pass
+  note: 'untested: built without booting 2026-11-04; added fifth reading on inline web analysis and renamed
+    the summary to course-06. The earlier landing, 4 parts and summary were reset and run live: 20/60 replica
+    splits, explicit pause, abort, corrected template and retry verified; validators pass'
 - key: section-050/module-02/playground
   kind: playground
   what: 'playground for module 2: Gate A Blue/Green Release With Analysis'
@@ -373,3 +374,9 @@ items:
   what: Gate a mesh-free blue/green release with Flagger
   status: done
   note: 'untested: built without booting 2026-11-04; Flagger 1.45.0 and load tester 0.39.0; static checks and astrona validate only; webhook format and event text read from the v1.45.0 source'
+
+- key: section-050/module-01/labs/lab-02
+  kind: lab
+  what: Gate a canary with a web analysis step
+  status: done
+  note: 'untested: built without booting 2026-11-04; Argo Rollouts 1.10.0 and podinfo 6.15.0; static checks and astrona validate only; web provider behaviour read from the v1.10.0 source'

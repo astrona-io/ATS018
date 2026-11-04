@@ -756,8 +756,34 @@ modules:
           - name: "Argo Rollouts kubectl plugin"
             url: https://argo-rollouts.readthedocs.io/en/stable/features/kubectl-plugin/
       - type: reading
+        title: "Gate A Canary With A Web Analysis Step"
+        path: sections/section-050/module-01/course-05-web-analysis-step.md
+      - type: reading
+        title: Question
+        path: sections/section-050/module-01/labs/lab-02/question.md
+      - type: lab
+        title: "Gate A Canary With A Web Analysis Step Lab"
+        path: sections/section-050/module-01/labs/lab-02
+        difficulty: intermediate
+        estimated_duration: 25m
+        topic: progressive-delivery
+        task_kind: build
+        tags: [argo-rollouts, canary, analysis, web-provider, promotion]
+        learning_goals:
+          - Finish a paused canary with promote and promote --full and explain the difference
+          - Complete an AnalysisTemplate that uses the web provider against a canary Service
+          - Replace a pause step with an inline analysis step
+          - Start a release with an environment variable and read its AnalysisRun
+        resources:
+          - name: "Argo Rollouts web metric provider"
+            url: https://argo-rollouts.readthedocs.io/en/stable/analysis/web/
+          - name: "Argo Rollouts analysis and progressive delivery"
+            url: https://argo-rollouts.readthedocs.io/en/stable/features/analysis/
+          - name: "kubectl argo rollouts promote"
+            url: https://argo-rollouts.readthedocs.io/en/stable/generated/kubectl-argo-rollouts/kubectl-argo-rollouts_promote/
+      - type: reading
         title: "Summary"
-        path: sections/section-050/module-01/course-05-summary.md
+        path: sections/section-050/module-01/course-06-summary.md
       - type: quiz
         title: "Knowledge Check: Roll Out A Canary With Argo Rollouts"
         path: sections/section-050/module-01/quiz.yaml

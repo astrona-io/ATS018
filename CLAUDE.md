@@ -422,6 +422,15 @@ content: `starfleet/scout-deploy` (Kustomize base and overlays, Helm values),
     old replicas available for the entire post-promotion analysis window.
     Empty Prometheus results fail the guarded condition used here; NaN
     satisfies neither comparison and yields Inconclusive, not Successful.
+  - Argo Rollouts 1.10.0 web provider (read from the source 2026-11-04, not
+    run): `jsonPath` sits under `provider.web`, `successCondition` on the
+    metric. A non-2xx response is a measurement error. A body that is not
+    JSON passes without evaluating the condition. The condition compares a
+    plain string, but `measurement.value` stores it with double quotes.
+    Plain `promote` during a running analysis step skips and cancels it;
+    `--full` sets `status.promoteFull` until completion. Editing steps on a
+    stable template starts no release; editing them mid-release restarts
+    from step 0. The plugin `set` command has only `image`.
   - Which Flagger provider settings and bundled Prometheus the Istio
     install of Flagger 1.45 uses.
   - The `kubectl` embedded Kustomize version on Kubernetes 1.35.

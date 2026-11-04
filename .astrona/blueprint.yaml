@@ -463,12 +463,16 @@ sections:
           - Promote, pause and abort a rollout and name the ReplicaSet that serves traffic
           - Explain how Argo Rollouts approximates a weight with replica counts when no traffic router is configured
           - Retry an aborted rollout after the image is fixed
+          - Explain the difference between promote and promote --full
+          - Replace a pause step with an inline analysis step that uses the web provider against a canary Service
+          - Start a release with an environment variable and read its AnalysisRun
         outline:
           - Why a Deployment rolling update is not a canary
           - The Rollout resource and the canary strategy steps
           - The kubectl argo rollouts plugin and its status view
           - Promote, pause, abort and retry
           - Weights without a traffic router
+          - Inline web analysis against a canary Service
         diagrams:
           - type: state
             shows: Rollout phases (Progressing, Paused, Healthy, Degraded) through promote and abort
@@ -481,6 +485,10 @@ sections:
           a Deployment (podinfo 6.14.x) with 5 replicas and a Service, and
           `shuttle`. Deliberately absent: no Rollout, no traffic router, no
           metrics provider.
+        notes: >
+          The web analysis reading creates the scout-canary Service in the
+          playground and needs no metrics provider. labs/lab-02 practises it
+          from a release paused at its first canary step.
       - id: module-02
         title: Gate A Blue/Green Release With Analysis
         objectives:

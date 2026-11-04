@@ -14,6 +14,9 @@ A new version should reach users a step at a time and stop on bad metrics. This 
 - Promote, pause and abort a rollout and name the ReplicaSet that serves traffic
 - Explain how Argo Rollouts approximates a weight with replica counts when no traffic router is configured
 - Retry an aborted rollout after the image is fixed
+- Explain the difference between promote and promote --full
+- Replace a pause step with an inline analysis step that uses the web provider against a canary Service
+- Start a release with an environment variable and read its AnalysisRun
 - Configure a blueGreen strategy with activeService, previewService and autoPromotionEnabled set to false
 - Test the new version through the preview Service before promotion
 - Write an AnalysisTemplate that queries Prometheus for the success rate of the new version
@@ -39,6 +42,8 @@ The section has the modules below, in reading order. Each module has a playgroun
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-050/module-01/playground
     ```
+
+*   **Web analysis lab:** Gate A Canary With A Web Analysis Step — `sections/section-050/module-01/labs/lab-02`. Start from a paused release, finish it with both kinds of promotion, gate the next release with a web check and save its AnalysisRun.
 
 ### 2. Gate A Blue/Green Release With Analysis
 *   **Module Reader:** Gate A Blue/Green Release With Analysis

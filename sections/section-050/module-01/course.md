@@ -6,7 +6,7 @@ Argo Rollouts adds those stops. Its `Rollout` resource replaces a Deployment and
 
 Keep one sentence in mind for this module: **without a traffic router, Argo Rollouts approximates canary weight by changing replica counts.** A traffic router is a component that controls the share of requests sent to each version. This playground has one Service and no traffic router, so the replica split matters more than any short request sample.
 
-The module has four parts. **Convert A Deployment Into A Rollout** replaces the starting Deployment and establishes a stable version. **Canary Steps And Replica Weights** changes the image, watches a pause and checks both versions through one Service. **Promote And Pause A Canary** advances the steps and tests an explicit pause. **Abort And Retry A Release** stops an invalid image, proves the stable version still serves requests, and retries a corrected release.
+The module has five parts. **Convert A Deployment Into A Rollout** replaces the starting Deployment and establishes a stable version. **Canary Steps And Replica Weights** changes the image, watches a pause and checks both versions through one Service. **Promote And Pause A Canary** advances the steps and tests an explicit pause. **Abort And Retry A Release** stops an invalid image, proves the stable version still serves requests, and retries a corrected release. **Gate A Canary With A Web Analysis Step** compares `promote` with `promote --full`, replaces a pause with an automatic HTTP (Hypertext Transfer Protocol) check through a second Service, and reads the result of that check. That check needs no metrics provider.
 
 ## Learning objectives
 
@@ -17,6 +17,9 @@ After this module you can:
 - Promote, pause and abort a release, and identify the ReplicaSet serving traffic.
 - Explain why replica counts approximate a weight without a traffic router.
 - Correct an image and retry an aborted release.
+- Explain the difference between `promote` and `promote --full`.
+- Replace a `pause` step with an inline `analysis` step that uses the `web` provider against a canary Service.
+- Start a release with an environment variable and read its AnalysisRun.
 
 ## Before you start
 
