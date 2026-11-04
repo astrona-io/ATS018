@@ -517,12 +517,15 @@ sections:
           - Configure the analysis interval, threshold, stepWeight and maxWeight with the built-in request-success-rate metric
           - Trigger a canary by changing the Deployment image and follow it in the Canary status and events
           - Generate test traffic during analysis with the Flagger load tester webhook
+          - Use Kubernetes blue/green without a mesh or metrics provider and gate promotion with a synchronous HTTP check
+          - Trigger a release by changing an environment variable and save Canary events
           - Compare how Flagger and Argo Rollouts each take over a workload
         outline:
           - What Flagger does with a Deployment and the objects it generates
           - The Canary resource and its analysis block
           - A promoted and a rolled back canary
           - Load testing webhooks
+          - Kubernetes blue/green with iterations and an HTTP pre-rollout gate
           - Flagger and Argo Rollouts side by side
         diagrams:
           - type: flowchart
@@ -537,6 +540,9 @@ sections:
         notes: >
           This is the compact module for the secondary tool. Check the memory
           of Istio plus Flagger and its Prometheus against the Podman budget.
+          The blue/green reading and lab-02 use a separate mesh-free environment
+          with Flagger 1.45.0 and load tester 0.39.0, no metrics backend, and
+          an empty metrics list. Do not change the existing Istio lab.
       - id: module-04
         title: Shift Canary Traffic With Argo Rollouts And A Traffic Router
         objectives:

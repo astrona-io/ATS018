@@ -391,7 +391,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Choose between Flagger and Rollouts."
     source_readings:
-      - sections/section-050/module-03/course-04-summary.md
+      - sections/section-050/module-03/course-05-summary.md
     prompt: "A team wants to keep its Deployment and let a controller create a primary copy and move Istio weights. Which tool fits?"
     options:
       - id: a
@@ -399,7 +399,7 @@ questions:
         explanation: "Argo Rollouts replaces the Deployment with a `Rollout`."
       - id: b
         text: "Flagger, with a `Canary` object"
-        explanation: "Correct. Flagger keeps the Deployment and needs a traffic provider."
+        explanation: "Correct. Flagger keeps the Deployment and uses a traffic provider such as Istio to move weights."
       - id: c
         text: "Flux, with a `HelmRelease`"
         explanation: "Flux delivers; it does not run a canary."

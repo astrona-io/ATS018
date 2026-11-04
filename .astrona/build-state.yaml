@@ -176,7 +176,7 @@ items:
   kind: course
   what: 'chapter for module 3: Automate Canary Analysis With Flagger'
   status: done
-  note: 'Landing + 3 parts + summary; promotion, rollback at 88.04% and fix verified live'
+  note: 'untested: built without booting 2026-11-04; added fourth reading on Kubernetes blue/green, synchronous HTTP gate and saved events; the Istio parts stay as verified live earlier (promotion, rollback at 88.04% and fix)'
 - key: section-050/quiz
   kind: quiz
   what: 'knowledge check for section-050: Progressive Delivery'
@@ -367,3 +367,9 @@ items:
   status: done
   note: 'untested: built without booting 2026-11-04; OpenTofu 1.13.2 and Kubernetes provider 3.4.0; static
     checks only'
+
+- key: section-050/module-03/labs/lab-02
+  kind: lab
+  what: Gate a mesh-free blue/green release with Flagger
+  status: done
+  note: 'untested: built without booting 2026-11-04; Flagger 1.45.0 and load tester 0.39.0; static checks and astrona validate only; webhook format and event text read from the v1.45.0 source'

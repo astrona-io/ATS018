@@ -839,8 +839,33 @@ modules:
           - name: "Flagger with Istio"
             url: https://docs.flagger.app/tutorials/istio-progressive-delivery
       - type: reading
+        title: "Blue/Green Without A Service Mesh"
+        path: sections/section-050/module-03/course-04-blue-green-without-a-mesh.md
+      - type: reading
+        title: Question
+        path: sections/section-050/module-03/labs/lab-02/question.md
+      - type: lab
+        title: "Gate A Mesh-Free Blue/Green Release With Flagger Lab"
+        path: sections/section-050/module-03/labs/lab-02
+        difficulty: intermediate
+        estimated_duration: 20m
+        topic: progressive-delivery
+        task_kind: build
+        tags: [flagger, blue-green, webhook, abort-rollback, promotion]
+        learning_goals:
+          - Configure Kubernetes blue/green analysis without a mesh or metrics backend
+          - Block a release with a synchronous HTTP gate and promote an environment change
+          - Save Canary event identities and messages and compare them with live events
+        resources:
+          - name: "Flagger Kubernetes blue/green"
+            url: https://docs.flagger.app/tutorials/kubernetes-blue-green
+          - name: "Flagger webhooks"
+            url: https://docs.flagger.app/usage/webhooks
+          - name: "Flagger 1.45.0 synchronous load tester handler"
+            url: https://github.com/fluxcd/flagger/blob/v1.45.0/pkg/loadtester/server.go
+      - type: reading
         title: "Summary"
-        path: sections/section-050/module-03/course-04-summary.md
+        path: sections/section-050/module-03/course-05-summary.md
       - type: quiz
         title: "Knowledge Check: Automate Canary Analysis With Flagger"
         path: sections/section-050/module-03/quiz.yaml

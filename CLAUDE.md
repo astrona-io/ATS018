@@ -270,7 +270,7 @@ section is only true for this one.
   | Flux | 2.9.6 |
   | Tekton Pipelines / Triggers / `tkn` | 1.17.0 / 0.36.4 / 0.46.1 |
   | Argo Rollouts | 1.10.0 |
-  | Flagger | 1.45.0 |
+  | Flagger / Flagger load tester | 1.45.0 / 0.39.0 |
   | Istio (Flagger module only) | 1.30.7 |
   | Argo Workflows / Argo Events | v4.1.6 / v1.9.11 (NATS 2.10.29 JetStream EventBus) |
   | Argo Rollouts Gateway API plugin | argoproj-labs/gatewayAPI v0.17.0 (Envoy Gateway v1.9.2 from the kind addon) |
