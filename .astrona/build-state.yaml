@@ -16,13 +16,13 @@ items:
 - key: section-010/module-02/playground
   kind: playground
   what: 'playground for module 2: Package And Configure Applications With Helm'
-  status: skipped
-  note: 'removed: Helm not on CNPE tool list'
+  status: done
+  note: 'untested: built without booting 2026-11-04; compact Helm 4.3.0 simulator module; schema and rendering checked; CLI validate blocked by home lock permissions'
 - key: section-010/module-02/course
   kind: course
   what: 'chapter for module 2: Package And Configure Applications With Helm'
-  status: skipped
-  note: 'removed: Helm not on CNPE tool list'
+  status: done
+  note: 'untested: built without booting 2026-11-04; compact Helm 4.3.0 simulator module; schema and rendering checked; CLI validate blocked by home lock permissions'
 - key: section-010/quiz
   kind: quiz
   what: 'knowledge check for section-010: Packaging Applications For GitOps'
@@ -316,4 +316,19 @@ items:
   kind: quiz
   what: 'final domain quiz across every section'
   status: done
-  note: '20 questions, sections/final-domain-quiz.yaml'
+  note: 'untested: built without booting 2026-11-04; 22 questions including 2 Helm questions'
+- key: section-010/module-02/lab
+  kind: lab
+  what: 'Edit, Upgrade And Roll Back A Helm Chart'
+  status: done
+  note: 'untested: built without booting 2026-11-04; schema, shell and content checks passed; CLI validate blocked by home lock permissions'
+- key: section-010/module-02/quiz
+  kind: quiz
+  what: '10 questions on Helm charts and releases'
+  status: done
+  note: 'untested: built without booting 2026-11-04; schema, shell and content checks passed; CLI validate blocked by home lock permissions'
+- key: section-010/capstone/lab-02
+  kind: capstone
+  what: 'Helm production release and Kustomize staging overlay'
+  status: done
+  note: 'untested: built without booting 2026-11-04; schema, shell and content checks passed; CLI validate blocked by home lock permissions'

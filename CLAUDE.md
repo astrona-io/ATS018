@@ -247,7 +247,7 @@ section is only true for this one.
 
   | Section | Title | Curriculum item |
   | --- | --- | --- |
-  | 010 | Packaging Applications For GitOps (Kustomize only) | Implementing GitOps Workflows |
+  | 010 | Packaging Applications For GitOps (Kustomize and Helm) | Implementing GitOps Workflows |
   | 020 | Continuous Delivery With Argo CD | Implementing GitOps Workflows |
   | 030 | Continuous Delivery With Flux | Implementing GitOps Workflows |
   | 040 | Continuous Integration Pipelines (Tekton, Argo Workflows and Events) | Building and Configuring CI/CD Pipelines |
@@ -264,7 +264,7 @@ section is only true for this one.
   | Tool | Version |
   | --- | --- |
   | Kustomize (inside `kubectl` 1.35) | 5.7.1 (the only Kustomize the lessons use) |
-  | Helm (bootstrap plumbing only, not taught) | 4.3.0 |
+  | Helm (chart authoring and release management) | 4.3.0 |
   | Argo CD | 3.5.4 |
   | Flux | 2.9.6 |
   | Tekton Pipelines / Triggers / `tkn` | 1.17.0 / 0.36.4 / 0.46.1 |
@@ -387,7 +387,7 @@ content: `starfleet/scout-deploy` (Kustomize base and overlays, Helm values),
     into each step's home from a `tekton.dev/git-0` basic-auth Secret on the
     run's service account. The kind node pulls from the in-cluster registry
     through a containerd `hosts.toml` written by a privileged Job.
-  - Helm 4.3.0 (bootstrap only, checked 2026-10-10): `--wait` defaults to
+  - Helm 4.3.0 (teaching and bootstrap, checked 2026-11-04): `--wait` defaults to
     `hookOnly` when omitted, `--atomic` is now `--rollback-on-failure`, and
     new installs use server-side apply by default.
   - podinfo 6.15.0 metrics and faults (verified 2026-10-12):
@@ -514,7 +514,8 @@ this order:
 
 **Tag list** (lower case, hyphens, never synonyms):
 
-- Packaging: `kustomize`, `overlays`, `patches`, `config-generator`
+- Packaging: `kustomize`, `overlays`, `patches`, `config-generator`, `helm-chart`,
+  `helm-values`, `helm-release`, `helm-rollback`
 - Argo CD: `argocd-application`, `sync-policy`, `self-heal`, `prune`,
   `sync-waves`, `sync-hooks`, `ignore-differences`, `applicationset`,
   `app-of-apps`, `appproject`, `repository-credentials`, `out-of-sync`,

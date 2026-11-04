@@ -1,0 +1,247 @@
+schema_version: 1
+kind: question_bank
+id: ats018-010-02
+course_id: ATS018
+exam_code: CNPE
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: module
+  id: section-010/module-02
+  title: Package And Configure Applications With Helm
+questions:
+- id: ats018-010-02-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Read the purpose of chart files.
+  source_readings:
+  - sections/section-010/module-02/course-01-chart-layout-and-rendering.md
+  prompt: You need to add a Kubernetes resource to the scout chart. Where does its template belong?
+  options:
+  - id: a
+    text: Chart.yaml
+    explanation: Chart.yaml holds package metadata rather than resource templates.
+  - id: b
+    text: templates/
+    explanation: Helm renders files in templates/.
+  - id: c
+    text: values.yaml
+    explanation: values.yaml holds inputs rather than resource templates.
+  - id: d
+    text: The release history
+    explanation: History stores release revisions rather than editable template files.
+  correct_option: b
+  explanation: Helm renders resource templates in templates/. Chart.yaml describes the package and values.yaml supplies
+    defaults.
+- id: ats018-010-02-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Distinguish local rendering from installation.
+  source_readings:
+  - sections/section-010/module-02/course-01-chart-layout-and-rendering.md
+  prompt: The production namespace is not reachable yet. Which command lets you inspect the local scout chart as
+    Kubernetes manifests?
+  options:
+  - id: a
+    text: helm install scout ./scout
+    explanation: install sends resources to Kubernetes and needs cluster access.
+  - id: b
+    text: helm history scout
+    explanation: history reads stored revisions from the cluster.
+  - id: c
+    text: helm template scout ./scout
+    explanation: template renders the local chart without installing a release.
+  - id: d
+    text: helm rollback scout 1
+    explanation: rollback changes an installed release and needs cluster access.
+  correct_option: c
+  explanation: helm template renders locally without installing a release. The other operations use release state
+    in the cluster.
+- id: ats018-010-02-q03
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Understand what linting proves.
+  source_readings:
+  - sections/section-010/module-02/course-01-chart-layout-and-rendering.md
+  prompt: helm lint succeeds for a chart with a readiness probe. What should you do before accepting the workload?
+  options:
+  - id: a
+    text: Check readiness and send an application request after installation
+    explanation: Readiness and an application request check the installed workload.
+  - id: b
+    text: Assume the application responds because lint checked the probe
+    explanation: Lint does not contact the running application or exercise its probe.
+  - id: c
+    text: Use appVersion as proof of the running image
+    explanation: appVersion describes intent and does not prove which image runs.
+  - id: d
+    text: Treat the release name as the probe result
+    explanation: A release name identifies the installation and is not a health result.
+  correct_option: a
+  explanation: Lint checks chart structure and common mistakes. Running readiness and a real response require the
+    installed workload.
+- id: ats018-010-02-q04
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Choose values for exposed settings.
+  source_readings:
+  - sections/section-010/module-02/course-02-values-templates-and-versions.md
+  prompt: The Deployment template reads .Values.replicaCount. Production needs two replicas. Which lasting change
+    best fits?
+  options:
+  - id: a
+    text: Hardcode two replicas in the template for every environment
+    explanation: Hardcoding would give every environment the same default behavior instead of an override.
+  - id: b
+    text: Change appVersion to 2
+    explanation: appVersion describes application metadata rather than pod count.
+  - id: c
+    text: Change the Service port to 2
+    explanation: A Service port controls the network entry point rather than replicas.
+  - id: d
+    text: 'Set replicaCount: 2 in the production values file'
+    explanation: The template reads replicaCount, so the environment values file can set it.
+  correct_option: d
+  explanation: A values override fits a setting that the template already exposes and keeps environment settings
+    separate.
+- id: ats018-010-02-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Identify when a direct template edit is required.
+  source_readings:
+  - sections/section-010/module-02/course-02-values-templates-and-versions.md
+  prompt: 'You add message: release-ready to values, but no template reads message. What makes the container receive
+    it?'
+  options:
+  - id: a
+    text: Add an env entry to the Deployment template that reads .Values.message
+    explanation: The env entry connects the values key to the container environment.
+  - id: b
+    text: Run helm list in all namespaces
+    explanation: Listing releases does not change rendered resources.
+  - id: c
+    text: Change the chart description to release-ready
+    explanation: The description is package metadata and does not create container settings.
+  - id: d
+    text: Set appVersion to the message
+    explanation: appVersion is descriptive metadata and does not create an env field.
+  correct_option: a
+  explanation: A values key alone cannot add a container environment variable. The template must render the required
+    env entry.
+- id: ats018-010-02-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Separate package metadata from image configuration.
+  source_readings:
+  - sections/section-010/module-02/course-02-values-templates-and-versions.md
+  prompt: The scout template reads image.tag. You change only appVersion from 6.14.0 to 6.15.0. Which image tag
+    does rendering use?
+  options:
+  - id: a
+    text: 6.15.0 because appVersion always sets the image
+    explanation: The template does not read appVersion when building this image reference.
+  - id: b
+    text: The unchanged image.tag value
+    explanation: The template reads image.tag, and that value did not change.
+  - id: c
+    text: The chart version
+    explanation: Chart version identifies the package rather than a container image tag.
+  - id: d
+    text: The Helm client version
+    explanation: The Helm client version does not select the application image.
+  correct_option: b
+  explanation: appVersion describes the application. This template uses image.tag, so that value must change to
+    select a new image.
+- id: ats018-010-02-q07
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Version a modified chart.
+  source_readings:
+  - sections/section-010/module-02/course-02-values-templates-and-versions.md
+  prompt: You add a new values-driven environment field to the chart. Which metadata change records a new chart
+    package?
+  options:
+  - id: a
+    text: Increase only the replica count
+    explanation: Replica count changes workload settings rather than chart package metadata.
+  - id: b
+    text: Rename the release namespace
+    explanation: A release namespace selects where the chart is installed.
+  - id: c
+    text: Increase Chart.yaml version
+    explanation: Chart.yaml version identifies a chart package change.
+  - id: d
+    text: Change the release revision by editing Chart.yaml
+    explanation: Helm assigns release revisions during operations; Chart.yaml cannot set them.
+  correct_option: c
+  explanation: Chart.yaml version identifies the package. Helm manages release revisions; they are separate from
+    chart versions.
+- id: ats018-010-02-q08
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Deploy or upgrade a namespaced release.
+  source_readings:
+  - sections/section-010/module-02/course-02-values-templates-and-versions.md
+  prompt: The same command must install scout if absent and upgrade it if present in outpost. Which command fits?
+  options:
+  - id: a
+    text: helm template scout ./scout --namespace outpost
+    explanation: template only renders manifests and does not manage releases.
+  - id: b
+    text: helm install scout ./scout --namespace outpost
+    explanation: install does not upgrade an existing release.
+  - id: c
+    text: helm list --namespace outpost
+    explanation: list reads release state without installing or upgrading.
+  - id: d
+    text: helm upgrade --install scout ./scout --namespace outpost --create-namespace
+    explanation: upgrade --install handles either state and creates the namespace on the install path when requested.
+  correct_option: d
+  explanation: upgrade --install handles either release state, and --create-namespace creates outpost when taking
+    the install path.
+- id: ats018-010-02-q09
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Find release revision numbers.
+  source_readings:
+  - sections/section-010/module-02/course-03-history-and-rollback.md
+  prompt: A release needs an earlier configuration. Which command shows the revision numbers to select?
+  options:
+  - id: a
+    text: helm lint ./scout
+    explanation: lint checks chart structure instead of release history.
+  - id: b
+    text: helm history scout --namespace starfleet-production
+    explanation: history lists release revisions for the named release and namespace.
+  - id: c
+    text: helm template scout ./scout
+    explanation: template renders local manifests instead of reading stored revisions.
+  - id: d
+    text: helm version --short
+    explanation: version reports the client version rather than release revisions.
+  correct_option: b
+  explanation: helm history reads the named release revisions in the selected namespace.
+- id: ats018-010-02-q10
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain rollback effects.
+  source_readings:
+  - sections/section-010/module-02/course-03-history-and-rollback.md
+  prompt: You roll back scout to revision 2 after revision 3 changed its message. What happens to history and your
+    local values files?
+  options:
+  - id: a
+    text: History loses revision 3 and the files are rewritten
+    explanation: Rollback adds a revision and does not rewrite local files.
+  - id: b
+    text: The chart version becomes 2 and local files are deleted
+    explanation: The rollback argument selects a release revision, not a chart version.
+  - id: c
+    text: A new revision restores revision 2 configuration; local files stay unchanged
+    explanation: Rollback adds a revision with the selected stored configuration and leaves local files alone.
+  - id: d
+    text: The release changes namespace to the one in the values filename
+    explanation: The values filename does not determine release namespace.
+  correct_option: c
+  explanation: Rollback restores the stored configuration and adds a revision. It does not rewrite local chart or
+    values files.

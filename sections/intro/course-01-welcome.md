@@ -12,7 +12,7 @@ The exam is hands-on. You get a set of Kubernetes clusters and a list of tasks, 
 
 The first topic is **implementing GitOps workflows**. GitOps means that a Git repository holds the desired state of the cluster, and a controller in the cluster keeps the cluster equal to that state. You will learn to:
 
-- Render the manifests for each environment with Kustomize overlays and Helm charts.
+- Render manifests with Kustomize overlays and Helm charts, and manage Helm releases with the `helm` command-line tool.
 - Deliver an application from a Git repository with Argo CD, and keep the cluster in line with Git through automated sync.
 - Create many applications at once with an ApplicationSet, and limit a team to its own repository and namespace with an AppProject.
 - Find out why an Argo CD application is out of sync or unhealthy, and fix it in Git.

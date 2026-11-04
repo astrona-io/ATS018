@@ -1,0 +1,5 @@
+replicaCount: 1
+image:
+  repository: ghcr.io/stefanprodan/podinfo
+  tag: "6.14.0"
+message: baseline

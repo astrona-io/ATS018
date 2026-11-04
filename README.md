@@ -3,7 +3,7 @@
 
 [![Liberapay](https://img.shields.io/badge/Liberapay-Support_Astrona.io-F6C915?logo=liberapay&logoColor=black&style=for-the-badge)](https://liberapay.com/Astrona.io)
 
-Training material covering the Certified Cloud Native Platform Engineer (CNPE) GitOps and Continuous Delivery domain: packaging applications with Kustomize, continuous delivery from Git with Argo CD and Flux, continuous integration pipelines with Tekton that hand a new image to a GitOps repository, and progressive delivery with Argo Rollouts and Flagger. Each module pairs a layered reader with an ungraded hands-on playground on a local kind cluster with an in-cluster Gitea server. Each section closes with an integration capstone.
+Training material covering the Certified Cloud Native Platform Engineer (CNPE) GitOps and Continuous Delivery domain: packaging applications with Kustomize and Helm, continuous delivery from Git with Argo CD and Flux, continuous integration pipelines with Tekton that hand a new image to a GitOps repository, and progressive delivery with Argo Rollouts and Flagger. Each module pairs a layered reader with an ungraded hands-on playground on a local kind cluster. Delivery modules supply an in-cluster Gitea server when needed. Each section closes with an integration capstone.
 
 This course covers the **GitOps and Continuous Delivery** domain of the Certified Cloud Native Platform Engineer (CNPE) exam, **25% of the exam**.
 
@@ -16,7 +16,7 @@ Each section ends with a **capstone lab** combining its modules and a knowledge-
 
 [`astrona.yaml`](astrona.yaml) is the manifest: every section, module, reading, playground, lab and capstone in the order they are meant to be taken.
 
-Everything targets **kind 0.33.0**, **kind_node_image kindest/node:v1.35.8**, **kubernetes 1.35**, **kustomize 5.7.1 (embedded in kubectl 1.35)**, **helm 4.3.0 (bootstrap plumbing only, not taught)**, **argocd 3.5.4**, **flux 2.9.6**, **tekton_pipelines 1.17.0**, **tekton_triggers 0.36.4**, **tkn 0.46.1**, **argo_rollouts 1.10.0**, **flagger 1.45.0**, **istio 1.30.7**, **kube_prometheus_stack_chart 92.3.0**, **gitea 28.1.0-rootless (plumbing only, not taught)**, **podinfo 6.15.0**, **go_httpbin 2.25.0** on `kind`.
+Everything targets **kind 0.33.0**, **kind_node_image kindest/node:v1.35.8**, **kubernetes 1.35**, **kustomize 5.7.1 (embedded in kubectl 1.35)**, **helm 4.3.0 (chart authoring and release management)**, **argocd 3.5.4**, **flux 2.9.6**, **tekton_pipelines 1.17.0**, **tekton_triggers 0.36.4**, **tkn 0.46.1**, **argo_rollouts 1.10.0**, **flagger 1.45.0**, **istio 1.30.7**, **kube_prometheus_stack_chart 92.3.0**, **gitea 28.1.0-rootless (plumbing only, not taught)**, **podinfo 6.15.0**, **go_httpbin 2.25.0** on `kind`.
 
 ---
 
@@ -24,7 +24,7 @@ Everything targets **kind 0.33.0**, **kind_node_image kindest/node:v1.35.8**, **
 
 | Section | Title | Modules | Curriculum item |
 | --- | --- | --- | --- |
-| [010](sections/section-010) | Packaging Applications For GitOps | 1 | Implementing GitOps Workflows for Application and Infrastructure Deployment |
+| [010](sections/section-010) | Packaging Applications For GitOps | 2 | Implementing GitOps Workflows for Application and Infrastructure Deployment |
 | [020](sections/section-020) | Continuous Delivery With Argo CD | 3 | Implementing GitOps Workflows for Application and Infrastructure Deployment |
 | [030](sections/section-030) | Continuous Delivery With Flux | 3 | Implementing GitOps Workflows for Application and Infrastructure Deployment |
 | [040](sections/section-040) | Continuous Integration Pipelines (Tekton, Argo Workflows and Events) | 3 | Building and Configuring CI/CD Pipelines Integrated with Kubernetes |

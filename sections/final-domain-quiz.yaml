@@ -452,3 +452,51 @@ questions:
         explanation: "Correct. The plugin removes the rule when the release ends, and requests without the header keep using stable pods."
     correct_option: d
     explanation: "The `Rollout` lists the rule under `managedRoutes`, `setCanaryScale` keeps a canary pod and `setHeaderRoute` creates the rule."
+  - id: ats018-final-q21
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: Choose a template change when a values key is not consumed.
+    source_readings:
+    - sections/section-010/module-02/course-02-values-templates-and-versions.md
+    prompt: 'The outpost team sets replicaCount: 2 in its Helm values file. Rendering still shows one replica because
+      the Deployment template contains the literal replicas: 1. Which change makes the value control the workload?'
+    options:
+    - id: a
+      text: 'Change the template to replicas: {{ .Values.replicaCount }}'
+      explanation: This expression reads the values key when Helm renders the Deployment.
+    - id: b
+      text: Change appVersion to "2"
+      explanation: appVersion describes the application and does not set replicas.
+    - id: c
+      text: Run helm list with the destination namespace
+      explanation: Listing releases cannot change the template.
+    - id: d
+      text: Rename values.yaml to Chart.yaml
+      explanation: Chart metadata and values are separate chart inputs.
+    correct_option: a
+    explanation: A values override only works when a template reads that value. Add the missing expression, render
+      again and upgrade the release.
+  - id: ats018-final-q22
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: Keep desired source values after a Helm rollback.
+    source_readings:
+    - sections/section-010/module-02/course-03-history-and-rollback.md
+    prompt: 'An operator rolls scout back to a known release revision. The response is correct again, but trial-values.yaml
+      still sets message: temporary. What should the operator use for the next repeatable upgrade?'
+    options:
+    - id: a
+      text: The temporary file, because rollback rewrote its contents
+      explanation: Rollback does not rewrite local values files.
+    - id: b
+      text: The revision number as the image tag
+      explanation: A release revision is separate from a container image tag.
+    - id: c
+      text: Only appVersion, because it restores all old values
+      explanation: appVersion cannot restore values or control the image unless a template explicitly reads it.
+    - id: d
+      text: The saved desired values file, with the temporary override omitted
+      explanation: The desired file preserves the intended configuration for another upgrade.
+    correct_option: d
+    explanation: Rollback restores stored release configuration and adds a revision. It leaves files unchanged, so
+      the next upgrade must use the desired source values.

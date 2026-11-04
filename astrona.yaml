@@ -16,12 +16,12 @@ training:
   description: >
     Training material covering the Certified Cloud Native Platform Engineer
     (CNPE) GitOps and Continuous Delivery domain: packaging applications with
-    Kustomize, continuous delivery from Git with Argo CD and Flux,
+    Kustomize and Helm, continuous delivery from Git with Argo CD and Flux,
     continuous integration pipelines with Tekton that hand a new image to a
     GitOps repository, and progressive delivery with Argo Rollouts and
     Flagger. Each module pairs a layered reader with an ungraded hands-on
-    playground on a local kind cluster with an in-cluster Gitea server. Each
-    section closes with an integration capstone.
+    playground on a local kind cluster. Delivery modules supply an in-cluster
+    Gitea server when needed. Each section closes with an integration capstone.
     Built for Kubernetes 1.35.
 
   certification:
@@ -63,10 +63,9 @@ modules:
     title: "Packaging Applications For GitOps"
     description: >
       Every GitOps controller applies manifests that a packaging tool
-      renders from Git. This section teaches Kustomize, the packaging tool
-      built into kubectl and rendered natively by Argo CD and Flux, so the
-      reader can produce a repeatable manifest per environment and read what
-      an overlay will apply before any controller touches the cluster.
+      renders from Git. Build Kustomize overlays and Helm charts, inspect
+      their rendered resources, and manage namespaced Helm releases through
+      installation, upgrade and rollback.
 
     content:
       - type: reading
@@ -116,6 +115,49 @@ modules:
         path: sections/section-010/module-01/quiz.yaml
         question_count: 10
       - type: reading
+        title: Package And Configure Applications With Helm
+        path: sections/section-010/module-02/course.md
+      - type: reading
+        title: Chart Layout, Rendering And Installation
+        path: sections/section-010/module-02/course-01-chart-layout-and-rendering.md
+      - type: reading
+        title: Values, Templates And Versions
+        path: sections/section-010/module-02/course-02-values-templates-and-versions.md
+      - type: reading
+        title: History And Rollback
+        path: sections/section-010/module-02/course-03-history-and-rollback.md
+      - type: reading
+        title: Question
+        path: sections/section-010/module-02/labs/lab-01/question.md
+      - type: lab
+        title: Edit, Upgrade And Roll Back A Helm Chart Lab
+        path: sections/section-010/module-02/labs/lab-01
+        difficulty: beginner
+        estimated_duration: 25m
+        topic: packaging
+        task_kind: build
+        tags:
+          - helm-chart
+          - helm-values
+          - helm-release
+          - helm-rollback
+        learning_goals:
+          - Edit a chart template and version metadata and deploy it with values
+          - Inspect release revisions and restore the desired revision through rollback
+          - Prove the saved chart matches the live release and application response
+        resources:
+          - name: Helm charts
+            url: https://helm.sh/docs/topics/charts/
+          - name: Helm rollback
+            url: https://helm.sh/docs/helm/helm_rollback/
+      - type: reading
+        title: Summary
+        path: sections/section-010/module-02/course-04-summary.md
+      - type: quiz
+        title: 'Knowledge Check: Package And Configure Applications With Helm'
+        path: sections/section-010/module-02/quiz.yaml
+        question_count: 10
+      - type: reading
         title: Question
         path: sections/section-010/capstone/labs/lab-01/question.md
       - type: lab
@@ -135,6 +177,31 @@ modules:
             url: https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/
           - name: "Kustomize reference"
             url: https://kubectl.docs.kubernetes.io/references/kustomize/
+
+      - type: reading
+        title: Question
+        path: sections/section-010/capstone/labs/lab-02/question.md
+      - type: lab
+        title: Deploy With Helm And A Kustomize Overlay Capstone
+        path: sections/section-010/capstone/labs/lab-02
+        difficulty: intermediate
+        estimated_duration: 35m
+        topic: packaging
+        task_kind: build
+        tags:
+          - helm-chart
+          - helm-values
+          - kustomize
+          - config-generator
+        learning_goals:
+          - Complete a values-driven Helm chart and deploy its required production workload
+          - Build a Kustomize staging overlay with a generated ConfigMap
+          - Prove both workload configurations through requests from shuttle
+        resources:
+          - name: Helm charts
+            url: https://helm.sh/docs/topics/charts/
+          - name: Kustomize in kubectl
+            url: https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/
 
   - id: module-020
     title: "Continuous Delivery With Argo CD"
@@ -941,4 +1008,5 @@ modules:
       - type: quiz
         title: "Final Quiz: GitOps and Continuous Delivery"
         path: sections/final-domain-quiz.yaml
+        question_count: 22
         pass_score: 70

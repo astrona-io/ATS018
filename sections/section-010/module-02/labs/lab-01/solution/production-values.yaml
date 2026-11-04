@@ -1,0 +1,4 @@
+replicaCount: 2
+image:
+  tag: "6.15.0"
+message: release-ready

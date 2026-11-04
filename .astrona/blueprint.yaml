@@ -16,12 +16,12 @@ course:
   description: >
     Training material covering the Certified Cloud Native Platform Engineer
     (CNPE) GitOps and Continuous Delivery domain: packaging applications with
-    Kustomize, continuous delivery from Git with Argo CD and Flux,
+    Kustomize and Helm, continuous delivery from Git with Argo CD and Flux,
     continuous integration pipelines with Tekton that hand a new image to a
     GitOps repository, and progressive delivery with Argo Rollouts and
     Flagger. Each module pairs a layered reader with an ungraded hands-on
-    playground on a local kind cluster with an in-cluster Gitea server. Each
-    section closes with an integration capstone.
+    playground on a local kind cluster. Delivery modules supply an in-cluster
+    Gitea server when needed. Each section closes with an integration capstone.
   certification:
     name: Certified Cloud Native Platform Engineer
     code: CNPE
@@ -34,7 +34,7 @@ course:
     kind_node_image: "kindest/node:v1.35.8"
     kubernetes: "1.35"
     kustomize: "5.7.1 (embedded in kubectl 1.35)"
-    helm: "4.3.0 (bootstrap plumbing only, not taught)"
+    helm: "4.3.0 (chart authoring and release management)"
     argocd: "3.5.4"
     flux: "2.9.6"
     tekton_pipelines: "1.17.0"
@@ -63,13 +63,10 @@ sections:
     title: Packaging Applications For GitOps
     curriculum_item: Implementing GitOps Workflows for Application and Infrastructure Deployment
     description: >
-      Every GitOps controller applies manifests that a packaging tool renders
-      from Git. This section teaches Kustomize, the packaging tool built into
-      kubectl and rendered natively by Argo CD and Flux, so the reader can
-      produce a repeatable manifest per environment and read what an overlay
-      will apply before any controller touches the cluster. It comes first
-      because Argo CD, Flux and Tekton all consume this format. Helm charts
-      appear later only as a source that Argo CD and Flux consume.
+      Package applications with Kustomize overlays and Helm charts. Render
+      the intended configuration before applying it, choose values or template
+      changes, and manage namespaced Helm releases through upgrades and rollback.
+      The compact Helm module is the simulator exception approved 2026-11-04.
     modules:
       - id: module-01
         title: Build Environment Overlays With Kustomize
@@ -101,6 +98,30 @@ sections:
           kubectl embeds its own kustomize version, which can lag the
           standalone 5.8.3 binary. State which one each command uses and
           check `kubectl version --client` output at build.
+      - id: module-02
+        title: Package And Configure Applications With Helm
+        objectives:
+          - Read Chart.yaml, values.yaml and templates and render and lint a chart
+          - Choose values overrides or template edits and bump version and appVersion
+          - Install and upgrade a release in a namespace, list it, inspect history and roll back
+        outline:
+          - Chart layout, helm lint, helm template and helm install
+          - Values overrides, direct template edits, version and appVersion, helm upgrade --install
+          - helm list, helm history and helm rollback
+          - Summary and a ten-question knowledge check
+        diagrams:
+          - type: flowchart
+            shows: Templates and values render to installed resources
+          - type: flowchart
+            shows: Rollback restores a stored configuration and adds a revision
+        playground: true
+        playground_env: >
+          Kubernetes 1.35 with Helm 4.3.0 in the terminal, preloaded podinfo
+          6.14.0 and 6.15.0 and curl 8.22.0. Empty staging and production
+          namespaces and shuttle in starfleet. No application release yet.
+        notes: >
+          Compact simulator exception approved 2026-11-04. One 25-minute lab
+          covers chart edits, versioning, values, upgrade and rollback.
     capstone:
       title: Packaging Applications For GitOps Capstone
       objective: >
@@ -109,6 +130,15 @@ sections:
         the right image tag, replica count and generated configuration per
         environment, and apply cleanly, proving both environments answer
         from `shuttle` with the expected version and message.
+    additional_capstones:
+      - id: lab-02
+        title: Deploy With Helm And A Kustomize Overlay
+        path: sections/section-010/capstone/labs/lab-02
+        estimated_duration: 35m
+        objective: >
+          Complete a Helm chart that delivers two production replicas and a
+          values-driven message. Complete a Kustomize staging overlay with a
+          generated ConfigMap. Prove both configurations through shuttle.
 
   - id: section-020
     title: Continuous Delivery With Argo CD
