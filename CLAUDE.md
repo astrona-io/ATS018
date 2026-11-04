@@ -234,11 +234,12 @@ section is only true for this one.
   Rollouts, Workflows, Events), Crossplane, Flagger, Flux, Gatekeeper,
   Grafana, Istio, Jaeger, Kyverno, Linkerd, OPA, OpenCost, OpenTelemetry,
   Prometheus and Tekton, plus built-in Kubernetes (`kubectl`, the Kustomize
-  inside `kubectl`, the core APIs). Anything else is a waste of the
-  student's time and is never a lesson subject. Helm charts appear only as
-  something a listed tool consumes (a Flux `HelmRelease`, an Argo CD
-  Application with a Helm source); the `helm` command-line tool is never
-  taught. Gitea, the in-cluster registry, `crane` and Helm itself are
+  inside `kubectl`, the core APIs). Two exceptions get one compact module
+  each, because the CNPE simulator tests them (user decision, 2026-11-04):
+  Helm (edit a chart and deploy it with the `helm` command-line tool, section
+  010) and OpenTofu (plan, apply and add a resource, section 060). Anything
+  else is a waste of the student's time and is never a lesson subject. Gitea,
+  the in-cluster registry and `crane` are
   plumbing: playground bootstraps install and seed them, and a lesson names
   them in one sentence at most and never teaches their web UI or CLI.
 - **The sections:** the order follows a change from Git to users: package
