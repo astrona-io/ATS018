@@ -316,7 +316,7 @@ items:
   kind: quiz
   what: 'final domain quiz across every section'
   status: done
-  note: 'untested: built without booting 2026-11-04; 22 questions including 2 Helm questions'
+  note: 'untested: built without booting 2026-11-04; 24 questions including 2 Helm and 2 OpenTofu questions'
 - key: section-010/module-02/lab
   kind: lab
   what: 'Edit, Upgrade And Roll Back A Helm Chart'
@@ -332,3 +332,38 @@ items:
   what: 'Helm production release and Kustomize staging overlay'
   status: done
   note: 'untested: built without booting 2026-11-04; schema, shell and content checks passed; CLI validate blocked by home lock permissions'
+
+- key: section-060/module-02/course
+  kind: course
+  what: Compact OpenTofu reading and summary
+  status: done
+  note: 'untested: built without booting 2026-11-04; OpenTofu 1.13.2 and Kubernetes provider 3.4.0; static
+    checks only'
+
+- key: section-060/module-02/playground
+  kind: playground
+  what: OpenTofu terminal and genuine local state
+  status: done
+  note: 'untested: built without booting 2026-11-04; OpenTofu 1.13.2 and Kubernetes provider 3.4.0; static
+    checks only'
+
+- key: section-060/module-02/lab
+  kind: lab
+  what: Plan and apply a Deployment and Service
+  status: done
+  note: 'untested: built without booting 2026-11-04; OpenTofu 1.13.2 and Kubernetes provider 3.4.0; static
+    checks only'
+
+- key: section-060/module-02/quiz
+  kind: quiz
+  what: 10 OpenTofu questions
+  status: done
+  note: 'untested: built without booting 2026-11-04; OpenTofu 1.13.2 and Kubernetes provider 3.4.0; static
+    checks only'
+
+- key: section-060/capstone/lab-02
+  kind: capstone
+  what: Three independent OpenTofu working directories
+  status: done
+  note: 'untested: built without booting 2026-11-04; OpenTofu 1.13.2 and Kubernetes provider 3.4.0; static
+    checks only'

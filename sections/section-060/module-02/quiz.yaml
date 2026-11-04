@@ -1,0 +1,237 @@
+schema_version: 1
+kind: question_bank
+id: ats018-060-02
+course_id: ATS018
+exam_code: CNPE
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: module
+  id: section-060/module-02
+  title: Plan And Apply Kubernetes Resources With OpenTofu
+questions:
+- id: ats018-060-02-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Identify the role of state.
+  source_readings:
+  - sections/section-060/module-02/course-01-read-a-working-directory-and-state.md
+  prompt: The directory already manages a Deployment. What lets OpenTofu identify that existing object?
+  options:
+  - id: a
+    text: The name of the file containing the resource
+    explanation: File names organize configuration but do not identify live resources.
+  - id: b
+    text: The local state maps its resource address to the real object
+    explanation: State maps configuration addresses to real resource identities.
+  - id: c
+    text: The order of resource blocks in the file
+    explanation: Block order does not identify a live object.
+  - id: d
+    text: The pod image tag alone
+    explanation: An image tag cannot identify which Deployment a resource owns.
+  correct_option: b
+  explanation: State preserves the identity mapping between configuration and the real resource.
+- id: ats018-060-02-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Initialize an existing directory.
+  source_readings:
+  - sections/section-060/module-02/course-01-read-a-working-directory-and-state.md
+  prompt: You receive a working directory with configuration and state. What should you do before planning?
+  options:
+  - id: a
+    text: Delete the state so discovery starts fresh
+    explanation: Deleting state loses existing ownership information.
+  - id: b
+    text: Run kubectl apply on the HCL files
+    explanation: kubectl applies Kubernetes manifests, not OpenTofu configuration.
+  - id: c
+    text: Rename all resource addresses
+    explanation: Changing addresses can change how OpenTofu maps the resources.
+  - id: d
+    text: Run tofu init with the supplied provider pin
+    explanation: Initialization installs the selected provider and keeps the state.
+  correct_option: d
+  explanation: Initialization prepares the provider and working directory without creating workloads.
+- id: ats018-060-02-q03
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Distinguish binary and readable plans.
+  source_readings:
+  - sections/section-060/module-02/course-02-review-and-apply-an-attribute-change.md
+  prompt: You need to apply exactly the reviewed operations. Which file should you give to tofu apply?
+  options:
+  - id: a
+    text: The binary file written by tofu plan -out=change.plan
+    explanation: The binary plan contains the reviewed operations.
+  - id: b
+    text: The redirected text from tofu plan
+    explanation: Redirected text is a review document, not an executable plan.
+  - id: c
+    text: The provider lock file
+    explanation: The lock file records provider selections, not resource operations.
+  - id: d
+    text: The text written by tofu show
+    explanation: The show display is readable text, not an executable plan.
+  correct_option: a
+  explanation: The binary plan records the proposed operations in a format apply can execute.
+- id: ats018-060-02-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Save a readable review.
+  source_readings:
+  - sections/section-060/module-02/course-02-review-and-apply-an-attribute-change.md
+  prompt: A binary plan is saved as change.plan. Which command creates a readable review without terminal
+    colors?
+  options:
+  - id: a
+    text: tofu apply -no-color change.plan > plan.txt
+    explanation: Apply changes resources rather than displaying the saved plan.
+  - id: b
+    text: tofu init > plan.txt
+    explanation: Initialization prepares the directory but does not display the saved plan.
+  - id: c
+    text: tofu show -no-color change.plan > plan.txt
+    explanation: Show renders the binary plan and -no-color omits escape codes.
+  - id: d
+    text: tofu state list > plan.txt
+    explanation: The state list contains resource addresses rather than a plan diff.
+  correct_option: c
+  explanation: Show displays the saved plan and shell redirection writes its text to the named file.
+- id: ats018-060-02-q05
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Read the scope of an attribute update.
+  source_readings:
+  - sections/section-060/module-02/course-02-review-and-apply-an-attribute-change.md
+  prompt: You changed only replicas from one to two. Which plan fits the intended change?
+  options:
+  - id: a
+    text: A Deployment deletion with no replacement
+    explanation: Deleting the Deployment does not satisfy the new replica count.
+  - id: b
+    text: A new namespace and no Deployment update
+    explanation: A namespace creation does not update the existing Deployment.
+  - id: c
+    text: An in-place Deployment update
+    explanation: The existing Deployment can be updated in place.
+  - id: d
+    text: A replacement of the cluster
+    explanation: Replacing the cluster is outside the requested attribute change.
+  correct_option: c
+  explanation: A replica change should update the existing Deployment.
+- id: ats018-060-02-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Connect a Service selector.
+  source_readings:
+  - sections/section-060/module-02/course-03-add-a-service-and-understand-reconciliation.md
+  prompt: Which value should the new Service selector match?
+  options:
+  - id: a
+    text: The labels on the Deployment pod template
+    explanation: Service selectors select matching pod labels.
+  - id: b
+    text: The Deployment resource address
+    explanation: A resource address is an OpenTofu identifier, not a pod label.
+  - id: c
+    text: The provider version string
+    explanation: A provider version does not select pods.
+  - id: d
+    text: The state file name
+    explanation: The state file name has no role in traffic selection.
+  correct_option: a
+  explanation: Kubernetes routes Service traffic to pods whose labels match the selector.
+- id: ats018-060-02-q07
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Choose Service ports.
+  source_readings:
+  - sections/section-060/module-02/course-03-add-a-service-and-understand-reconciliation.md
+  prompt: Podinfo listens on 9898 and clients must use port 80. Which Service port block is correct?
+  options:
+  - id: a
+    text: port = 9898 and target_port = 80
+    explanation: These values reverse the Service port and pod target port.
+  - id: b
+    text: port = 80 and target_port = 443
+    explanation: Port 443 is not the application port in this task.
+  - id: c
+    text: port = 9898 and target_port = 9898
+    explanation: Clients would need port 9898, while the task requires 80.
+  - id: d
+    text: port = 80 and target_port = 9898
+    explanation: The Service receives on 80 and forwards to the application on 9898.
+  correct_option: d
+  explanation: The Service accepts connections on port and forwards them to target_port on the pods.
+- id: ats018-060-02-q08
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Compare drift repair models.
+  source_readings:
+  - sections/section-060/module-02/course-03-add-a-service-and-understand-reconciliation.md
+  prompt: A person changes a managed replica count after apply. When does OpenTofu restore the configured
+    count?
+  options:
+  - id: a
+    text: Immediately through its permanent controller
+    explanation: OpenTofu does not install a permanent reconciliation controller.
+  - id: b
+    text: When a plan proposes the repair and an apply executes it
+    explanation: A normal plan reads live drift and apply performs the repair.
+  - id: c
+    text: When kubectl reads the Deployment
+    explanation: Reading the Deployment does not change its desired replica count.
+  - id: d
+    text: When tofu init downloads the provider
+    explanation: Initialization installs providers but does not repair live drift.
+  correct_option: b
+  explanation: OpenTofu does not continuously reconcile resources between commands.
+- id: ats018-060-02-q09
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Keep state identity safe.
+  source_readings:
+  - sections/section-060/module-02/course-01-read-a-working-directory-and-state.md
+  prompt: A plan tries to create a Deployment that already exists after someone removed local state. What
+    information was lost?
+  options:
+  - id: a
+    text: The mapping from the configured resource to the existing Deployment
+    explanation: State records which real object corresponds to a resource address.
+  - id: b
+    text: The Kubernetes Deployment controller binary
+    explanation: Removing local state does not remove a Kubernetes controller.
+  - id: c
+    text: The container image stored in the cluster
+    explanation: State removal does not remove an image from the cluster.
+  - id: d
+    text: The Service domain name
+    explanation: A Service name does not replace a Deployment identity mapping.
+  correct_option: a
+  explanation: Configuration alone does not tell OpenTofu which real object it already manages.
+- id: ats018-060-02-q10
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Choose an owner for managed fields.
+  source_readings:
+  - sections/section-060/module-02/course-03-add-a-service-and-understand-reconciliation.md
+  prompt: A team wants Crossplane and OpenTofu to manage the same Deployment replica count. What should
+    they do?
+  options:
+  - id: a
+    text: Let both overwrite the field on each run
+    explanation: Two owners can repeatedly overwrite each other with conflicting values.
+  - id: b
+    text: Delete both state and configuration
+    explanation: Deleting state and configuration discards the management records.
+  - id: c
+    text: Give the field one clear owner
+    explanation: A clear owner prevents competing desired values for the field.
+  - id: d
+    text: Use manual scaling as a third owner
+    explanation: Manual scaling adds another change source without settling ownership.
+  correct_option: c
+  explanation: Competing desired values can overwrite each other. Choose a clear owner for each managed
+    field.

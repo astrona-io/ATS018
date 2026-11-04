@@ -97,3 +97,8 @@ When a graded lab tests what a chapter taught, that chapter ends with a **Your m
 The last page of every module is the **Summary**. It sums up what you learned in a few short paragraphs, organised by idea. It also ends the module's hands-on work: the Summary page removes the playground, so your machine is clean before the next module.
 
 One rule holds on every page. Code blocks are exactly what you type or what you will see. Never change a command to make it "look right". If the result is different from the page, that difference is the lesson.
+
+OpenTofu also gets one compact module for simulator practice. You inspect local
+state, review a saved plan, apply an attribute change and add a Kubernetes
+Service. Crossplane teaches continuous reconciliation; OpenTofu teaches an
+explicit plan and apply workflow.

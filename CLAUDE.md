@@ -252,7 +252,7 @@ section is only true for this one.
   | 030 | Continuous Delivery With Flux | Implementing GitOps Workflows |
   | 040 | Continuous Integration Pipelines (Tekton, Argo Workflows and Events) | Building and Configuring CI/CD Pipelines |
   | 050 | Progressive Delivery | Deploying Applications Using Progressive Delivery Strategies |
-  | 060 | Infrastructure Deployment Through GitOps (Crossplane) | Implementing GitOps Workflows |
+  | 060 | Infrastructure Deployment Through GitOps (Crossplane and OpenTofu) | Implementing GitOps Workflows |
 
   The full design (modules, objectives, playground environments, capstones)
   is in `.astrona/blueprint.yaml`.
@@ -265,6 +265,7 @@ section is only true for this one.
   | --- | --- |
   | Kustomize (inside `kubectl` 1.35) | 5.7.1 (the only Kustomize the lessons use) |
   | Helm (chart authoring and release management) | 4.3.0 |
+  | OpenTofu / Kubernetes provider (`hashicorp/kubernetes`) | 1.13.2 / 3.4.0 |
   | Argo CD | 3.5.4 |
   | Flux | 2.9.6 |
   | Tekton Pipelines / Triggers / `tkn` | 1.17.0 / 0.36.4 / 0.46.1 |
@@ -526,6 +527,7 @@ this order:
   `resolvers`, `tekton-triggers`, `eventlistener`, `webhook`, `argo-workflows`,
   `argo-events`, `workflowtemplate`
 - Hand-off: `image-tag-update`, `git-credentials`, `container-registry`
+- Infrastructure: `opentofu`, `kubernetes-provider`, `state`, `execution-plan`
 - Progressive delivery: `argo-rollouts`, `canary`, `blue-green`,
   `analysistemplate`, `promotion`, `abort-rollback`, `flagger`, `istio`,
   `prometheus`, `promql`
@@ -549,7 +551,8 @@ astrona test -c sections/section-020/module-01/labs/lab-01
 
 Names: a playground is `ats-018-playground-<section>-<module>`, a module lab
 is `ats-018-lab-<section>-<module>` and a capstone is
-`ats-018-capstone-<section>`; keep those names. A second lab in a module
+`ats-018-capstone-<section>`; keep those names. A second section capstone takes `ats-018-capstone-<section>-<lab>`, for
+example `ats-018-capstone-060-02`. A second lab in a module
 takes `ats-018-lab-<section>-<module>-<lab>`, for example
 `ats-018-lab-020-02-02`, so two labs never share a name. Lab bootstrap
 scripts do not pin a kube context: astrona sets `KUBECONFIG` for the lab, and

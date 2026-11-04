@@ -931,7 +931,8 @@ modules:
       A platform team also delivers the infrastructure and the platform APIs
       that applications use. This section teaches Crossplane, which turns
       Kubernetes into a control plane for any resource, and delivers its
-      objects from Git with Argo CD or Flux.
+      objects from Git with Argo CD or Flux. A compact OpenTofu module teaches
+      state, plan and apply with the Kubernetes provider.
 
     content:
       - type: reading
@@ -986,6 +987,49 @@ modules:
         path: sections/section-060/module-01/quiz.yaml
         question_count: 10
       - type: reading
+        title: Plan And Apply Kubernetes Resources With OpenTofu
+        path: sections/section-060/module-02/course.md
+      - type: reading
+        title: Read A Working Directory And Its State
+        path: sections/section-060/module-02/course-01-read-a-working-directory-and-state.md
+      - type: reading
+        title: Review And Apply An Attribute Change
+        path: sections/section-060/module-02/course-02-review-and-apply-an-attribute-change.md
+      - type: reading
+        title: Add A Service And Understand Reconciliation
+        path: sections/section-060/module-02/course-03-add-a-service-and-understand-reconciliation.md
+      - type: reading
+        title: Question
+        path: sections/section-060/module-02/labs/lab-01/question.md
+      - type: lab
+        title: Plan And Apply A Deployment And Service Lab
+        path: sections/section-060/module-02/labs/lab-01
+        difficulty: beginner
+        estimated_duration: 20m
+        topic: gitops-handoff
+        task_kind: build
+        tags:
+          - opentofu
+          - kubernetes-provider
+          - state
+          - execution-plan
+        learning_goals:
+          - Inspect state and save a human-readable plan before applying
+          - Update managed resources and add a Service without replacing the existing Deployment
+          - Prove state, configuration and live Kubernetes behaviour agree
+        resources:
+          - name: OpenTofu planning
+            url: https://opentofu.org/docs/v1.13/cli/commands/plan/
+          - name: Kubernetes provider Service 3.4.0
+            url: https://registry.terraform.io/providers/hashicorp/kubernetes/3.4.0/docs/resources/service
+      - type: reading
+        title: Summary
+        path: sections/section-060/module-02/course-04-summary.md
+      - type: quiz
+        title: 'Knowledge Check: Plan And Apply Kubernetes Resources With OpenTofu'
+        path: sections/section-060/module-02/quiz.yaml
+        question_count: 10
+      - type: reading
         title: Question
         path: sections/section-060/capstone/labs/lab-01/question.md
       - type: lab
@@ -1005,8 +1049,32 @@ modules:
             url: https://argo-cd.readthedocs.io/en/stable/operator-manual/health/
           - name: "Crossplane Compositions"
             url: https://docs.crossplane.io/latest/composition/compositions/
+      - type: reading
+        title: Question
+        path: sections/section-060/capstone/labs/lab-02/question.md
+      - type: lab
+        title: Repair Three OpenTofu Working Directories Capstone
+        path: sections/section-060/capstone/labs/lab-02
+        difficulty: advanced
+        estimated_duration: 35m
+        topic: gitops-handoff
+        task_kind: troubleshooting
+        tags:
+          - opentofu
+          - kubernetes-provider
+          - state
+          - execution-plan
+        learning_goals:
+          - Inspect state and save a human-readable plan before applying
+          - Update managed resources and add a Service without replacing the existing Deployment
+          - Prove state, configuration and live Kubernetes behaviour agree
+        resources:
+          - name: OpenTofu planning
+            url: https://opentofu.org/docs/v1.13/cli/commands/plan/
+          - name: Kubernetes provider Service 3.4.0
+            url: https://registry.terraform.io/providers/hashicorp/kubernetes/3.4.0/docs/resources/service
       - type: quiz
         title: "Final Quiz: GitOps and Continuous Delivery"
         path: sections/final-domain-quiz.yaml
-        question_count: 22
+        question_count: 24
         pass_score: 70

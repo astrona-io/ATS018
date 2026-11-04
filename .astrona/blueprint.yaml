@@ -577,7 +577,8 @@ sections:
       The first competency covers infrastructure as well as applications.
       This section teaches Crossplane, which turns infrastructure into
       Kubernetes objects, and delivers those objects with Argo CD and Flux so
-      one Git repository drives both. It comes last because it reuses the
+      one Git repository drives both. OpenTofu adds an explicit plan and apply
+      workflow with the Kubernetes provider. It comes last because it reuses the
       delivery controllers and packaging from earlier sections.
     modules:
       - id: module-01
@@ -605,6 +606,25 @@ sections:
           needed. One claim is deliberately broken.
         notes: >
           Pin Crossplane and check v2 versus v1 API names at build.
+      - id: module-02
+        title: Plan And Apply Kubernetes Resources With OpenTofu
+        objectives:
+          - Read a working directory and its existing state
+          - Initialize and save a human-readable plan
+          - Change a Deployment attribute and add a Service
+          - Compare explicit apply with Crossplane reconciliation
+        outline:
+          - Read A Working Directory And Its State
+          - Review And Apply An Attribute Change
+          - Add A Service And Understand Reconciliation
+        diagrams:
+          - type: flowchart
+            shows: Configuration planned against live objects, applied and recorded in state
+        playground: true
+        playground_env: OpenTofu 1.13.2 and Kubernetes provider 3.4.0 on the terminal; one provider-managed
+          Deployment and real local state; no Service.
+        notes: Compact simulator exception approved 2026-11-04. Adds capstone/labs/lab-02 with scale, expose
+          and drift directories; lab-01 is unchanged.
     capstone:
       title: Infrastructure Deployment Through GitOps Capstone
       objective: >

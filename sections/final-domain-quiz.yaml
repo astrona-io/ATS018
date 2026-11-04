@@ -500,3 +500,50 @@ questions:
     correct_option: d
     explanation: Rollback restores stored release configuration and adds a revision. It leaves files unchanged, so
       the next upgrade must use the desired source values.
+
+  - id: ats018-final-q23
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: Save a readable review.
+    source_readings:
+    - sections/section-060/module-02/course-02-review-and-apply-an-attribute-change.md
+    prompt: A binary plan is saved as change.plan. Which command creates a readable review without terminal
+      colors?
+    options:
+    - id: a
+      text: tofu apply -no-color change.plan > plan.txt
+      explanation: Apply changes resources rather than displaying the saved plan.
+    - id: b
+      text: tofu init > plan.txt
+      explanation: Initialization prepares the directory but does not display the saved plan.
+    - id: c
+      text: tofu show -no-color change.plan > plan.txt
+      explanation: Show renders the binary plan and -no-color omits escape codes.
+    - id: d
+      text: tofu state list > plan.txt
+      explanation: The state list contains resource addresses rather than a plan diff.
+    correct_option: c
+    explanation: Show displays the saved plan and shell redirection writes its text to the named file.
+  - id: ats018-final-q24
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: Compare drift repair models.
+    source_readings:
+    - sections/section-060/module-02/course-03-add-a-service-and-understand-reconciliation.md
+    prompt: A person changes a managed replica count after apply. When does OpenTofu restore the configured
+      count?
+    options:
+    - id: a
+      text: Immediately through its permanent controller
+      explanation: OpenTofu does not install a permanent reconciliation controller.
+    - id: b
+      text: When a plan proposes the repair and an apply executes it
+      explanation: A normal plan reads live drift and apply performs the repair.
+    - id: c
+      text: When kubectl reads the Deployment
+      explanation: Reading the Deployment does not change its desired replica count.
+    - id: d
+      text: When tofu init downloads the provider
+      explanation: Initialization installs providers but does not repair live drift.
+    correct_option: b
+    explanation: OpenTofu does not continuously reconcile resources between commands.
