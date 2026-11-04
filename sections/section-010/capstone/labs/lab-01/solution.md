@@ -7,6 +7,14 @@ astrona res copy scout
 cd scout
 ```
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-010/capstone/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Step 1: build staging and read the first error
 
 ```sh
@@ -79,4 +87,10 @@ kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.starfleet-stagi
 kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.starfleet-production/
 ```
 
-The staging response has `"version": "6.15.0"` and `"message": "staging"`. The production response has `"version": "6.14.0"` and `"message": "production"`. Then run `astrona submit`.
+The staging response has `"version": "6.15.0"` and `"message": "staging"`. The production response has `"version": "6.14.0"` and `"message": "production"`.
+
+Stop the watch with Ctrl-C, then run the plain command once:
+
+```sh
+astrona submit -c sections/section-010/capstone/labs/lab-01
+```

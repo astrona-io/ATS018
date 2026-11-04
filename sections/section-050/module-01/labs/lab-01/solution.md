@@ -1,5 +1,13 @@
 # Solution
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-050/module-01/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Step 1: write the Rollout for the current version
 
 A Rollout has the same `selector` and pod template as the Deployment. It adds a `strategy` with the canary steps. Start on the version that runs now, `6.14.0`, so the controller treats the next change as a release.
@@ -112,4 +120,10 @@ kubectl argo rollouts get rollout scout -n starfleet --no-color
 kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout | grep '"version"'
 ```
 
-The status is `Healthy` with `6.15.0 (stable)` and the response shows `"version": "6.15.0"`. Then run `astrona submit`.
+The status is `Healthy` with `6.15.0 (stable)` and the response shows `"version": "6.15.0"`.
+
+Stop the watch with Ctrl-C, then run the plain command once:
+
+```sh
+astrona submit -c sections/section-050/module-01/labs/lab-01
+```

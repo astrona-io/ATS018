@@ -2,6 +2,14 @@
 
 Three objects solve the task: an `AppProject` that limits the `outpost` team, an `ApplicationSet` that generates the two environment applications, and the `Application` of the team. Create the project first, because the team application refers to it.
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-020/module-02/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Step 1: create the AppProject
 
 An `AppProject` limits which repositories, destinations and resource kinds its applications may use. Without `clusterResourceWhitelist`, a project allows no cluster-scoped resource. The empty group `''` is the core API group, where `Service` lives.
@@ -138,6 +146,12 @@ kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.outpost/
 ```
 
 Each JSON response shows a `version`. The first two must show `6.15.0`.
+
+Stop the watch with Ctrl-C, then run the plain command once:
+
+```sh
+astrona submit -c sections/section-020/module-02/labs/lab-01
+```
 
 ## Common mistakes
 

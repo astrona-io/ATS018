@@ -1,5 +1,13 @@
 # Solution
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-050/module-03/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Step 1: create the Canary
 
 A `Canary` names the target Deployment and holds the release policy. Flagger checks every 15 seconds, moves 10 percent of the requests per step up to 50 percent, and allows 3 failed checks. The `rollout` webhook calls the load tester, so the canary pods receive requests and the success rate has values.
@@ -93,10 +101,16 @@ kubectl -n starfleet patch deploy scout --type=json -p='[{"op":"remove","path":"
 kubectl -n starfleet get canary scout --watch
 ```
 
-After about three minutes the status is `Succeeded`. Check the result and run `astrona submit`:
+After about three minutes the status is `Succeeded`. Check the result:
 
 ```sh
 kubectl -n starfleet exec deploy/shuttle -c shuttle -- curl -s http://scout.starfleet/ | grep -E '"(version|message)"'
 ```
 
 The response shows version `6.15.0` and the message `fixed`.
+
+Stop the watch with Ctrl-C, then run the plain command once:
+
+```sh
+astrona submit -c sections/section-050/module-03/labs/lab-01
+```

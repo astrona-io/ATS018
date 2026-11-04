@@ -2,6 +2,14 @@
 
 Two deliveries are broken. Steps 1 to 5 repair the delivery from Git: the source, the two Kustomizations and a change pushed to Git. Steps 6 to 8 repair the Helm release. The two parts do not depend on each other.
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-030/capstone/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Step 1: read the status of the source and the Kustomization
 
 ```sh
@@ -205,4 +213,10 @@ kubectl -n starfleet get deploy relay-podinfo
 kubectl -n starfleet exec deploy/shuttle -- curl -s http://relay-podinfo.starfleet:9898/
 ```
 
-The Deployment has 1 ready replica and the response shows `"version": "6.15.0"`. Run `astrona submit` to grade.
+The Deployment has 1 ready replica and the response shows `"version": "6.15.0"`.
+
+Stop the watch with Ctrl-C, then run the plain command once:
+
+```sh
+astrona submit -c sections/section-030/capstone/labs/lab-01
+```

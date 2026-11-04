@@ -13,15 +13,16 @@ while changing the resources through OpenTofu.
 
 ## The feedback loop
 
-Run the following from the host terminal where you started the lab:
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
 
 ```sh
-astrona submit --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-060/module-02/labs/lab-01
+astrona submit --watch --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-060/module-02/labs/lab-01
 ```
 
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 The checks are `scout`. Each requires a saved review and the applied
-result, so none should pass on the untouched starting environment. Re-run the
-same submission command after each completed directory.
+result, so none should pass on the untouched starting environment.
 
 ## Step 1: Review and apply scout
 
@@ -83,8 +84,13 @@ tofu plan -no-color
 ```
 
 Look for version `6.15.0` in the response and a fresh plan with no changes.
-Run the check: `scout` should now pass. It compares the saved review with
+The watch terminal shows `scout` passing. It compares the saved review with
 live resource identities, checks state and configuration, and sends a request.
+Stop the watch with Ctrl-C, then run the plain command once:
+
+```sh
+astrona submit --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-060/module-02/labs/lab-01
+```
 
 ## If a check stays red
 

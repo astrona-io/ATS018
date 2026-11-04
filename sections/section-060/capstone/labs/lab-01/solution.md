@@ -2,6 +2,14 @@
 
 Two faults hide in the repository. The `preview` environment sets `replicas: "1"` (a string), so the API server rejects it and the sync fails. The `Composition` sets the Service `targetPort` to `web`, but the container port is named `http`, so the Service has no endpoints even though every `ScoutEnvironment` reports `Ready`.
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-060/capstone/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Step 1: Deliver the repository with Argo CD
 
 Save this as `application-scout-platform.yaml`:
@@ -118,7 +126,7 @@ The pod is running, but the Service targets the port `web`. The pod names its po
 
 ## Step 5: Fix both faults in Git
 
-Clone the repository (use `kubectl -n gitea port-forward svc/gitea-http 3000:3000` in a second terminal):
+Clone the repository (use `kubectl -n gitea port-forward svc/gitea-http 3000:3000` in another terminal):
 
 ```sh
 git clone http://platform:starfleet-gitops@127.0.0.1:3000/starfleet/platform-infra.git
@@ -170,4 +178,10 @@ Sync Status:        Synced to main (740dfcf)
 Health Status:      Healthy
 ```
 
-The commit identifier in your output differs. Run `astrona submit`.
+The commit identifier in your output differs.
+
+Stop the watch with Ctrl-C, then run the plain command once:
+
+```sh
+astrona submit -c sections/section-060/capstone/labs/lab-01
+```

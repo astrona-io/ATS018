@@ -1,5 +1,13 @@
 # Solution
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Step 1: write the Pipeline
 
 The three Tasks already exist. Save this as `pipeline-scout-release.yaml`:
@@ -161,6 +169,8 @@ The application is `Synced` and `Healthy`, and the request returns `"version": "
 Do not fix the version with `kubectl set image` or `kubectl edit`. With self-heal on, Argo CD reverts the change, and Git would still say `6.14.0`.
 
 ## Step 6: submit
+
+Stop the watch with Ctrl-C, then run the plain command once:
 
 ```sh
 astrona submit

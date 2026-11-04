@@ -11,11 +11,13 @@ Build the production Helm release and the staging Kustomize overlay from the sup
 
 ## The feedback loop
 
-Run grading from the host terminal where you started the lab. Re-run it after each change:
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
 
 ```sh
-astrona submit --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-010/capstone/labs/lab-02
+astrona submit --watch --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-010/capstone/labs/lab-02
 ```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
 
 The `chart-release` and `overlay` checks need work at startup. These are expected conditions, not a captured grading transcript.
 
@@ -126,13 +128,7 @@ kubectl -n starfleet exec deploy/shuttle -- curl -fsS http://scout.starfleet-pro
 
 Look for chart `scout-0.2.0`, application version `6.15.0` and message `chart-production`.
 
-Run the check from the host terminal:
-
-```sh
-astrona submit --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-010/capstone/labs/lab-02
-```
-
-The `chart-release` check should now pass. If pods are still settling, wait for the Deployment with `kubectl -n starfleet-production rollout status deploy/scout --timeout=180s` and submit again.
+The watch terminal shows the `chart-release` check passing. If pods are still settling, wait for the Deployment with `kubectl -n starfleet-production rollout status deploy/scout --timeout=180s`.
 
 ## Step 3: Complete the staging overlay
 
@@ -203,13 +199,11 @@ kubectl -n starfleet exec deploy/shuttle -- curl -fsS http://scout.starfleet-pro
 
 Both responses should show version `6.15.0`. Staging must show `overlay-staging`; production must still show `chart-production`.
 
-Run the check from the host terminal:
+The watch terminal shows both `chart-release` and `overlay` passing. Stop the watch with Ctrl-C, then run the plain command once:
 
 ```sh
 astrona submit --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-010/capstone/labs/lab-02
 ```
-
-Both `chart-release` and `overlay` should now pass.
 
 ## If a check stays red
 

@@ -1,5 +1,13 @@
 # Solution
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Step 1: push a commit and read the first symptom
 
 Clone the repository, change `VERSION` and push to `main`:
@@ -145,7 +153,7 @@ kubectl -n starfleet get workflows -l events.argoproj.io/sensor=push-ci \
   -o jsonpath='{range .items[*]}{.metadata.name}{"  "}{.status.phase}{"  "}{.spec.arguments.parameters[0].value}{"\n"}{end}'
 ```
 
-The newest Workflow is `Succeeded`, and its revision is the commit ID that `git rev-parse HEAD` printed. Then submit:
+The newest Workflow is `Succeeded`, and its revision is the commit ID that `git rev-parse HEAD` printed. Then stop the watch with Ctrl-C and run the plain command once:
 
 ```sh
 astrona submit

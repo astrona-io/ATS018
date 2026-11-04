@@ -1,5 +1,13 @@
 # Solution
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Step 1: run the template and read the failure
 
 Save this as `workflow-run-tests.yaml`:
@@ -193,6 +201,8 @@ The Workflow created by the Sensor is `Succeeded`, and its revision is the commi
 If no Workflow appears, read the Sensor log with `kubectl -n argo-events logs -l sensor-name=push-ci`. If you pushed before the pods were `Running`, push a new commit.
 
 ## Step 6: submit
+
+Stop the watch with Ctrl-C, then run the plain command once:
 
 ```sh
 astrona submit

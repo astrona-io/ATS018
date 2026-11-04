@@ -1,5 +1,13 @@
 # Solution
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Step 1: read why the Rollout is Degraded
 
 Read the status of the Rollout:
@@ -184,7 +192,7 @@ kubectl -n starfleet patch rollout scout --type=json -p '[{"op":"replace","path"
 kubectl -n starfleet get rollout scout -o jsonpath='{.status.phase}{"\n"}'
 ```
 
-The template is the stable one again, so the Rollout is `Healthy` at once and no new release starts. Then submit:
+The template is the stable one again, so the Rollout is `Healthy` at once and no new release starts. Then stop the watch with Ctrl-C and run the plain command once:
 
 ```sh
 astrona submit

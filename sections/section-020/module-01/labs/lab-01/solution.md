@@ -2,6 +2,14 @@
 
 Argo CD can only deliver what it can read, so the work has three parts: give Argo CD access to the repository, tell it what to deliver in an `Application`, and check the result.
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-020/module-01/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Step 1: save the repository Secret
 
 Argo CD reads repository credentials from Secrets in its own namespace that carry the label `argocd.argoproj.io/secret-type: repository`. The `url` in the Secret must match the `repoURL` of the `Application`.
@@ -94,6 +102,12 @@ kubectl -n starfleet-staging get deploy scout
 ```
 
 The application controller sees the drift and syncs again, so the Deployment returns to 1 replica. If it stays at 3, check that `selfHeal: true` is in the `Application` under `spec.syncPolicy.automated`.
+
+Stop the watch with Ctrl-C, then run the plain command once:
+
+```sh
+astrona submit -c sections/section-020/module-01/labs/lab-01
+```
 
 ## Common mistakes
 

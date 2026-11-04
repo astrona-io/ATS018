@@ -1,5 +1,13 @@
 # Solution
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-050/module-02/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Step 1: write the gate
 
 An AnalysisTemplate holds the Prometheus query and the conditions. The controller runs inside the cluster, so the address is the in-cluster Service address of Prometheus. The argument `candidate-hash` selects the pods of one template through the label `rollouts_pod_template_hash`. The first measurement waits 45 seconds because a new pod needs several 15-second scrapes before its rate has data.
@@ -212,8 +220,14 @@ kubectl apply -f rollout-scout-gated.yaml
 kubectl argo rollouts status scout -n starfleet --timeout 180s
 ```
 
-The Rollout is `Healthy` on the accepted template. Send a request from `shuttle` and then run `astrona submit`:
+The Rollout is `Healthy` on the accepted template. Send a request from `shuttle`:
 
 ```sh
 kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout | grep '"message"'
+```
+
+Stop the watch with Ctrl-C, then run the plain command once:
+
+```sh
+astrona submit -c sections/section-050/module-02/labs/lab-01
 ```

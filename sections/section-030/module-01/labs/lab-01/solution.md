@@ -1,5 +1,13 @@
 # Solution
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-030/module-01/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Step 1: read the status of the source and the Kustomization
 
 ```sh
@@ -167,4 +175,10 @@ kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.starfleet-produ
 flux get kustomizations -n flux-system
 ```
 
-The response shows `"message": "production"`. All three `Kustomization` objects show `False` under `SUSPENDED` and `True` under `READY`. Run `astrona submit` to grade.
+The response shows `"message": "production"`. All three `Kustomization` objects show `False` under `SUSPENDED` and `True` under `READY`.
+
+Stop the watch with Ctrl-C, then run the plain command once:
+
+```sh
+astrona submit -c sections/section-030/module-01/labs/lab-01
+```

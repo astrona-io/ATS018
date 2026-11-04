@@ -2,6 +2,14 @@
 
 The gate has two faults. The Rollout passes the hash of the stable template to the analysis, so the analysis never judges the candidate. The query selects `path="/"`, but podinfo labels requests to `/` with `path="root"`, so the query returns no data. You find both by releasing a test candidate and reading its `AnalysisRun`.
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-050/capstone/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Step 1: Read the gate
 
 Show how the Rollout runs the analysis:
@@ -125,4 +133,10 @@ kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.starfleet/
   "message": "canary-good",
 ```
 
-The output is shortened to two lines. The stable ReplicaSet is now the one of `canary-good`, and 4 replicas are available. Run `astrona submit`.
+The output is shortened to two lines. The stable ReplicaSet is now the one of `canary-good`, and 4 replicas are available.
+
+Stop the watch with Ctrl-C, then run the plain command once:
+
+```sh
+astrona submit -c sections/section-050/capstone/labs/lab-01
+```

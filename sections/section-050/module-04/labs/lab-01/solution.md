@@ -1,5 +1,13 @@
 # Solution
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-050/module-04/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Step 1: create the AnalysisTemplate
 
 An `AnalysisTemplate` holds the metric query. This one divides the rate of `2xx` responses by the rate of all responses on `path="root"` for one pod template hash. A new pod has no rate data for about 45 seconds, so the metric starts after `initialDelay: 45s`. It succeeds at `0.99` or higher, and one failed measurement is allowed.
@@ -177,4 +185,10 @@ kubectl argo rollouts get rollout scout -n starfleet
 kubectl -n starfleet exec deploy/shuttle -- curl -s http://$GATEWAY/ | grep '"message"'
 ```
 
-The request returns `good-build`. Run `astrona submit` to grade.
+The request returns `good-build`.
+
+Stop the watch with Ctrl-C, then run the plain command once:
+
+```sh
+astrona submit -c sections/section-050/module-04/labs/lab-01
+```

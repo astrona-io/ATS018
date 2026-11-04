@@ -1,5 +1,13 @@
 # Solution
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-060/module-01/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Step 1: deliver the repository with Argo CD
 
 An Argo CD `Application` names a Git path and a destination. One `Application` with the path `.` and `directory.recurse: true` reads the platform API and both environments. Automated sync with prune and self-heal keeps the cluster equal to Git. The sync option `SkipDryRunOnMissingResource=true` lets the `ScoutEnvironment` objects apply after the definition that creates their kind. The sync wave annotations in the files set that order: the definition first, then the `Composition`, then the environments.
@@ -126,4 +134,10 @@ kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.starfleet-produ
 kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.starfleet-staging/ | grep -E '"(version|message)"'
 ```
 
-The `Application` is `Synced` and `Healthy`, both XRs are `READY True`, and both environments return version `6.15.0`. Run `astrona submit` to grade.
+The `Application` is `Synced` and `Healthy`, both XRs are `READY True`, and both environments return version `6.15.0`.
+
+Stop the watch with Ctrl-C, then run the plain command once:
+
+```sh
+astrona submit -c sections/section-060/module-01/labs/lab-01
+```

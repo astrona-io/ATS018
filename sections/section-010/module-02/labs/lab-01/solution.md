@@ -11,11 +11,13 @@ Install the starter chart, add the required template field and values, then use 
 
 ## The feedback loop
 
-Run grading from the host terminal where you started the lab. Re-run it after each change:
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
 
 ```sh
-astrona submit --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-010/module-02/labs/lab-01
+astrona submit --watch --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-010/module-02/labs/lab-01
 ```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
 
 The `chart-release` and `rollback` checks need work at startup. These are expected conditions, not a captured grading transcript.
 
@@ -129,13 +131,7 @@ kubectl -n starfleet exec deploy/shuttle -- curl -fsS http://scout.starfleet-pro
 
 Look for chart `scout-0.2.0`, application version `6.15.0` and message `release-ready`.
 
-Run the check from the host terminal:
-
-```sh
-astrona submit --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-010/module-02/labs/lab-01
-```
-
-The `chart-release` check should now pass. If pods are still settling, wait for the Deployment with `kubectl -n starfleet-production rollout status deploy/scout --timeout=180s` and submit again.
+The watch terminal shows the `chart-release` check passing. If pods are still settling, wait for the Deployment with `kubectl -n starfleet-production rollout status deploy/scout --timeout=180s`.
 
 ## Step 3: Upgrade once and roll back
 
@@ -158,13 +154,11 @@ kubectl -n starfleet exec deploy/shuttle -- curl -fsS http://scout.starfleet-pro
 
 Look for a new deployed revision that records the rollback to 2. The response should show version `6.15.0` and message `release-ready` again. The saved chart and values still describe this desired configuration.
 
-Run the check from the host terminal:
+The watch terminal shows both `chart-release` and `rollback` passing. Stop the watch with Ctrl-C, then run the plain command once:
 
 ```sh
 astrona submit --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-010/module-02/labs/lab-01
 ```
-
-Both `chart-release` and `rollback` should now pass.
 
 ## If a check stays red
 

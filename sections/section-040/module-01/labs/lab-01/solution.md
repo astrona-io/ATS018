@@ -1,5 +1,13 @@
 # Solution
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Step 1: start the Pipeline
 
 The Pipeline `scout-ci` declares one workspace, `shared`. A `PipelineRun` must bind it. A `volumeClaimTemplate` makes Tekton create a PersistentVolumeClaim for the run.
@@ -114,6 +122,8 @@ kubectl -n starfleet get pipelinerun -o jsonpath='{range .items[*]}{.metadata.na
 The new run is `Succeeded`, and its `version` result is `6.15.0`. The old run is still listed as `Failed`.
 
 ## Step 5: submit
+
+Stop the watch with Ctrl-C, then run the plain command once:
 
 ```sh
 astrona submit

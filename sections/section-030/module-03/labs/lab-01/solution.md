@@ -1,5 +1,13 @@
 # Solution
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-030/module-03/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Step 1: scan the registry
 
 Save this as `imagerepository-scout.yaml`:
@@ -137,4 +145,10 @@ kubectl -n starfleet rollout status deploy/scout --timeout=90s
 kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.starfleet.svc/
 ```
 
-The response shows `"version": "6.15.0"`. In your clone, `git pull` and `git log` show the commit from `fluxcdbot`. Run `astrona submit` to grade.
+The response shows `"version": "6.15.0"`. In your clone, `git pull` and `git log` show the commit from `fluxcdbot`.
+
+Stop the watch with Ctrl-C, then run the plain command once:
+
+```sh
+astrona submit -c sections/section-030/module-03/labs/lab-01
+```

@@ -2,6 +2,14 @@
 
 Four things solve the task. First repair the broken `probe` Application in Git and turn on automated sync. Then create the `AppProject`, the `ApplicationSet` and the team `Application`. Start with `probe`, because it shows the fault that the other objects must not repeat.
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-020/capstone/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Step 1: find why probe is not healthy
 
 An Argo CD `Application` has two statuses. The sync status says whether the live objects match Git. The health status says whether they work. Read both:
@@ -178,4 +186,10 @@ kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.starfleet-produ
 kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.outpost/
 ```
 
-All four applications are `Synced` and `Healthy`, and the two `scout` environments answer with version `6.15.0`. Run `astrona submit` to grade the result.
+All four applications are `Synced` and `Healthy`, and the two `scout` environments answer with version `6.15.0`.
+
+Stop the watch with Ctrl-C, then run the plain command once:
+
+```sh
+astrona submit -c sections/section-020/capstone/labs/lab-01
+```

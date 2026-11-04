@@ -2,6 +2,14 @@
 
 Start with the overview, then take one application at a time. For each one, find which component reports the problem, then fix it in the place where the fault lives.
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-020/module-03/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Step 1: read all three applications
 
 ```sh
@@ -89,6 +97,12 @@ kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.starfleet-image
 ```
 
 Each JSON response must show `"version": "6.15.0"`.
+
+Stop the watch with Ctrl-C, then run the plain command once:
+
+```sh
+astrona submit -c sections/section-020/module-03/labs/lab-01
+```
 
 ## Common mistakes
 
