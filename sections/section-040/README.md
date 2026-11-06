@@ -44,7 +44,7 @@ The section has the modules below, in reading order. Each module has a playgroun
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-040/module-02/playground
     ```
 
-*   **Tekton Triggers lab:** Create PipelineRuns From JSON Requests With Tekton Triggers — `sections/section-040/module-02/labs/lab-02` (20 minutes). Extract two payload fields, write a run template with a named ServiceAccount, connect the existing EventListener, repair its permissions and send a request from `shuttle`. Grading sends fresh payloads and checks their successful runs.
+*   **Tekton Triggers readings and lab:** Listen For A Push With Tekton Triggers, Start The Pipeline From A Git Push and Create PipelineRuns From JSON Requests With Tekton Triggers — `sections/section-040/module-02/labs/lab-02` (20 minutes). Extract two payload fields, write a run template with a named ServiceAccount, connect the existing EventListener, repair its permissions and send a request from `shuttle`. Grading sends fresh payloads and checks their successful runs.
 
 ### 3. Run CI Workflows With Argo Workflows
 *   **Module Reader:** Run CI Workflows With Argo Workflows

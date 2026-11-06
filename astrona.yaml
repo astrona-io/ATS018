@@ -635,8 +635,11 @@ modules:
           - name: "Tekton authentication"
             url: https://tekton.dev/docs/pipelines/auth/
       - type: reading
+        title: "Listen For A Push With Tekton Triggers"
+        path: sections/section-040/module-02/course-04-listen-for-a-push-with-tekton-triggers.md
+      - type: reading
         title: "Start The Pipeline From A Git Push"
-        path: sections/section-040/module-02/course-04-start-the-pipeline-from-a-git-push.md
+        path: sections/section-040/module-02/course-05-start-the-pipeline-from-a-git-push.md
       - type: reading
         title: Question
         path: sections/section-040/module-02/labs/lab-02/question.md
@@ -666,7 +669,7 @@ modules:
             url: https://github.com/tektoncd/pipeline/blob/v1.17.0/docs/pipelineruns.md
       - type: reading
         title: "Summary"
-        path: sections/section-040/module-02/course-05-summary.md
+        path: sections/section-040/module-02/course-06-summary.md
       - type: quiz
         title: "Knowledge Check: Hand Off From A Tekton Pipeline To GitOps"
         path: sections/section-040/module-02/quiz.yaml
@@ -968,8 +971,8 @@ modules:
           - name: "Flagger 1.45.0 synchronous load tester handler"
             url: https://github.com/fluxcd/flagger/blob/v1.45.0/pkg/loadtester/server.go
       - type: reading
-        title: "Require Manual Approval Before A Release"
-        path: sections/section-050/module-03/course-05-manual-approval-gates.md
+        title: "Wait For Approval Before A Rollout"
+        path: sections/section-050/module-03/course-05-wait-for-approval-before-a-rollout.md
       - type: reading
         title: Question
         path: sections/section-050/module-03/labs/lab-03/question.md
@@ -993,8 +996,11 @@ modules:
           - name: "Load tester 0.39.0 gate endpoints in Flagger 1.45.0"
             url: https://github.com/fluxcd/flagger/blob/v1.45.0/pkg/loadtester/server.go
       - type: reading
+        title: "Wait For Approval Before Promotion"
+        path: sections/section-050/module-03/course-06-wait-for-approval-before-promotion.md
+      - type: reading
         title: "Summary"
-        path: sections/section-050/module-03/course-06-summary.md
+        path: sections/section-050/module-03/course-07-summary.md
       - type: quiz
         title: "Knowledge Check: Automate Canary Analysis With Flagger"
         path: sections/section-050/module-03/quiz.yaml

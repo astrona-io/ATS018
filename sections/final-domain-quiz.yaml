@@ -259,7 +259,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Describe the hand-off from CI to GitOps."
     source_readings:
-      - sections/section-040/module-02/course-05-summary.md
+      - sections/section-040/module-02/course-06-summary.md
     prompt: "Which two results prove a pipeline release end to end?"
     options:
       - id: a
@@ -391,7 +391,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Choose between Flagger and Rollouts."
     source_readings:
-      - sections/section-050/module-03/course-05-summary.md
+      - sections/section-050/module-03/course-07-summary.md
     prompt: "A team wants to keep its Deployment and let a controller create a primary copy and move Istio weights. Which tool fits?"
     options:
       - id: a

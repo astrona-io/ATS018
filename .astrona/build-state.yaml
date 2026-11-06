@@ -129,7 +129,7 @@ items:
   kind: course
   what: 'chapter for module 2: Hand Off From A Tekton Pipeline To GitOps'
   status: done
-  note: 'untested: built without booting 2026-11-06; existing four parts retained; added Triggers lab mission, landing outline and summary coverage; new lab YAML and shell syntax checked; astrona validate blocked by sandbox home lock'
+  note: 'untested: built without booting 2026-11-06; deep-dive review 2026-11-06 split the Triggers reading into course-04 (objects, request processing order, permissions, apply and check) and course-05 (filter test, webhook, push, end to end, troubleshooting, lab mission) and moved summary to course-06; recorded outputs kept unchanged; Triggers 0.36.4 sink and docs checked; added Triggers lab mission, landing outline and summary coverage; new lab YAML and shell syntax checked; astrona validate blocked by sandbox home lock'
 - key: section-040/quiz
   kind: quiz
   what: 'knowledge check for section-040: Continuous Integration Pipelines With Tekton'
@@ -175,7 +175,7 @@ items:
   kind: course
   what: 'chapter for module 3: Automate Canary Analysis With Flagger'
   status: done
-  note: 'untested: built without booting 2026-11-06; added fifth reading on manual confirmation gates and moved summary to course-06; Flagger 1.45.0 phases, events and load tester 0.39.0 endpoints checked against tagged source; existing parts retained'
+  note: 'untested: built without booting 2026-11-06; deep-dive review 2026-11-06 split the manual confirmation reading into course-05 (confirm-rollout, per-interval loop, status fields, load tester gate) and course-06 (confirm-promotion, checks that keep running, VirtualService weight, phase diagram) and moved summary to course-07; Flagger 1.45.0 scheduler, status and load tester 0.39.0 handlers checked against tagged source; existing parts retained'
 - key: section-050/quiz
   kind: quiz
   what: 'knowledge check for section-050: Progressive Delivery'

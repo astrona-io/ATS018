@@ -202,7 +202,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Name the parts of Tekton Triggers."
     source_readings:
-      - sections/section-040/module-02/course-04-start-the-pipeline-from-a-git-push.md
+      - sections/section-040/module-02/course-04-listen-for-a-push-with-tekton-triggers.md
     prompt: "In Tekton Triggers, which object reads values such as `$(body.after)` from the webhook request?"
     options:
       - id: a
@@ -225,7 +225,7 @@ questions:
     difficulty: advanced
     learning_objective: "Read an accepted but dropped event."
     source_readings:
-      - sections/section-040/module-02/course-04-start-the-pipeline-from-a-git-push.md
+      - sections/section-040/module-02/course-05-start-the-pipeline-from-a-git-push.md
     prompt: "You send a push event for `refs/heads/dev` to the `EventListener`. It answers with an event ID, but `tkn pipelinerun list` shows no new run. Why?"
     options:
       - id: a

@@ -6,7 +6,7 @@ This split is the hand-off. It keeps one source of truth for what runs in the cl
 
 Keep one sentence in mind for this module: **the pipeline writes to the registry and to Git, and only Argo CD writes to the cluster.** Every step you build either publishes an image, commits a tag, or starts the pipeline.
 
-The module has four parts. **Publish An Image To The Registry** explains the hand-off and writes a Task that publishes a new image tag. **Commit The New Tag With Git Credentials** writes the Task that changes the tag in the GitOps repository, and gives it credentials through a Secret and a service account. **One Pipeline From Source To Commit** chains the clone, the publish and the commit into one Pipeline and follows its commit until Argo CD serves it. **Start The Pipeline From A Git Push** adds Tekton Triggers and a webhook, so one push to the source repository ends with the new version answering requests.
+The module has five parts. **Publish An Image To The Registry** explains the hand-off and writes a Task that publishes a new image tag. **Commit The New Tag With Git Credentials** writes the Task that changes the tag in the GitOps repository, and gives it credentials through a Secret and a service account. **One Pipeline From Source To Commit** chains the clone, the publish and the commit into one Pipeline and follows its commit until Argo CD serves it. **Listen For A Push With Tekton Triggers** builds the `EventListener`, `TriggerBinding` and `TriggerTemplate`, explains the order in which the listener applies them to a request, and gives it the permissions to create runs. **Start The Pipeline From A Git Push** tests the filter by hand, connects the webhook, follows one push to the new version answering requests, and shows where to look when a push creates no run.
 
 The 20-minute lab **Create PipelineRuns From JSON Requests With Tekton Triggers** practises field extraction, template substitution and listener permissions with an existing Pipeline. You send a request from inside the cluster and check that its values reach a successful run.
 
@@ -17,7 +17,7 @@ After this module you can:
 - Push a newly tagged image to the in-cluster registry from a pipeline Task.
 - Update the image tag in a GitOps repository from a pipeline with a Git commit.
 - Give a Task Git credentials through a Secret and a service account.
-- Start a PipelineRun from a Git push with an `EventListener`, a `TriggerBinding` and a `TriggerTemplate`.
+- Start a PipelineRun from a Git push with an `EventListener`, a `TriggerBinding` and a `TriggerTemplate`, and say in which order the listener applies interceptors, bindings and the template.
 - Prove the full flow from a push to a PipelineRun, a commit and an Argo CD sync of the new version.
 
 ## Before you start
