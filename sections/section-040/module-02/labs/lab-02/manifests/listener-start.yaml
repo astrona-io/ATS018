@@ -1,0 +1,58 @@
+# This account can read namespaced Triggers objects, but cannot create runs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: scout-listener-readonly
+  namespace: starfleet
+rules:
+  - apiGroups: ["triggers.tekton.dev"]
+    resources: ["eventlisteners", "triggerbindings", "triggertemplates", "triggers", "interceptors"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: scout-listener-readonly
+  namespace: starfleet
+subjects:
+  - kind: ServiceAccount
+    name: scout-listener
+    namespace: starfleet
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: scout-listener-readonly
+---
+# Cluster-scoped read permissions are already in place.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: scout-listener
+subjects:
+  - kind: ServiceAccount
+    name: scout-listener
+    namespace: starfleet
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: tekton-triggers-eventlistener-clusterroles
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: scout-push
+  namespace: starfleet
+spec:
+  serviceAccountName: scout-listener
+  triggers:
+    - name: push
+      bindings:
+        - ref: scout-unwired
+      template:
+        ref: scout-unwired

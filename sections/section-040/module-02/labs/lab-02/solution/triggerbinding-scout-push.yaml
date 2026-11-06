@@ -1,0 +1,11 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: scout-push
+  namespace: starfleet
+spec:
+  params:
+    - name: revision
+      value: $(body.ref)
+    - name: repository
+      value: $(body.repository.full_name)

@@ -129,8 +129,7 @@ items:
   kind: course
   what: 'chapter for module 2: Hand Off From A Tekton Pipeline To GitOps'
   status: done
-  note: landing + 4 parts + summary; real push -> EventListener -> PipelineRun -> commit -> Argo CD sync
-    to 6.15.0
+  note: 'untested: built without booting 2026-11-06; existing four parts retained; added Triggers lab mission, landing outline and summary coverage; new lab YAML and shell syntax checked; astrona validate blocked by sandbox home lock'
 - key: section-040/quiz
   kind: quiz
   what: 'knowledge check for section-040: Continuous Integration Pipelines With Tekton'
@@ -391,3 +390,9 @@ items:
   what: Run a Pipeline that changes the cluster with tkn, with a new reading part
   status: done
   note: 'untested: built without booting 2026-11-04; Tekton 1.17.0, tkn 0.46.1, alpine/kubectl:1.35.4 (also added to the module playground preloads); static checks and astrona validate only; tkn flags, log line format and status.pipelineSpec read from the source'
+
+- key: section-040/module-02/labs/lab-02
+  kind: lab
+  what: 'Create PipelineRuns From JSON Requests With Tekton Triggers'
+  status: done
+  note: 'untested: built without booting 2026-11-06; Pipelines 1.17.0 and Triggers 0.36.4; two-field extraction, template substitution, listener RBAC and in-cluster requests; graders correlate fresh event IDs and check successful runs; YAML and bash -n passed; astrona validate blocked by sandbox home lock'

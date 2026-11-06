@@ -1,0 +1,13 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: scout-push
+  namespace: starfleet
+spec:
+  serviceAccountName: scout-listener
+  triggers:
+    - name: push
+      bindings:
+        - ref: scout-push
+      template:
+        ref: scout-check

@@ -1,0 +1,38 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: scout-check
+  namespace: starfleet
+spec:
+  params:
+    - name: revision
+      type: string
+    - name: repository
+      type: string
+  tasks:
+    - name: check-payload
+      params:
+        - name: revision
+          value: $(params.revision)
+        - name: repository
+          value: $(params.repository)
+      taskSpec:
+        params:
+          - name: revision
+            type: string
+          - name: repository
+            type: string
+        steps:
+          - name: check
+            image: alpine:3.23
+            env:
+              - name: REVISION
+                value: $(params.revision)
+              - name: REPOSITORY
+                value: $(params.repository)
+            script: |
+              #!/bin/sh
+              set -eu
+              test -n "$REVISION"
+              test -n "$REPOSITORY"
+              printf 'Repository: %s\nRevision: %s\n' "$REPOSITORY" "$REVISION"

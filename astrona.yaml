@@ -638,6 +638,33 @@ modules:
         title: "Start The Pipeline From A Git Push"
         path: sections/section-040/module-02/course-04-start-the-pipeline-from-a-git-push.md
       - type: reading
+        title: Question
+        path: sections/section-040/module-02/labs/lab-02/question.md
+      - type: lab
+        title: "Create PipelineRuns From JSON Requests With Tekton Triggers Lab"
+        path: sections/section-040/module-02/labs/lab-02
+        difficulty: intermediate
+        estimated_duration: 20m
+        topic: ci-pipelines
+        task_kind: build
+        tags: [tekton-triggers, eventlistener, triggerbinding, triggertemplate, rbac, payload-params]
+        learning_goals:
+          - Extract two JSON payload fields with a TriggerBinding
+          - Substitute bound params into a PipelineRun with a named ServiceAccount
+          - Wire an EventListener and repair its permission to create runs
+          - Send in-cluster requests and prove new runs succeed with the supplied values
+        resources:
+          - name: "Tekton Triggers 0.36.4 installation"
+            url: https://github.com/tektoncd/triggers/blob/v0.36.4/docs/install.md
+          - name: "Tekton Triggers 0.36.4 TriggerBindings"
+            url: https://github.com/tektoncd/triggers/blob/v0.36.4/docs/triggerbindings.md
+          - name: "Tekton Triggers 0.36.4 TriggerTemplates"
+            url: https://github.com/tektoncd/triggers/blob/v0.36.4/docs/triggertemplates.md
+          - name: "Tekton Triggers 0.36.4 EventListeners and permissions"
+            url: https://github.com/tektoncd/triggers/blob/v0.36.4/docs/eventlisteners.md
+          - name: "Tekton Pipelines 1.17.0 PipelineRuns"
+            url: https://github.com/tektoncd/pipeline/blob/v1.17.0/docs/pipelineruns.md
+      - type: reading
         title: "Summary"
         path: sections/section-040/module-02/course-05-summary.md
       - type: quiz

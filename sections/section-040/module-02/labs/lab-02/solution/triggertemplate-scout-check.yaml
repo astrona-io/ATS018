@@ -1,0 +1,25 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: scout-check
+  namespace: starfleet
+spec:
+  params:
+    - name: revision
+    - name: repository
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1
+      kind: PipelineRun
+      metadata:
+        generateName: scout-check-
+        namespace: starfleet
+      spec:
+        pipelineRef:
+          name: scout-check
+        params:
+          - name: revision
+            value: $(tt.params.revision)
+          - name: repository
+            value: $(tt.params.repository)
+        taskRunTemplate:
+          serviceAccountName: scout-runner

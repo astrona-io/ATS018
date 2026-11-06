@@ -44,6 +44,8 @@ The section has the modules below, in reading order. Each module has a playgroun
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-040/module-02/playground
     ```
 
+*   **Tekton Triggers lab:** Create PipelineRuns From JSON Requests With Tekton Triggers — `sections/section-040/module-02/labs/lab-02` (20 minutes). Extract two payload fields, write a run template with a named ServiceAccount, connect the existing EventListener, repair its permissions and send a request from `shuttle`. Grading sends fresh payloads and checks their successful runs.
+
 ### 3. Run CI Workflows With Argo Workflows
 *   **Module Reader:** Run CI Workflows With Argo Workflows
 *   **Hands-on Playground:** `sections/section-040/module-03/playground` — kind cluster with Argo Workflows v4.1.6 and the `argo` command-line tool, Argo Events v1.9.11 with a one-pod EventBus, and Gitea with `starfleet/scout-app`. A WorkflowTemplate `run-tests` is installed and deliberately has a step with a wrong working directory. Deliberately absent: no Workflow, no EventSource and no Sensor.

@@ -8,6 +8,8 @@ Keep one sentence in mind for this module: **the pipeline writes to the registry
 
 The module has four parts. **Publish An Image To The Registry** explains the hand-off and writes a Task that publishes a new image tag. **Commit The New Tag With Git Credentials** writes the Task that changes the tag in the GitOps repository, and gives it credentials through a Secret and a service account. **One Pipeline From Source To Commit** chains the clone, the publish and the commit into one Pipeline and follows its commit until Argo CD serves it. **Start The Pipeline From A Git Push** adds Tekton Triggers and a webhook, so one push to the source repository ends with the new version answering requests.
 
+The 20-minute lab **Create PipelineRuns From JSON Requests With Tekton Triggers** practises field extraction, template substitution and listener permissions with an existing Pipeline. You send a request from inside the cluster and check that its values reach a successful run.
+
 ## Learning objectives
 
 After this module you can:

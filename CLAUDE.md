@@ -268,7 +268,8 @@ section is only true for this one.
   | OpenTofu / Kubernetes provider (`hashicorp/kubernetes`) | 1.13.2 / 3.4.0 |
   | Argo CD | 3.5.4 |
   | Flux | 2.9.6 |
-  | Tekton Pipelines / Triggers / `tkn` | 1.17.0 / 0.36.4 / 0.46.1 |
+  | Tekton Pipelines / `tkn` | 1.17.0 / 0.46.1 |
+  | Tekton Triggers (including the EventListener lab; pin checked 2026-11-06) | 0.36.4 |
   | `alpine/kubectl` (Tekton steps that call the Kubernetes API) | 1.35.4 |
   | Argo Rollouts | 1.10.0 |
   | Flagger / Flagger load tester | 1.45.0 / 0.39.0 |
