@@ -383,6 +383,8 @@ content: `starfleet/scout-deploy` (Kustomize base and overlays, Helm values),
     resolves). The git resolver's `url` form clones anonymously unless the
     `gitToken` param names a token Secret. Do not preload the digest-pinned
     Tekton images: kind then fails the pods with `CreateContainerError`.
+    The same holds for every `preloadImages` entry with `@sha256:`, with or
+    without a tag; leave such images out and let the cluster pull them.
   - Gitea 28.1.0 webhooks (verified 2026-10-10): with
     `webhook.ALLOWED_HOST_LIST = *` Gitea refuses to deliver to a ClusterIP
     ("denied by egress"); set it to `private,loopback` for an in-cluster
