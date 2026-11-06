@@ -66,7 +66,8 @@ def check(folder, name, namespace, replicas, mode):
         require(any(ref.startswith(address+'.spec[0].template[0].metadata[0].labels') for ref in refs), 'keep the selector reference in the saved configuration')
     configuration = '\n'.join(p.read_text() for p in directory.glob('*.tf'))
     require('ignore_changes' not in configuration, 'do not hide drift with ignore_changes')
-    body = json.loads(run('kubectl','-n','starfleet','exec','deploy/shuttle','--','curl','-fsS','--retry','5','--retry-delay','1','--max-time','10',f'http://{name}.{namespace}/'))
+    # The Service may be seconds old: plain --retry skips DNS and connection errors, so retry on all of them.
+    body = json.loads(run('kubectl','-n','starfleet','exec','deploy/shuttle','--','curl','-fsS','--retry','10','--retry-delay','2','--retry-all-errors','--max-time','10',f'http://{name}.{namespace}/'))
     require(body.get('version') == '6.15.0', 'request must return version 6.15.0')
 try:
     check(*sys.argv[1:4], int(sys.argv[4]), sys.argv[5])
