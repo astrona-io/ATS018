@@ -13,7 +13,7 @@ astrona submit --git ssh://git@github.com/astrona-io/ATS018.git -c sections/sect
 astrona destroy ats-018-lab-040-02-02
 ```
 
-Bootstrap installs Tekton Pipelines 1.17.0 and Triggers 0.36.4 without interceptors. It installs the `tkn` command-line tool 0.46.1 in `~/.astrona/bin` if no `tkn` is on `PATH`. The node preloads the step and client images; the controller images, including the EventListener sink image, are pulled from the pinned releases during bootstrap.
+Bootstrap installs Tekton Pipelines 1.17.0 and Triggers 0.36.4 with the core interceptors, because the Triggers controller needs their ConfigMap; the lab itself uses no interceptor. It installs the `tkn` command-line tool 0.46.1 in `~/.astrona/bin` if no `tkn` is on `PATH`. The node preloads the step and client images; the controller images, including the EventListener sink image, are pulled from the pinned releases during bootstrap.
 
 The existing Pipeline `scout-check` checks that both params are nonempty. It does not clone a repository or publish an image. This keeps the task focused on request-to-run parameter delivery. The listener account can read Triggers resources but cannot create runs; its cluster-scoped read permissions already exist.
 
