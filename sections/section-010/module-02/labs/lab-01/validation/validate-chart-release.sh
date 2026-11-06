@@ -34,7 +34,7 @@ READY="$(kubectl -n starfleet-production get deploy scout -o jsonpath='{.status.
 [[ "$REPLICAS" == 2 && "$READY" == 2 ]] || fail "need 2 ready replicas"
 MESSAGE="$(kubectl -n starfleet-production get deploy scout -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="PODINFO_UI_MESSAGE")].value}')"
 [[ "$MESSAGE" == release-ready ]] || fail "set PODINFO_UI_MESSAGE through the template and values"
-BODY="$(kubectl -n starfleet exec deploy/shuttle -- curl -fsS --max-time 10 http://scout.starfleet-production/)" || fail "request from shuttle failed"
+BODY="$(kubectl -n starfleet exec deploy/shuttle -- curl -fsS --retry 6 --retry-delay 2 --retry-all-errors --max-time 10 http://scout.starfleet-production/)" || fail "request from shuttle failed"
 grep -Eq '"version": *"6.15.0"' <<<"$BODY" || fail "response version differs"
 grep -Eq '"message": *"release-ready"' <<<"$BODY" || fail "response message differs"
 echo "PASS: chart-release"

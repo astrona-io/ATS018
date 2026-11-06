@@ -18,7 +18,7 @@ CONFIGMAP="$(kubectl -n starfleet-staging get deploy scout -o jsonpath='{.spec.t
 MESSAGE="$(kubectl -n starfleet-staging get cm "$CONFIGMAP" -o jsonpath='{.data.PODINFO_UI_MESSAGE}')" || fail "no referenced ConfigMap"
 [[ "$MESSAGE" == overlay-staging ]] || fail "wrong generated message"
 kubectl diff -k "$OVERLAY" >/dev/null || fail "saved overlay differs from live state or cannot be rendered"
-BODY="$(kubectl -n starfleet exec deploy/shuttle -- curl -fsS --max-time 10 http://scout.starfleet-staging/)" || fail "request failed"
+BODY="$(kubectl -n starfleet exec deploy/shuttle -- curl -fsS --retry 6 --retry-delay 2 --retry-all-errors --max-time 10 http://scout.starfleet-staging/)" || fail "request failed"
 grep -Eq '"version": *"6.15.0"' <<<"$BODY" || fail "wrong response version"
 grep -Eq '"message": *"overlay-staging"' <<<"$BODY" || fail "wrong response message"
 echo "PASS: overlay"
