@@ -10,7 +10,9 @@ Use `--watch` until the end, because a plain `astrona submit` finishes the attem
 
 ## Step 1: create the Canary
 
-A `Canary` names the target Deployment and holds the release policy. Flagger checks every 15 seconds, moves 10 percent of the requests per step up to 50 percent, and allows 3 failed checks. The `rollout` webhook calls the load tester, so the canary pods receive requests and the success rate has values.
+A `Canary` names the target Deployment and holds the release policy. Flagger checks every 30 seconds, moves 10 percent of the requests per step up to 50 percent, and allows 5 failed checks. The success rate is computed over the last minute of requests. The `rollout` webhook calls the load tester, so the canary pods receive requests and the success rate has values.
+
+The margins are wide on purpose. Prometheus scrapes the sidecar proxies every 15 seconds, and a rate over a time window needs two scrapes with requests inside that window. Fresh canary pods have no requests before the load tester starts, so the first one or two checks can return no values. Flagger counts each of them as a failed check, and a passing check does not reset the count. A `threshold` of 5 and a `1m` window leave room for that warm-up without letting a faulty release through.
 
 Save this as `canary-scout.yaml`:
 
@@ -31,15 +33,15 @@ spec:
     port: 80
     targetPort: http
   analysis:
-    interval: 15s
-    threshold: 3
+    interval: 30s
+    threshold: 5
     maxWeight: 50
     stepWeight: 10
     metrics:
       - name: request-success-rate
         thresholdRange:
           min: 99
-        interval: 30s
+        interval: 1m
     webhooks:
       - name: load-test
         type: rollout
@@ -72,7 +74,7 @@ kubectl -n starfleet set image deploy/scout scout=ghcr.io/stefanprodan/podinfo:6
 kubectl -n starfleet get canary scout --watch
 ```
 
-The weight rises from 10 to 50, then the status becomes `Succeeded`. Press `Ctrl+C`. A `no values found` warning at the first step is normal: Flagger halts until the load tester has produced requests.
+The weight rises from 10 to 50, one step every 30 seconds, then the status becomes `Succeeded` after about four minutes. Press `Ctrl+C`. A `no values found` warning at the first step is normal: Flagger halts until the load tester has produced requests.
 
 ## Step 3: release the faulty template
 
@@ -83,7 +85,7 @@ kubectl -n starfleet patch deploy scout --type=json -p='[{"op":"add","path":"/sp
 kubectl -n starfleet get canary scout --watch
 ```
 
-The weight stays at 10 while the checks fail. After the third failed check the status becomes `Failed` and the weight returns to 0. Read the reason and prove the primary pods still serve:
+The weight stays at 10 while the checks fail. After the fifth failed check, about two and a half minutes after the change, the status becomes `Failed` and the weight returns to 0. Read the reason and prove the primary pods still serve:
 
 ```sh
 kubectl -n starfleet describe canary scout | sed -n '/Events:/,$p' | tail -4
@@ -101,7 +103,7 @@ kubectl -n starfleet patch deploy scout --type=json -p='[{"op":"remove","path":"
 kubectl -n starfleet get canary scout --watch
 ```
 
-After about three minutes the status is `Succeeded`. Check the result:
+After about four minutes the status is `Succeeded`. Check the result:
 
 ```sh
 kubectl -n starfleet exec deploy/shuttle -c shuttle -- curl -s http://scout.starfleet/ | grep -E '"(version|message)"'

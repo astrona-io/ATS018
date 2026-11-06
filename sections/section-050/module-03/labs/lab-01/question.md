@@ -9,7 +9,7 @@ Let Flagger release `scout` with a canary analysis, then prove it protects users
 When you finish, these must be true:
 
 - A `Canary` named `scout` in `starfleet` uses the provider `istio` and targets the Deployment `scout`. The Service has port `80` and `targetPort` `http`.
-- Its analysis checks every `15s`, allows `3` failed checks (`threshold: 3`), moves the weight in steps of `10` up to `maxWeight: 50`, and has the built-in metric `request-success-rate` with a minimum of `99`. A `rollout` webhook calls the load tester so the canary receives requests: `hey -z 1m -q 10 -c 2 http://scout-canary.starfleet/`.
+- Its analysis checks every `30s`, allows `5` failed checks (`threshold: 5`), moves the weight in steps of `10` up to `maxWeight: 50`, and has the built-in metric `request-success-rate` with a minimum of `99` measured over an `interval` of `1m`. A `rollout` webhook calls the load tester so the canary receives requests: `hey -z 1m -q 10 -c 2 http://scout-canary.starfleet/`.
 - The image `ghcr.io/stefanprodan/podinfo:6.15.0` was released and promoted.
 - A faulty template was released next: the `scout` container command was `./podinfo --port=9898 --random-error`. Flagger measured a low success rate, rolled the release back and the primary pods kept serving `6.15.0`.
 - Last, a fixed template was released and promoted: the faulty command is removed and the environment variable `PODINFO_UI_MESSAGE` is `fixed`.

@@ -24,15 +24,15 @@ spec:
     port: 80
     targetPort: http
   analysis:
-    interval: 15s
-    threshold: 3
+    interval: 30s
+    threshold: 5
     maxWeight: 50
     stepWeight: 10
     metrics:
       - name: request-success-rate
         thresholdRange:
           min: 99
-        interval: 30s
+        interval: 1m
     webhooks:
       - name: load-test
         type: rollout
@@ -58,15 +58,17 @@ wait_for_phase Initialized
 # Give Prometheus time to scrape the first Istio metrics, so the first analysis steps find data.
 sleep 60
 
+# After each template change wait until Flagger has started the release (Progressing),
+# otherwise the phase of the previous release is read as the result of this one.
 kubectl -n starfleet set image deploy/scout scout=ghcr.io/stefanprodan/podinfo:6.15.0
-sleep 20
+wait_for_phase Progressing
 wait_for_phase Succeeded
 
 kubectl -n starfleet patch deploy scout --type=json -p='[{"op":"add","path":"/spec/template/spec/containers/0/command","value":["./podinfo","--port=9898","--random-error"]}]'
-sleep 20
+wait_for_phase Progressing
 wait_for_phase Failed
 
 kubectl -n starfleet patch deploy scout --type=json -p='[{"op":"remove","path":"/spec/template/spec/containers/0/command"},{"op":"add","path":"/spec/template/spec/containers/0/env","value":[{"name":"PODINFO_UI_MESSAGE","value":"fixed"}]}]'
-sleep 20
+wait_for_phase Progressing
 wait_for_phase Succeeded
 sleep 10

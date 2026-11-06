@@ -56,6 +56,8 @@ Events:
 
 This is the real event list of the release, copied from the playground. Each `Advance` line is one step. The `Halt advancement` warning shows the safe default: when the metric returns no values, Flagger waits and does not promote. Here the first requests had not yet reached the Istio metrics. Flagger tried again and continued.
 
+Look at the margin in that list: two halts, and `threshold: 3` allows three. Each halt counts as a failed check, and a passing check does not reset the count. The gap comes from Prometheus, which scrapes the sidecar proxies every 15 seconds; a rate over the metric `interval` needs two scrapes with requests inside that window, and the fresh canary pods receive no requests before the load tester starts. On a slow machine a third halt rolls a good release back. A release policy for real use leaves more room: `interval: 30s`, `threshold: 5` and a metric `interval` of `1m` give the first scrapes time to land, and still roll a faulty release back after five failed checks.
+
 ## What the promotion did
 
 After `maxWeight`, Flagger copies the canary pod template into `scout-primary`, waits for the primary pods to be ready and scales the canary down. Then it sets the weights back to 100 and 0. Check which version the `scout` Service returns:
