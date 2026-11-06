@@ -968,8 +968,33 @@ modules:
           - name: "Flagger 1.45.0 synchronous load tester handler"
             url: https://github.com/fluxcd/flagger/blob/v1.45.0/pkg/loadtester/server.go
       - type: reading
+        title: "Require Manual Approval Before A Release"
+        path: sections/section-050/module-03/course-05-manual-approval-gates.md
+      - type: reading
+        title: Question
+        path: sections/section-050/module-03/labs/lab-03/question.md
+      - type: lab
+        title: "Require Manual Approval Before A Flagger Rollout Lab"
+        path: sections/section-050/module-03/labs/lab-03
+        difficulty: intermediate
+        estimated_duration: 20m
+        topic: progressive-delivery
+        task_kind: build
+        tags: [flagger, canary, blue-green, webhook, promotion]
+        learning_goals:
+          - Add a confirm-rollout webhook that holds a new target Deployment image for approval
+          - Save waiting event identities and messages and compare them with live Canary events
+          - Open the gate and prove the primary Deployment serves the approved version
+        resources:
+          - name: "Flagger manual gating"
+            url: https://docs.flagger.app/usage/webhooks
+          - name: "Flagger 1.45.0 confirmation phases and events"
+            url: https://github.com/fluxcd/flagger/blob/v1.45.0/pkg/controller/scheduler_hooks.go
+          - name: "Load tester 0.39.0 gate endpoints in Flagger 1.45.0"
+            url: https://github.com/fluxcd/flagger/blob/v1.45.0/pkg/loadtester/server.go
+      - type: reading
         title: "Summary"
-        path: sections/section-050/module-03/course-05-summary.md
+        path: sections/section-050/module-03/course-06-summary.md
       - type: quiz
         title: "Knowledge Check: Automate Canary Analysis With Flagger"
         path: sections/section-050/module-03/quiz.yaml

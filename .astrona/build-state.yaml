@@ -175,7 +175,7 @@ items:
   kind: course
   what: 'chapter for module 3: Automate Canary Analysis With Flagger'
   status: done
-  note: 'untested: built without booting 2026-11-04; added fourth reading on Kubernetes blue/green, synchronous HTTP gate and saved events; the Istio parts stay as verified live earlier (promotion, rollback at 88.04% and fix)'
+  note: 'untested: built without booting 2026-11-06; added fifth reading on manual confirmation gates and moved summary to course-06; Flagger 1.45.0 phases, events and load tester 0.39.0 endpoints checked against tagged source; existing parts retained'
 - key: section-050/quiz
   kind: quiz
   what: 'knowledge check for section-050: Progressive Delivery'
@@ -396,3 +396,9 @@ items:
   what: 'Create PipelineRuns From JSON Requests With Tekton Triggers'
   status: done
   note: 'untested: built without booting 2026-11-06; Pipelines 1.17.0 and Triggers 0.36.4; two-field extraction, template substitution, listener RBAC and in-cluster requests; graders correlate fresh event IDs and check successful runs; YAML and bash -n passed; astrona validate blocked by sandbox home lock'
+
+- key: section-050/module-03/labs/lab-03
+  kind: lab
+  what: Require manual approval before a Flagger rollout
+  status: done
+  note: 'untested: built without booting 2026-11-06; reused Flagger 1.45.0 and load tester 0.39.0 bootstrap; preloaded podinfo 6.14.0 and 6.15.0; YAML, shell, CLI config schema, pinned CRD schema and Helm rendering passed; astrona validate blocked before config load by sandbox home maintenance lock; no runtime checks'

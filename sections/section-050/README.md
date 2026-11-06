@@ -61,6 +61,8 @@ The section has the modules below, in reading order. Each module has a playgroun
 
 *   **Mesh-free lab:** Gate A Mesh-Free Blue/Green Release With Flagger — `sections/section-050/module-03/labs/lab-02`. A separate environment with Flagger and its load tester only; block an HTTP gate, promote an environment change and save events.
 
+*   **Manual approval reading and lab:** Require Manual Approval Before A Release and Require Manual Approval Before A Flagger Rollout — `sections/section-050/module-03/labs/lab-03` (20 minutes). Compare start and promotion confirmation gates, preserve waiting events and approve a new image in a separate mesh-free environment.
+
 ### 4. Shift Canary Traffic With Argo Rollouts And A Traffic Router
 *   **Module Reader:** Shift Canary Traffic With Argo Rollouts And A Traffic Router
 *   **Hands-on Playground:** `sections/section-050/module-04/playground` — kind cluster with Argo Rollouts 1.10.0 and the Gateway API plugin v0.17.0, Envoy Gateway with a Gateway and an HTTPRoute for `scout`, and a small Prometheus. Deliberately absent: no Rollout and no AnalysisTemplate.

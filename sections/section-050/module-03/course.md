@@ -4,7 +4,7 @@ A canary release sends a growing share of traffic to a new version and stops whe
 
 Flagger works differently from Argo Rollouts. It does not replace your Deployment with a new resource kind. It keeps the Deployment and creates a copy of it called the primary. For canary releases it changes the weights of a service mesh (here Istio) between the primary and the canary pods. For blue/green it can use the Kubernetes provider without a mesh or metrics backend. The `scout` Deployment you already have stays the object you edit.
 
-Keep one sentence in mind for this module: **change the Deployment, and Flagger runs the release.** The module has four parts. The first creates a `Canary` and reads the objects Flagger generates. The second changes the image and follows a canary to promotion. The third deploys a version that returns errors and proves Flagger rolls it back while the old version keeps serving. The fourth uses mesh-free blue/green analysis, checks the candidate with a pre-rollout HTTP webhook and saves the Canary events.
+Keep one sentence in mind for this module: **change the Deployment, and Flagger runs the release.** The module has five parts. The first creates a `Canary` and reads the objects Flagger generates. The second changes the image and follows a canary to promotion. The third deploys a version that returns errors and proves Flagger rolls it back while the old version keeps serving. The fourth uses mesh-free blue/green analysis, checks the candidate with a pre-rollout HTTP webhook and saves the Canary events. The fifth adds manual approval before rollout or promotion and explains the status and events while each gate is closed.
 
 ## Learning objectives
 
@@ -16,6 +16,7 @@ After this module you can:
 - Generate test traffic during the analysis with the Flagger load tester webhook.
 - Configure Kubernetes blue/green with iterations, an empty metrics list and a synchronous HTTP gate.
 - Trigger an environment-variable release and save its Canary events.
+- Require manual approval with confirmation webhooks and control the load tester gate.
 - Compare how Flagger and Argo Rollouts each take over a workload.
 
 ## Before you start
@@ -31,7 +32,7 @@ The playground runs Kubernetes 1.35.8, Istio 1.30.7 (a service mesh that routes 
 
 Sidecar injection is on in `starfleet`, so every pod there has an Envoy sidecar proxy. No `Canary` exists yet. The commands in this module use the `kubectl` context of the playground; check it with `kubectl config current-context` if another cluster is running on your machine.
 
-The mesh-free blue/green example uses a separate lab environment with Flagger and its load tester only. Pause the Istio playground before starting it.
+The mesh-free blue/green and manual approval labs each use a separate environment with Flagger and its load tester only. Pause the Istio playground before starting either lab.
 
 Write the YAML files in an empty folder on your machine. No GitOps controller manages these objects, so you apply changes directly. In a GitOps environment you would put the same Deployment and `Canary` in Git.
 

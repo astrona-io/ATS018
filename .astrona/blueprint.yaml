@@ -535,6 +535,8 @@ sections:
           - Generate test traffic during analysis with the Flagger load tester webhook
           - Use Kubernetes blue/green without a mesh or metrics provider and gate promotion with a synchronous HTTP check
           - Trigger a release by changing an environment variable and save Canary events
+          - Require confirm-rollout approval, preserve waiting events and open the load tester gate
+          - Distinguish Waiting from WaitingPromotion and explain checks that continue before promotion
           - Compare how Flagger and Argo Rollouts each take over a workload
         outline:
           - What Flagger does with a Deployment and the objects it generates
@@ -542,6 +544,7 @@ sections:
           - A promoted and a rolled back canary
           - Load testing webhooks
           - Kubernetes blue/green with iterations and an HTTP pre-rollout gate
+          - Manual confirmation gates before rollout and promotion with status and event evidence
           - Flagger and Argo Rollouts side by side
         diagrams:
           - type: flowchart
@@ -558,7 +561,9 @@ sections:
           of Istio plus Flagger and its Prometheus against the Podman budget.
           The blue/green reading and lab-02 use a separate mesh-free environment
           with Flagger 1.45.0 and load tester 0.39.0, no metrics backend, and
-          an empty metrics list. Do not change the existing Istio lab.
+          an empty metrics list. Lab-03 reuses this stack with an initialized
+          ungated Canary and preloaded podinfo 6.14.0 and 6.15.0 for manual
+          rollout approval. Do not change the existing Istio lab.
       - id: module-04
         title: Shift Canary Traffic With Argo Rollouts And A Traffic Router
         objectives:

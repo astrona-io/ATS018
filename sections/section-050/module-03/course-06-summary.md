@@ -10,6 +10,8 @@ If a check fails, Flagger counts it. When the count reaches `threshold`, it sets
 
 With `provider: kubernetes`, `analysis.iterations` and `metrics: []`, Flagger needs neither a service mesh nor a metrics backend. A `pre-rollout` webhook can call the load tester to check the canary Service before promotion. Metadata `type: bash` makes the command synchronous, so a failed HTTP request stops advancement and counts toward the failure threshold. Promotion copies the candidate template into the primary Deployment while the public Service keeps selecting primary pods.
 
+A `confirm-rollout` webhook waits in `Waiting` before candidate scale-up. A `confirm-promotion` webhook waits in `WaitingPromotion` before copying the template to the primary, while rollout hooks and metric checks continue. Rejected confirmations do not count toward the failed-check threshold. The load tester stores approval by Canary name and namespace; close the gate before the next release when fresh approval is needed.
+
 An environment-variable change in the target pod template also triggers a release. Canary events explain a failed gate, iteration progress and promotion. Saving event identities and messages preserves that evidence for comparison with live state.
 
 Flagger and Argo Rollouts solve the same problem in different ways:
