@@ -6,6 +6,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 command -v python3 >/dev/null
 kubectl apply -f "$SCRIPT_DIR/../manifests/lab-start.yaml"
 kubectl -n starfleet rollout status deploy/shuttle --timeout=180s
+# An earlier run on the same machine leaves its state and files here; start
+# from the shipped working directory only.
+rm -rf "$HOME/resources/tofu/scout"
 mkdir -p "$HOME/resources/tofu"
 cp -R "$SCRIPT_DIR/../resources/." "$HOME/resources/tofu/"
 cd "$HOME/resources/tofu/scout"
