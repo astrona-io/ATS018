@@ -53,6 +53,7 @@ The section has the modules below, in reading order. Each module has a playgroun
     astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-040/module-03/playground
     ```
 *   **Argo command-line lab:** Run And Repair Workflows With The argo Command-Line Tool — `sections/section-040/module-03/labs/lab-02`. Read a failed run, fix its WorkflowTemplate, run a copied step in parallel, start a second template with a namespace parameter and a ServiceAccount, and keep one successful run per template.
+*   **Insert-a-step lab:** Insert A Step Between Two Existing Steps — `sections/section-040/module-03/labs/lab-03` (20 minutes). Add a template that hashes an output parameter of an earlier step, insert it as its own group between two existing steps, run the changed WorkflowTemplate with `argo submit`, read the digest with `argo logs`, and delete the run from before the change.
 
 ### Section Capstone Challenge
 *   **Comprehensive Challenge:** Continuous Integration Pipelines With Tekton Capstone — `sections/section-040/capstone/labs/lab-01`

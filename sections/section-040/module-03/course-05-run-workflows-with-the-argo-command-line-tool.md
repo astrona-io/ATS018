@@ -274,3 +274,23 @@ astrona submit --git ssh://git@github.com/astrona-io/ATS018.git -c sections/sect
 astrona destroy ats-018-lab-040-03-02
 astrona start ats-018-playground-040-03
 ```
+
+## Your mission: Insert A Step Between Two Existing Steps
+
+You can now read a template, change it with `argo template update` and read a run. The mission gives you a template that hands a manifest from one step to the next. You add a template that hashes the manifest, insert it as its own group between the two steps, run the changed template, read the digest with `argo logs` and remove the run from before the change.
+
+Pause the playground, then start the lab and read the task:
+
+```sh
+astrona stop ats-018-playground-040-03
+astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-040/module-03/labs/lab-03
+```
+
+Use `--watch` while you work, submit once at the end, then remove the lab and start the playground again:
+
+```sh
+astrona submit --watch --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-040/module-03/labs/lab-03
+astrona submit --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-040/module-03/labs/lab-03
+astrona destroy ats-018-lab-040-03-03
+astrona start ats-018-playground-040-03
+```

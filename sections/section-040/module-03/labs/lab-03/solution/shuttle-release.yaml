@@ -1,0 +1,70 @@
+# shuttle-release with the step verify-checksum between fetch-manifest and deploy.
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: shuttle-release
+  namespace: starfleet
+spec:
+  entrypoint: main
+  serviceAccountName: workflow-runner
+  arguments:
+    parameters:
+      - name: version
+        value: "6.15.0"
+  templates:
+    - name: main
+      steps:
+        - - name: fetch-manifest
+            template: fetch-manifest
+        - - name: verify-checksum
+            template: verify-checksum
+            arguments:
+              parameters:
+                - name: manifest
+                  value: "{{steps.fetch-manifest.outputs.parameters.manifest}}"
+        - - name: deploy
+            template: deploy
+            arguments:
+              parameters:
+                - name: manifest
+                  value: "{{steps.fetch-manifest.outputs.parameters.manifest}}"
+        - - name: notify
+            template: notify
+    - name: fetch-manifest
+      container:
+        image: alpine:3.23
+        command: [sh, -c]
+        args:
+          - printf '%s' "shuttle {{workflow.parameters.version}} image=ghcr.io/stefanprodan/podinfo:{{workflow.parameters.version}}" > /tmp/manifest.txt && cat /tmp/manifest.txt
+      outputs:
+        parameters:
+          - name: manifest
+            valueFrom:
+              path: /tmp/manifest.txt
+    - name: verify-checksum
+      inputs:
+        parameters:
+          - name: manifest
+      container:
+        image: alpine:3.23
+        command: [sh, -c]
+        args:
+          - printf '%s' "{{inputs.parameters.manifest}}" | sha256sum | awk '{printf "%s", $1}' > /tmp/checksum.txt && cat /tmp/checksum.txt
+      outputs:
+        parameters:
+          - name: checksum
+            valueFrom:
+              path: /tmp/checksum.txt
+    - name: deploy
+      inputs:
+        parameters:
+          - name: manifest
+      container:
+        image: alpine:3.23
+        command: [sh, -c]
+        args:
+          - echo "deploying {{inputs.parameters.manifest}}"
+    - name: notify
+      container:
+        image: alpine:3.23
+        command: [echo, release done]

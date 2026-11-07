@@ -735,6 +735,30 @@ modules:
           - name: "Argo Workflows Kubernetes resources"
             url: https://argo-workflows.readthedocs.io/en/stable/walk-through/kubernetes-resources/
       - type: reading
+        title: Question
+        path: sections/section-040/module-03/labs/lab-03/question.md
+      - type: lab
+        title: "Insert A Step Between Two Existing Steps"
+        path: sections/section-040/module-03/labs/lab-03
+        difficulty: intermediate
+        estimated_duration: 20m
+        topic: ci-pipelines
+        task_kind: build
+        tags: [argo-workflows, argo-cli, workflowtemplate, params-results]
+        learning_goals:
+          - Add a template that hashes an input parameter and exports the digest as an output parameter
+          - Insert a step between two existing steps of a steps list so it runs after one and before the other
+          - Run the changed WorkflowTemplate with the argo command-line tool and keep only the new Succeeded run
+        resources:
+          - name: "Argo Workflows documentation"
+            url: https://argo-workflows.readthedocs.io/en/latest/
+          - name: "Argo Workflows WorkflowTemplates"
+            url: https://argo-workflows.readthedocs.io/en/stable/workflow-templates/
+          - name: "Argo Workflows steps"
+            url: https://argo-workflows.readthedocs.io/en/stable/walk-through/steps/
+          - name: "Argo Workflows output parameters"
+            url: https://argo-workflows.readthedocs.io/en/stable/walk-through/output-parameters/
+      - type: reading
         title: "Summary"
         path: sections/section-040/module-03/course-06-summary.md
       - type: quiz
