@@ -2,8 +2,10 @@
 """Compare the reviewed plan with its live objects, then check configuration and traffic."""
 import json, os, pathlib, subprocess, sys
 os.environ['PATH'] = str(pathlib.Path.home()/'.astrona/bin') + ':' + os.environ['PATH']
+# Capture stdout only: curl writes its retry warnings and OpenTofu writes its
+# deprecation warnings to stderr, and both would break the JSON parsed below.
 def run(*args):
-    return subprocess.check_output(args, text=True, stderr=subprocess.STDOUT)
+    return subprocess.check_output(args, text=True)
 def require(ok, message):
     if not ok: raise ValueError(message)
 def check(folder, name, namespace, replicas, mode):
