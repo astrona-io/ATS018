@@ -19,10 +19,18 @@ rows=$(kubectl -n "$NS" get workflows -o jsonpath='{range .items[*]}{.metadata.n
 names=$(printf '%s\n' "$rows" | awk -F'|' -v t="$TEMPLATE" '$2 == t && $3 == "Succeeded" {print $1}')
 [[ -n "$names" ]] || fail "no Succeeded Workflow from the WorkflowTemplate $TEMPLATE in $NS"
 
+# status.nodes is a map keyed by node id, and a jsonpath filter only works on a list, so walk
+# every node with range and pick the step by its displayName. The value is the text after the
+# first "|" of that node's line.
+node_output() { # workflow, step displayName, lines of "displayName|value"
+  printf '%s\n' "$3" | awk -F'|' -v n="$2" '$1 == n {sub(/^[^|]*\|/, ""); print; exit}'
+}
 seen_step=false
 for name in $names; do
-  manifest=$(kubectl -n "$NS" get workflow "$name" -o jsonpath='{.status.nodes[?(@.displayName=="fetch-manifest")].outputs.parameters[?(@.name=="manifest")].value}' 2>/dev/null)
-  checksum=$(kubectl -n "$NS" get workflow "$name" -o jsonpath='{.status.nodes[?(@.displayName=="verify-checksum")].outputs.parameters[?(@.name=="checksum")].value}' 2>/dev/null | tr -d '[:space:]')
+  manifests=$(kubectl -n "$NS" get workflow "$name" -o jsonpath='{range .status.nodes.*}{.displayName}|{.outputs.parameters[?(@.name=="manifest")].value}{"\n"}{end}' 2>/dev/null)
+  checksums=$(kubectl -n "$NS" get workflow "$name" -o jsonpath='{range .status.nodes.*}{.displayName}|{.outputs.parameters[?(@.name=="checksum")].value}{"\n"}{end}' 2>/dev/null)
+  manifest=$(node_output "$name" fetch-manifest "$manifests")
+  checksum=$(node_output "$name" verify-checksum "$checksums" | tr -d '[:space:]')
   [[ -n "$checksum" ]] || continue
   seen_step=true
   [[ -n "$manifest" ]] || fail "the run $name has no output parameter manifest on fetch-manifest; keep that template as it was"

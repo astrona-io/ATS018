@@ -105,10 +105,11 @@ argo logs -n starfleet @latest
 
 `argo get` shows `Succeeded` and a tree with four pods, with `verify-checksum` between `fetch-manifest` and `deploy`. `argo logs` prints one line per pod: the manifest from `fetch-manifest`, a 64-character hex digest from `verify-checksum`, `deploying shuttle 6.15.0 ...` from `deploy` and `release done` from `notify`.
 
-You can compare the digest on your own machine. Read the manifest the run produced and hash it:
+You can compare the digest on your own machine. `status.nodes` is a map keyed by node id, so a jsonpath filter on it returns nothing; walk the nodes with `range` and pick the `fetch-manifest` line, then hash the text after the `|`:
 
 ```sh
-MANIFEST=$(kubectl -n starfleet get workflow "$(argo list -n starfleet -o name | head -n 1)" -o jsonpath='{.status.nodes[?(@.displayName=="fetch-manifest")].outputs.parameters[?(@.name=="manifest")].value}')
+WF=$(argo list -n starfleet -o name | head -n 1)
+MANIFEST=$(kubectl -n starfleet get workflow "$WF" -o jsonpath='{range .status.nodes.*}{.displayName}|{.outputs.parameters[?(@.name=="manifest")].value}{"\n"}{end}' | awk -F'|' '$1 == "fetch-manifest" {sub(/^[^|]*\|/, ""); print; exit}')
 printf '%s' "$MANIFEST" | sha256sum
 ```
 

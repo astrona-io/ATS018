@@ -407,4 +407,4 @@ items:
   kind: lab
   what: Insert A Step Between Two Existing Steps (20m)
   status: done
-  note: 'untested: built without booting 2026-11-07; Argo Workflows and argo CLI v4.1.6 reused from lab-02; steps list with four groups, output parameter from file, sha256sum of an input parameter; four jsonpath graders; YAML and bash -n passed; no astrona validate, no live run'
+  note: 'tested 2026-11-07 (astrona test green after the checksum grader was fixed to walk the status.nodes map); Argo Workflows and argo CLI v4.1.6 reused from lab-02; steps list with four groups, output parameter from file, sha256sum of an input parameter; four jsonpath graders'
