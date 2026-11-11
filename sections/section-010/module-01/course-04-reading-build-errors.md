@@ -126,27 +126,3 @@ You can now tell from the first words of a Kustomize error which stage failed an
 > - **Trusting a clean build for patches with a `target`.** A target that selects nothing is not an error. Check the rendered output or the diff for the field the patch should change.
 > - **Adding the overlay's namespace to a patch target.** Patches run before the `namespace` field, so the target then matches nothing.
 > - **Fixing an error in the cluster instead of in the files.** The next render brings the mistake back. In a GitOps setup, the fix is always a commit.
-
-## Your mission: Fix And Deploy Kustomize Overlays
-
-You can now read a Kustomize build error, find the file it points to and spot a patch that selects nothing. The mission gives you a `scout` folder with a broken `staging` overlay and a `production` overlay that builds but renders the wrong result. You fix the files, apply both overlays and prove each environment answers from the `shuttle` pod.
-
-Pause the playground, then start the lab and read the task:
-
-```sh
-astrona stop ats-018-playground-010-01
-astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-010/module-01/labs/lab-01
-```
-
-When both overlays are applied, grade your work:
-
-```sh
-astrona submit -c sections/section-010/module-01/labs/lab-01
-```
-
-Then remove the lab and start the playground again:
-
-```sh
-astrona destroy ats-018-lab-010-01
-astrona start ats-018-playground-010-01
-```

@@ -1,0 +1,60 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: probe-release
+  namespace: starfleet
+spec:
+  entrypoint: main
+  serviceAccountName: workflow-runner
+  templates:
+    - name: main
+      steps:
+        - - name: prepare
+            template: prepare
+        - - name: checksum
+            template: checksum
+            arguments:
+              parameters:
+                - name: manifest
+                  value: "{{steps.prepare.outputs.parameters.manifest}}"
+        - - name: publish
+            template: publish
+            arguments:
+              parameters:
+                - name: checksum
+                  value: "{{steps.checksum.outputs.parameters.checksum}}"
+    - name: prepare
+      container:
+        image: alpine:3.23
+        command: [sh, -c]
+        args: ["printf '%s' 'release=probe-v2' > /tmp/manifest"]
+      outputs:
+        parameters:
+          - name: manifest
+            valueFrom:
+              path: /tmp/manifest
+    - name: checksum
+      inputs:
+        parameters:
+          - name: manifest
+      container:
+        image: alpine:3.23
+        command: [sh, -c]
+        env:
+          - name: MANIFEST
+            value: "{{inputs.parameters.manifest}}"
+        args:
+          - printf '%s' "$MANIFEST" | sha256sum | cut -d ' ' -f 1 > /tmp/checksum
+      outputs:
+        parameters:
+          - name: checksum
+            valueFrom:
+              path: /tmp/checksum
+    - name: publish
+      inputs:
+        parameters:
+          - name: checksum
+      container:
+        image: alpine:3.23
+        command: [echo]
+        args: ["checksum={{inputs.parameters.checksum}}"]

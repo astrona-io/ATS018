@@ -209,23 +209,3 @@ You can now finish a paused release in either way, write a check with the `web` 
 > - **Requesting the `scout` Service.** It selects both versions, so a check through it may measure the stable pods.
 > - **Editing the steps during a release.** A change to the steps restarts that release from the first step.
 > - **Applying a saved file without the environment variable.** The apply removes the variable, changes the pod template and starts a new release.
-
-## Your mission: Gate A Canary With A Web Analysis Step
-
-You can now compare both promotions and gate a canary with a `web` check. The mission starts from a paused release, asks you to finish it, complete a template, replace a pause with an analysis step, and save the AnalysisRun of a new release.
-
-Pause the playground, then start the lab and read the task:
-
-```sh
-astrona stop ats-018-playground-050-01
-astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-050/module-01/labs/lab-02
-```
-
-Check your progress with `--watch` while you work, because a plain `astrona submit` finishes the attempt and deletes the lab. Stop the watch with Ctrl-C and submit once at the end. Then remove the lab and start the playground again:
-
-```sh
-astrona submit --watch --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-050/module-01/labs/lab-02
-astrona submit --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-050/module-01/labs/lab-02
-astrona destroy ats-018-lab-050-01-02
-astrona start ats-018-playground-050-01
-```

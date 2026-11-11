@@ -196,23 +196,3 @@ before the primary takes the new template.
 > - Do not leave the gate open and expect fresh approval for every release. Close it before the next template change.
 > - Do not expect a gate to time out. No Canary field limits how long `Waiting` lasts; a forgotten closed gate holds the release until someone opens it.
 > - Do not change `scout-primary`. Flagger watches the target Deployment and owns the primary copy.
-
-## Your mission: Require Manual Approval Before A Flagger Rollout
-
-You can now hold a new template before analysis starts. The mission asks you
-to add a confirmation gate, save waiting events and approve a new image.
-
-Pause the playground and start the separate mesh-free lab:
-
-```sh
-astrona stop ats-018-playground-050-03
-astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-050/module-03/labs/lab-03
-```
-
-Grade the completed task once, then return to the playground:
-
-```sh
-astrona submit --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-050/module-03/labs/lab-03
-astrona destroy ats-018-lab-050-03-03
-astrona start ats-018-playground-050-03
-```

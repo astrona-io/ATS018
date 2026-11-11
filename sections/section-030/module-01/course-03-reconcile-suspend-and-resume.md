@@ -131,27 +131,3 @@ You can now pause an applier, read its suspension separately from its last Ready
 > - **Trusting `READY=True` without reading `SUSPENDED`.** It can describe an older successful reconciliation.
 > - **Reconciling only the applier after a Git push.** Use `--with-source` when you also need a fresh fetch.
 > - **Keeping a live edit as the fix.** Reconciliation restores Git; commit the intended change instead.
-
-## Your mission: Reconcile A Git Source With Flux
-
-You can now read the status of a `GitRepository` and a `Kustomization`, order two appliers with `dependsOn` and deliver a change through Git. The mission gives you a `GitRepository` that follows a branch that does not exist and a `scout` `Kustomization` with no dependency. You repair the source, add the `platform` `Kustomization`, order the two objects, push a new staging message to Git and prove the `shuttle` pod receives it.
-
-Pause the playground, then start the lab and read the task:
-
-```sh
-astrona stop ats-018-playground-030-01
-astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-030/module-01/labs/lab-01
-```
-
-When you are done, grade your work:
-
-```sh
-astrona submit -c sections/section-030/module-01/labs/lab-01
-```
-
-Then remove the lab and start the playground again:
-
-```sh
-astrona destroy ats-018-lab-030-01
-astrona start ats-018-playground-030-01
-```

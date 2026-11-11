@@ -735,6 +735,9 @@ modules:
           - name: "Argo Workflows Kubernetes resources"
             url: https://argo-workflows.readthedocs.io/en/stable/walk-through/kubernetes-resources/
       - type: reading
+        title: "Pass A Step Output Through A Checksum Check"
+        path: sections/section-040/module-03/course-06-pass-a-step-output-through-a-checksum-check.md
+      - type: reading
         title: Question
         path: sections/section-040/module-03/labs/lab-03/question.md
       - type: lab
@@ -760,7 +763,7 @@ modules:
             url: https://argo-workflows.readthedocs.io/en/stable/walk-through/output-parameters/
       - type: reading
         title: "Summary"
-        path: sections/section-040/module-03/course-06-summary.md
+        path: sections/section-040/module-03/course-07-summary.md
       - type: quiz
         title: "Knowledge Check: Run CI Workflows With Argo Workflows"
         path: sections/section-040/module-03/quiz.yaml

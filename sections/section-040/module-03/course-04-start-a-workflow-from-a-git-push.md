@@ -185,27 +185,3 @@ You now have the whole CI path: a push, an event, a filter, a Workflow, a test r
 > [!WARNING]
 > - A Sensor without the right Role creates nothing, and the error is only in the Sensor pod log. With only `create` on `workflows`, the `submit` operation fails with `workflowtemplates.argoproj.io "run-tests" is forbidden: User "system:serviceaccount:argo-events:workflow-submitter" cannot get resource "workflowtemplates"`. Read it with `kubectl -n argo-events logs -l sensor-name=push-ci`.
 > - A one-pod JetStream `EventBus` needs `streamConfig` with `replicas: 1`. With the default of three stream replicas the pods log `replicas > 1 not supported in non-clustered mode`, and no event is delivered.
-
-## Your mission: Start A Workflow From A Git Push With Argo Events
-
-You can now receive a Git push with an EventSource, filter it with a Sensor and run a Workflow for the pushed commit. The mission gives you a `run-tests` WorkflowTemplate that fails and a webhook that nothing answers. You fix the template, create the EventSource and the Sensor, push a commit and prove that the push started a `Succeeded` Workflow.
-
-Pause the playground, then start the lab and read the task:
-
-```sh
-astrona stop ats-018-playground-040-03
-astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-040/module-03/labs/lab-01
-```
-
-When the Workflow has succeeded, grade your work:
-
-```sh
-astrona submit -c sections/section-040/module-03/labs/lab-01
-```
-
-Then remove the lab and start the playground again:
-
-```sh
-astrona destroy ats-018-lab-040-03
-astrona start ats-018-playground-040-03
-```

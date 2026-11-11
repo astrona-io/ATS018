@@ -232,27 +232,3 @@ The corrected image is now stable with five ready replicas. You can distinguish 
 > - **Retrying before fixing the cause.** Retry repeats the same template and can reproduce the same failure.
 > - **Reading Degraded as proof that all requests fail.** The stable ReplicaSet can still serve successfully.
 > - **Using `--full` when release checks must run.** It skips the remaining pauses, steps and analysis.
-
-## Your mission: Release A New Version With A Canary Rollout
-
-You can now turn a Deployment into a canary Rollout, move a release one pause at a time, and tell an aborted release from a serving stable version. The mission gives you the `scout` Deployment on podinfo 6.14.0. You replace it with a Rollout that pauses at 20 percent and 60 percent, release 6.15.0 through both pauses, and prove the new version answers from the `shuttle` pod.
-
-Pause the playground, then start the lab and read the task:
-
-```sh
-astrona stop ats-018-playground-050-01
-astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-050/module-01/labs/lab-01
-```
-
-When the release is healthy, grade your work:
-
-```sh
-astrona submit -c sections/section-050/module-01/labs/lab-01
-```
-
-Then remove the lab and start the playground again:
-
-```sh
-astrona destroy ats-018-lab-050-01
-astrona start ats-018-playground-050-01
-```

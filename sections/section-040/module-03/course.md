@@ -8,6 +8,8 @@ Keep one sentence in mind for this module: **a Workflow is a graph of templates,
 
 The module has five parts. **A Workflow With A DAG** writes a Workflow with a directed acyclic graph (DAG) of tasks, passes a parameter and shared files between them, and shows the pod each task creates. **Reuse A Workflow With A WorkflowTemplate** moves the same graph into a `WorkflowTemplate` and starts runs from it with arguments. **Read A Failed Workflow** breaks runs on purpose and finds each cause with `kubectl`. **Start A Workflow From A Git Push** adds an Argo Events `EventSource`, `EventBus` and `Sensor` so a push to the source repository starts the tests. **Run Workflows With The argo Command-Line Tool** starts, reads, repairs and cleans up runs with `argo`, and runs steps in parallel in a `steps` list.
 
+**Pass A Step Output Through A Checksum Check** adds an ordered step, passes its input and output parameters, and compares its recorded digest with the input.
+
 ## Learning objectives
 
 After this module you can:

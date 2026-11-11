@@ -66,15 +66,3 @@ You can now inspect release history and recover a known configuration. Pair Helm
 > - **Using a chart version as a rollback argument.** Choose a revision number from `helm history`.
 > - **Expecting history to shrink.** A rollback creates a new revision.
 > - **Reapplying temporary values.** Rollback leaves local files unchanged; use the desired file on the next upgrade.
-
-## Your mission: Edit, Upgrade And Roll Back A Helm Chart
-
-You can now edit a chart and manage its release history. The task asks you to add a missing template field, deploy the required values and recover them through a rollback.
-
-```sh
-astrona stop ats-018-playground-010-02
-astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-010/module-02/labs/lab-01
-astrona submit --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-010/module-02/labs/lab-01
-astrona destroy ats-018-lab-010-02
-astrona start ats-018-playground-010-02
-```

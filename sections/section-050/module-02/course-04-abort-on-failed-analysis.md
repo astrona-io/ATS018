@@ -229,27 +229,3 @@ You have proved that a ready application can fail release analysis while stable 
 > - **Scraping the faulty application's `/metrics` endpoint on port 9898.** Random errors can hide measurements; use the separate metrics port.
 > - **Retrying an unchanged bad template.** The error flag remains after abort until you remove it from desired state.
 > - **Expecting post-promotion analysis to prevent all exposure.** Active traffic reaches the candidate while that check runs.
-
-## Your mission: Gate A Blue/Green Release With Analysis
-
-You can now write a Prometheus metric gate, attach it before promotion, and read why an AnalysisRun failed. The mission gives you a blue/green `scout` Rollout without analysis. You add the gate, release a good candidate and a faulty one, and end on the accepted template with active traffic unharmed.
-
-Pause the playground, then start the lab and read the task:
-
-```sh
-astrona stop ats-018-playground-050-02
-astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-050/module-02/labs/lab-01
-```
-
-When the Rollout is healthy on the good template, grade your work:
-
-```sh
-astrona submit -c sections/section-050/module-02/labs/lab-01
-```
-
-Then remove the lab and start the playground again:
-
-```sh
-astrona destroy ats-018-lab-050-02
-astrona start ats-018-playground-050-02
-```
