@@ -166,27 +166,3 @@ You can now build a canary that runs the checks for you. The `AnalysisTemplate` 
 > - **Treating no data as success.** An empty result fails here, because `len(result) == 1` is false. Do not change the condition to hide missing data.
 > - **Pointing the query at the wrong pods.** Without the template hash label, the query also counts the stable pods and can hide a faulty canary.
 > - **Using `--full` promotion to skip the gate.** Full promotion skips the remaining steps and the analysis.
-
-## Your mission: Route And Guard A Canary Through The Gateway API
-
-You can now add a header test route to a Rollout, run a background analysis on the canary pods and read an automatic abort. The mission gives you the `scout` Rollout without steps, behind a Gateway API route, with Prometheus installed. You add the `managedRoutes` entry, the header and weight steps and the background analysis, release a good and a faulty template, and prove from the `shuttle` pod that the good one is served.
-
-Pause the playground, then start the lab and read the task:
-
-```sh
-astrona stop ats-018-playground-050-04
-astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-050/module-04/labs/lab-01
-```
-
-When the Rollout is `Healthy` on the good template, grade your work:
-
-```sh
-astrona submit -c sections/section-050/module-04/labs/lab-01
-```
-
-Then remove the lab and start the playground again:
-
-```sh
-astrona destroy ats-018-lab-050-04
-astrona start ats-018-playground-050-04
-```

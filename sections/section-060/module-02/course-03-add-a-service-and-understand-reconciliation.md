@@ -100,16 +100,3 @@ can now add a dependent resource and explain which tool repairs drift and when.
 > name alone does not route traffic. OpenTofu does not continuously repair
 > manual changes, and state does not make it a running controller. Change the
 > configuration rather than editing managed objects by hand.
-
-## Your mission: Plan And Apply A Deployment And Service
-
-You can now review an attribute change and add a dependent Service. The task
-asks you to save one plan for both changes, apply it and prove the result.
-
-```sh
-astrona stop ats-018-playground-060-02
-astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-060/module-02/labs/lab-01
-astrona submit --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-060/module-02/labs/lab-01
-astrona destroy ats-018-lab-060-02
-astrona start ats-018-playground-060-02
-```

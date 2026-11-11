@@ -126,22 +126,3 @@ You can now release a Deployment without a mesh or metrics backend, use a synchr
 > - Do not check the public `scout` Service in the pre-rollout hook. It still serves the old primary template. Check `scout-canary`.
 > - Do not expect `metrics: []` to create a health check. Configure a webhook for the behaviour you need to test.
 > - Do not retry a failed release by editing `scout-primary`. Change the target Deployment's pod template.
-
-## Your mission: Gate A Mesh-Free Blue/Green Release With Flagger
-
-You can now configure iteration-based analysis and diagnose a failed HTTP gate. The mission asks you to block a release, repair the gate, promote an environment change and save the Canary events.
-
-If you used the lab environment for practice above, remove it first. Start a fresh attempt with these commands:
-
-```sh
-astrona destroy ats-018-lab-050-03-02
-astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-050/module-03/labs/lab-02
-```
-
-Grade the completed task, then return to the playground:
-
-```sh
-astrona submit --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-050/module-03/labs/lab-02
-astrona destroy ats-018-lab-050-03-02
-astrona start ats-018-playground-050-03
-```

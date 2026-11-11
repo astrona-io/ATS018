@@ -185,27 +185,3 @@ You can now give a team its own project, restrict its repositories, namespaces a
 > - **Forgetting the core group is empty.** Services and ConfigMaps use `group: ''`, not `group: v1` or `core`.
 > - **Putting a Namespace manifest in a tenant's repository.** A Namespace is a cluster-wide object, and a project without a `clusterResourceWhitelist` refuses it. The platform team creates tenant namespaces.
 > - **Reading an `InvalidSpecError` as a Git problem.** It means the `Application` breaks a project rule; nothing was fetched or rendered.
-
-## Your mission: Generate Applications And Restrict A Team With An AppProject
-
-You can now generate applications from an `ApplicationSet` and limit a team with an `AppProject`. The mission gives you a cluster with Argo CD and two private repositories. You create the `outpost` project, an `ApplicationSet` for two environments and the team's `Application`.
-
-Pause the playground first, so it does not compete for memory with the lab cluster:
-
-```sh
-astrona stop ats-018-playground-020-02
-```
-
-Start the lab and submit your work:
-
-```sh
-astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-020/module-02/labs/lab-01
-astrona submit -c sections/section-020/module-02/labs/lab-01
-```
-
-When you finish, remove the lab and resume the playground:
-
-```sh
-astrona destroy ats-018-lab-020-02
-astrona start ats-018-playground-020-02
-```

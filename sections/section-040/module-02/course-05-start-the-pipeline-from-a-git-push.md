@@ -157,33 +157,3 @@ You can now start a pipeline from a Git push with an `EventListener`, a `Trigger
 > - **A webhook URL the Git server cannot reach.** The webhook is sent from the Git server's pod, so use the in-cluster Service address of the `EventListener`.
 > - **Reading "accepted" as "started".** The listener answers with an event ID even when an interceptor drops the event. Check `tkn pipelinerun list`.
 > - **Looking for the fault in the wrong place.** The Git server shows whether the delivery arrived, the listener log shows whether the run was created, and `tkn` shows whether it passed. Start at the Git server.
-
-## Your mission: Create PipelineRuns From JSON Requests With Tekton Triggers
-
-You can now bind request fields to run params and give a listener permission to create runs. The mission asks you to repair an existing listener, extract two fields and prove that its requests produce successful runs.
-
-Pause the playground, then start the lab:
-
-```sh
-astrona stop ats-018-playground-040-02
-astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-040/module-02/labs/lab-02
-```
-
-In another host terminal, watch the checks as you work:
-
-```sh
-astrona submit --watch --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-040/module-02/labs/lab-02
-```
-
-The watch grades every few seconds and records nothing. Once all checks pass, stop the watch with Ctrl-C and submit once; a plain submission finishes the attempt and deletes the lab:
-
-```sh
-astrona submit --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-040/module-02/labs/lab-02
-```
-
-If the lab is still present, remove it, then resume the playground:
-
-```sh
-astrona destroy ats-018-lab-040-02-02
-astrona start ats-018-playground-040-02
-```

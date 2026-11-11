@@ -97,27 +97,3 @@ You now know both outcomes of a Flagger release: a promotion when the metric pas
 > - `Failed` does not repair the Deployment. The faulty template stays in `scout` until you change it.
 > - A fault that the metric does not measure goes through. The built-in success rate counts HTTP status codes, so an application that returns status 200 with a wrong body passes.
 > - Do not lower `threshold` or `min` to make a failing release pass. Fix the version.
-
-## Your mission: Release And Roll Back A Canary With Flagger
-
-You can now create a `Canary`, follow a promotion and read the events of a rollback. The mission gives you the `scout` Deployment on podinfo 6.14.0 with Istio and Flagger installed. You create the `Canary`, promote 6.15.0, let a faulty release roll back and promote a fixed template, and prove the result from the `shuttle` pod.
-
-Pause the playground, then start the lab and read the task:
-
-```sh
-astrona stop ats-018-playground-050-03
-astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-050/module-03/labs/lab-01
-```
-
-When the `Canary` has succeeded with the fixed template, grade your work:
-
-```sh
-astrona submit -c sections/section-050/module-03/labs/lab-01
-```
-
-Then remove the lab and start the playground again:
-
-```sh
-astrona destroy ats-018-lab-050-03
-astrona start ats-018-playground-050-03
-```

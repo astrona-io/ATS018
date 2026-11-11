@@ -372,23 +372,3 @@ You can now run two Tasks in parallel and pass them a result and a param, start 
 > - **Trusting the exit code of `--showlog`.** Without `-E`, the command does not exit with the status of the run. Read the status with `tkn pipelinerun describe` or wait for the condition with `kubectl wait`.
 > - **Using `--pipeline` to delete one run.** `tkn pipelinerun delete --pipeline team-namespace` deletes all runs of that Pipeline. Name the one run you want to remove.
 > - **Expecting the namespace to go with the run.** The Task created it through the API, so no owner links it to the run. Deleting a run leaves `team-alpha` in place.
-
-## Your mission: Run A Pipeline That Changes The Cluster With tkn
-
-The Pipeline `outpost-onboard` prepares a namespace for each new site, and its first run has failed. Find out why with `tkn`, add a Task that runs in parallel with another, give the account the right it is missing, run the Pipeline for two sites, save the log of one run, and delete the failed run.
-
-Pause the playground, then start the lab and read the task:
-
-```sh
-astrona stop ats-018-playground-040-01
-astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-040/module-01/labs/lab-02
-```
-
-Check your progress with `--watch` while you work, because a plain `astrona submit` finishes the attempt and deletes the lab. Stop the watch with Ctrl-C and submit once at the end. Then remove the lab and start the playground again:
-
-```sh
-astrona submit --watch --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-040/module-01/labs/lab-02
-astrona submit --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-040/module-01/labs/lab-02
-astrona destroy ats-018-lab-040-01-02
-astrona start ats-018-playground-040-01
-```

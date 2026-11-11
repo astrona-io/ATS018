@@ -21,4 +21,6 @@ Key facts:
 - A `resource` template applies its manifest with the ServiceAccount of its pod, and deleting the run leaves the object in place.
 - A Sensor filter reads event data under `body`, for example `body.ref`.
 
+Step groups establish order, and output parameters carry values between them. A checksum comparison must use the exact input bytes and the output of the specific run being inspected.
+
 <!-- astrona:playground:destroy -->

@@ -124,32 +124,45 @@ modules:
         title: Values, Templates And Versions
         path: sections/section-010/module-02/course-02-values-templates-and-versions.md
       - type: reading
-        title: History And Rollback
-        path: sections/section-010/module-02/course-03-history-and-rollback.md
-      - type: reading
         title: Question
         path: sections/section-010/module-02/labs/lab-01/question.md
       - type: lab
-        title: Edit, Upgrade And Roll Back A Helm Chart Lab
+        title: Author And Upgrade A Helm Chart Lab
         path: sections/section-010/module-02/labs/lab-01
         difficulty: beginner
-        estimated_duration: 25m
+        estimated_duration: 15m
         topic: packaging
         task_kind: build
         tags:
           - helm-chart
           - helm-values
           - helm-release
-          - helm-rollback
         learning_goals:
           - Edit a chart template and version metadata and deploy it with values
-          - Inspect release revisions and restore the desired revision through rollback
           - Prove the saved chart matches the live release and application response
         resources:
           - name: Helm charts
             url: https://helm.sh/docs/topics/charts/
           - name: Helm rollback
             url: https://helm.sh/docs/helm/helm_rollback/
+      - type: reading
+        title: History And Rollback
+        path: sections/section-010/module-02/course-03-history-and-rollback.md
+      - type: reading
+        title: Question
+        path: sections/section-010/module-02/labs/lab-02/question.md
+      - type: lab
+        title: Recover A Helm Release From History Lab
+        path: sections/section-010/module-02/labs/lab-02
+        difficulty: intermediate
+        estimated_duration: 15m
+        topic: packaging
+        task_kind: troubleshooting
+        tags:
+        - packaging
+        learning_goals:
+        - Choose a working revision from release history
+        - Roll back and verify the application response
       - type: reading
         title: Summary
         path: sections/section-010/module-02/course-04-summary.md
@@ -313,6 +326,21 @@ modules:
       - type: reading
         title: "Permanent Drift And ignoreDifferences"
         path: sections/section-020/module-03/course-03-permanent-drift-and-ignore-differences.md
+      - type: reading
+        title: Question
+        path: sections/section-020/module-03/labs/lab-02/question.md
+      - type: lab
+        title: Let The HPA Own Replicas During GitOps Sync Lab
+        path: sections/section-020/module-03/labs/lab-02
+        difficulty: intermediate
+        estimated_duration: 15m
+        topic: gitops
+        task_kind: troubleshooting
+        tags:
+        - gitops
+        learning_goals:
+        - Separate comparison exceptions from sync behavior
+        - Verify self-heal still repairs fields outside the exception
       - type: reading
         title: "Health Failures"
         path: sections/section-020/module-03/course-04-health-failures.md
@@ -735,6 +763,9 @@ modules:
           - name: "Argo Workflows Kubernetes resources"
             url: https://argo-workflows.readthedocs.io/en/stable/walk-through/kubernetes-resources/
       - type: reading
+        title: "Pass A Step Output Through A Checksum Check"
+        path: sections/section-040/module-03/course-06-pass-a-step-output-through-a-checksum-check.md
+      - type: reading
         title: Question
         path: sections/section-040/module-03/labs/lab-03/question.md
       - type: lab
@@ -760,11 +791,11 @@ modules:
             url: https://argo-workflows.readthedocs.io/en/stable/walk-through/output-parameters/
       - type: reading
         title: "Summary"
-        path: sections/section-040/module-03/course-06-summary.md
+        path: sections/section-040/module-03/course-07-summary.md
       - type: quiz
         title: "Knowledge Check: Run CI Workflows With Argo Workflows"
         path: sections/section-040/module-03/quiz.yaml
-        question_count: 10
+        question_count: 11
       - type: reading
         title: Question
         path: sections/section-040/capstone/labs/lab-01/question.md

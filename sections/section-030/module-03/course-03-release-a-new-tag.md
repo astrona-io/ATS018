@@ -138,27 +138,3 @@ You can now publish a tag, follow it through four controllers and find the objec
 > - **Debugging the Kustomization first.** If the commit is missing, the fault is earlier. Start at the `ImageRepository`.
 > - **Editing the marked line by hand and expecting it to stay.** The next run writes the policy tag again.
 > - **Expecting a new tag to match a range that stops below it.** A policy with `>=6.14.0 <6.15.0` never selects `6.15.1`.
-
-## Your mission: Automate Image Updates With Flux
-
-You can now follow a new image tag from the registry through the image controllers, a commit and the Kustomization to the pods. The mission gives you a delivery of `scout` 6.14.0 and a registry that also holds 6.15.0. You create the three image objects and the setter marker, let Flux commit the new tag to Git and prove the `shuttle` pod gets version 6.15.0.
-
-Pause the playground, then start the lab and read the task:
-
-```sh
-astrona stop ats-018-playground-030-03
-astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-030/module-03/labs/lab-01
-```
-
-When you are done, grade your work:
-
-```sh
-astrona submit -c sections/section-030/module-03/labs/lab-01
-```
-
-Then remove the lab and start the playground again:
-
-```sh
-astrona destroy ats-018-lab-030-03
-astrona start ats-018-playground-030-03
-```

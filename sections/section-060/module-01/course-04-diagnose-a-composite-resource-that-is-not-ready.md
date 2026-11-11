@@ -107,27 +107,3 @@ You can now find the failing layer in a Crossplane stack: the XR condition names
 > - `Synced=False` and `Ready=False` are different problems. `Synced=False` means Crossplane or the provider cannot apply the object. `Ready=False` with `Synced=True` means the object exists but does not work yet.
 > - Do not fix a composed Deployment with `kubectl edit`. Crossplane owns it and restores the value from the XR. Change the XR in Git.
 > - When you change the version of a running environment to a tag that does not exist, the old pods keep running while the new pod fails to pull. The old pods keep the Deployment available, so a readiness rule that only checks for availability stays true. The rule in this `Composition` also compares the updated replicas, and that is what turns the XR to `Ready=False`.
-
-## Your mission: Deliver The Platform With Argo CD And Repair Production
-
-You can now deliver a Crossplane repository with Argo CD, make Argo CD report the Ready state of an XR, and trace a failing environment down to its pods. The mission gives you a cluster with Crossplane, the provider and the function installed, and the repository in Git. You create the `Application`, add the health check, find the cause in production and fix it in Git, and prove from the `shuttle` pod that both environments answer.
-
-Pause the playground, then start the lab and read the task:
-
-```sh
-astrona stop ats-018-playground-060-01
-astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-060/module-01/labs/lab-01
-```
-
-When the `Application` is `Healthy` and both environments are Ready, grade your work:
-
-```sh
-astrona submit -c sections/section-060/module-01/labs/lab-01
-```
-
-Then remove the lab and start the playground again:
-
-```sh
-astrona destroy ats-018-lab-060-01
-astrona start ats-018-playground-060-01
-```

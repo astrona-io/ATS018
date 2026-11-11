@@ -13,6 +13,4 @@ cp "$SCRIPT_DIR/production-values.yaml" "$HOME/resources/production-values.yaml"
 helm lint "$HOME/resources/scout" -f "$HOME/resources/production-values.yaml"
 helm template scout "$HOME/resources/scout" -n starfleet-production -f "$HOME/resources/production-values.yaml" >/dev/null
 helm upgrade --install scout "$HOME/resources/scout" -n starfleet-production --create-namespace -f "$HOME/resources/production-values.yaml" --wait=watcher --timeout 180s
-helm upgrade --install scout "$HOME/resources/scout" -n starfleet-production -f "$HOME/resources/production-values.yaml" --set message=temporary --wait=watcher --timeout 180s
-helm rollback scout 2 -n starfleet-production --wait=watcher --timeout 180s
 kubectl -n starfleet-production rollout status deploy/scout --timeout=180s

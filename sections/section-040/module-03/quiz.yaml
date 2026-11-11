@@ -26,7 +26,7 @@ questions:
         explanation: "Correct. Both have ended, so the pod shows `0/2` ready."
       - id: b
         text: "`init` and `main`, because every pod has an init container"
-        explanation: "An `init` container only appears for git input artifacts, and it is not counted in the ready column."
+        explanation: "Init containers are not counted in the regular-container ready column. Their presence does not explain the two regular containers shown here."
       - id: c
         text: "`step-main` and `step-wait`, named after the steps"
         explanation: "Those names belong to Tekton, not to Argo Workflows."
@@ -242,3 +242,27 @@ questions:
         explanation: "Argo CD plays no part in this path."
     correct_option: a
     explanation: "The `submit` operation needs the right to create Workflows and to read `workflowtemplates`. Without the Role, the Sensor creates nothing, and the error is only in the Sensor pod log."
+  - id: ats018-040-03-q11
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: Pass a step output to a checksum operation without changing its bytes.
+    source_readings:
+    - sections/section-040/module-03/course-06-pass-a-step-output-through-a-checksum-check.md
+    prompt: An Argo step emits a payload. A later step must hash exactly those bytes, including spaces, before publishing.
+      Which approach preserves the checksum input?
+    options:
+    - id: a
+      text: Interpolate the payload directly into a shell command and use echo
+      explanation: Shell interpretation and an added newline can change the bytes.
+    - id: b
+      text: Pass the output parameter through an environment variable and use printf %s with a quoted expansion
+      explanation: Quoting avoids splitting and globbing; printf does not append a newline.
+    - id: c
+      text: Hash the output parameter name
+      explanation: The name identifies the value but is not the payload.
+    - id: d
+      text: Publish and compute the checksum in parallel
+      explanation: Publishing can finish before the checksum has been verified.
+    correct_option: b
+    explanation: Order prepare, checksum and publish steps. Pass the parameter as data and preserve its bytes when
+      computing the digest.
