@@ -119,7 +119,7 @@ Now you know which step failed, its exit code, and the error. The workspace was 
 
 ## The same facts with kubectl
 
-The exam gives you `kubectl` for sure; `tkn` may not be there. Every fact above is in the objects, so you can read it without `tkn`. The TaskRun's `Succeeded` condition holds the message, `status.steps` holds the exit code of each step, and the pod holds the log of each step container:
+The Kubernetes API exposes this evidence through `kubectl`; the optional `tkn` CLI provides shortcuts. Every fact above is in the objects, so you can read it without `tkn`. The TaskRun's `Succeeded` condition holds the message, `status.steps` holds the exit code of each step, and the pod holds the log of each step container:
 
 ```sh
 kubectl -n starfleet get taskrun scout-ci-2mk48-run-tests \

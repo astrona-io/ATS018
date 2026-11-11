@@ -10,7 +10,6 @@ labs:
     preparation:
     - sections/section-010/module-02/course-01-chart-layout-and-rendering.md
     - sections/section-010/module-02/course-02-values-templates-and-versions.md
-    - sections/section-010/module-02/course-03-history-and-rollback.md
   sections/section-010/capstone/labs/lab-01:
     preparation:
     - sections/section-010/module-01/course-01-base-and-kustomization.md
@@ -194,10 +193,15 @@ labs:
     - sections/section-060/module-02/course-01-read-a-working-directory-and-state.md
     - sections/section-060/module-02/course-02-review-and-apply-an-attribute-change.md
     - sections/section-060/module-02/course-03-add-a-service-and-understand-reconciliation.md
+  sections/section-010/module-02/labs/lab-02:
+    preparation:
+    - sections/section-010/module-02/course-03-history-and-rollback.md
+  sections/section-020/module-03/labs/lab-02:
+    preparation:
+    - sections/section-020/module-03/course-03-permanent-drift-and-ignore-differences.md
 additional_readings:
 - sections/section-020/module-01/course-04-helm-charts-as-a-source.md
 - sections/section-020/module-02/course-01-app-of-apps.md
-- sections/section-020/module-03/course-03-permanent-drift-and-ignore-differences.md
 - sections/section-040/module-01/course-04-shared-tasks-with-resolvers.md
 - sections/section-050/module-03/course-06-wait-for-approval-before-promotion.md
 - sections/section-060/module-01/course-05-deliver-the-platform-with-flux.md

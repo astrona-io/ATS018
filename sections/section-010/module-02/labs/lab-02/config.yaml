@@ -1,0 +1,47 @@
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-018-lab-010-02-02
+  docs:
+    question: question.md
+    solution: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+    - curlimages/curl:8.22.0
+    - ghcr.io/stefanprodan/podinfo:6.14.0
+    - ghcr.io/stefanprodan/podinfo:6.15.0
+bootstrap:
+  init:
+  - name: helm-cli
+    description: Installs Helm 4.3.0 in the terminal
+    type: file
+    source: bootstrap/00-install-helm.sh
+  - name: lab-start
+    description: Creates namespaces and the shuttle client
+    type: file
+    source: bootstrap/01-seed-cluster.sh
+  - name: seed-history
+    type: file
+    source: bootstrap/02-seed-history.sh
+    description: Install the baseline, working revision and temporary regression
+testing:
+  init:
+  - name: verify-unfinished-state
+    description: Require a ready API and an explicit grader rejection before solving
+    type: file
+    source: testing/verify-start.sh
+    timeout: 10m
+  - name: solution
+    description: Reference solution for this task
+    type: file
+    source: solution/apply.sh
+validation:
+  scripts:
+  - name: rollback
+    description: Restore the stored working revision and verify the live response
+    type: file
+    source: validation/validate-rollback.sh
+teardown:
+  keepCluster: false

@@ -1,10 +1,11 @@
 # Coverage review
 
+The review separates Helm authoring from history-based recovery and adds an HPA/GitOps ownership lab. Its grader commits an unrelated Git change and verifies self-heal while replicas remain under HPA control. The playground exercises the same procedure. The checksum lesson has a linked question, and the release-pipeline task explicitly describes image copying rather than source compilation.
+
 The checksum lab now follows a complete example of step groups, input and output parameters, byte-preserving hashing and inspection of the specific Workflow run. Labs remain beside their preparation, with an explicit mapping for event-driven tasks as well as pipeline definitions.
 
 The course exercises delivery from Git, packaging, pipelines, progressive delivery and local infrastructure reconciliation. Practical limits remain:
 
-- App-of-apps, Helm as an Argo CD source, permanent drift handling, shared Tekton resolvers and Flux delivery of Crossplane resources have no dedicated module lab.
 - The image-publishing Task copies an existing image into a local registry. It does not compile application source or prove a reproducible image build.
 - Crossplane manages Kubernetes objects inside kind. Provider installation and reconciliation do not establish competence with a real cloud account, credentials or cloud quotas.
 - OpenTofu exercises local state and Kubernetes resources. Remote-state locking, cloud backends and concurrent operators are outside these labs.
@@ -20,13 +21,10 @@ The workflow checks registration and preparation order, then runs each selected 
 
 Playgrounds run bootstrap and readiness checks. A playground with testing/smoke.sh also runs that script. A successful playground start alone does not prove all learner commands. Network downloads, public registries and chart repositories remain external dependencies. Consult the PR's latest workflow for actual runtime results; this review and the generated map are not passing test reports.
 
+## Assessment and procedure checks
+
+CI checks quiz registration, answer references, unique question IDs, declared counts and links to earlier readings. Playground procedure tests cover the named examples above; other playgrounds still prove only startup and declared readiness unless they contain their own smoke script. These checks do not establish every command in every lesson.
+
 ## Readings without a module-lab link
 
-These remain visible in the reverse map. Some are supporting concepts or integrated in a section capstone; none is claimed as an independently graded skill merely because it appears in a reading.
-
-- [course-04-helm-charts-as-a-source](sections/section-020/module-01/course-04-helm-charts-as-a-source.md)
-- [course-01-app-of-apps](sections/section-020/module-02/course-01-app-of-apps.md)
-- [course-03-permanent-drift-and-ignore-differences](sections/section-020/module-03/course-03-permanent-drift-and-ignore-differences.md)
-- [course-04-shared-tasks-with-resolvers](sections/section-040/module-01/course-04-shared-tasks-with-resolvers.md)
-- [course-06-wait-for-approval-before-promotion](sections/section-050/module-03/course-06-wait-for-approval-before-promotion.md)
-- [course-05-deliver-the-platform-with-flux](sections/section-060/module-01/course-05-deliver-the-platform-with-flux.md)
+The generated reverse map in [LAB-COVERAGE.md](LAB-COVERAGE.md) lists the current supporting and capstone-only readings. A listed concept is not claimed as independently assessed without a lab link.

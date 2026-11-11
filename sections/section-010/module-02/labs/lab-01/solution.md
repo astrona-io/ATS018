@@ -1,13 +1,12 @@
 # Solution Walkthrough
 
-Install the starter chart, add the required template field and values, then use release history to recover the desired configuration. A release is an installed copy of a Helm chart. A revision records one release operation.
+Install the starter chart, add the required template field and values, then verify the upgraded release. A release is an installed copy of a Helm chart. A revision records one release operation.
 
 | Goal | Where it lives | Command or file |
 | --- | --- | --- |
 | Resource structure | Chart templates | `scout/templates/deployment.yaml` |
 | Environment settings | Values override | `production-values.yaml` |
 | Package identity | Chart metadata | `scout/Chart.yaml` |
-| Recovery | Stored release revisions | `helm history`, `helm rollback` |
 
 ## The feedback loop
 
@@ -19,7 +18,7 @@ astrona submit --watch --git ssh://git@github.com/astrona-io/ATS018.git -c secti
 
 Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
 
-The `chart-release` and `rollback` checks need work at startup. These are expected conditions, not a captured grading transcript.
+The `chart-release` check needs work at startup. These are expected conditions, not a captured grading transcript.
 
 ## Step 1: Install the baseline
 
@@ -36,7 +35,7 @@ helm install scout ./scout --namespace starfleet-production --wait=watcher --tim
 helm history scout --namespace starfleet-production
 ```
 
-Look for the initial revision with image `6.14.0`. No full check is ready yet: the chart and rollback requirements need the later operations.
+Look for the initial revision with image `6.14.0`. No full check is ready yet: the chart requirements need the later upgrade.
 
 ## Step 2: Complete and deploy the chart
 
@@ -133,34 +132,6 @@ Look for chart `scout-0.2.0`, application version `6.15.0` and message `release-
 
 The watch terminal shows the `chart-release` check passing. If pods are still settling, wait for the Deployment with `kubectl -n starfleet-production rollout status deploy/scout --timeout=180s`.
 
-## Step 3: Upgrade once and roll back
+## Finish
 
-Create the temporary revision without changing the desired values file:
-
-```sh
-helm upgrade --install scout ./scout --namespace starfleet-production -f production-values.yaml --set message=temporary --wait=watcher --timeout 180s
-helm history scout --namespace starfleet-production
-kubectl -n starfleet exec deploy/shuttle -- curl -fsS http://scout.starfleet-production/
-```
-
-Look for revision 3 and message `temporary`. The chart check needs the desired message restored. In the required clean sequence, revision 2 contains that message. Roll back to it:
-
-```sh
-helm rollback scout 2 --namespace starfleet-production --wait=watcher --timeout 180s
-helm history scout --namespace starfleet-production
-kubectl -n starfleet-production rollout status deploy/scout --timeout=180s
-kubectl -n starfleet exec deploy/shuttle -- curl -fsS http://scout.starfleet-production/
-```
-
-Look for a new deployed revision that records the rollback to 2. The response should show version `6.15.0` and message `release-ready` again. The saved chart and values still describe this desired configuration.
-
-The watch terminal shows both `chart-release` and `rollback` passing. Stop the watch with Ctrl-C, then run the plain command once:
-
-```sh
-astrona submit --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-010/module-02/labs/lab-01
-```
-
-## If a check stays red
-
-- **chart-release:** Confirm that the terminal files are under `~/resources` and that the release is in `starfleet-production`. A saved template that differs from the installed one needs a Helm operation, not a live Deployment edit.
-- **rollback:** Read history. Revision 1 must be the starter install, revision 2 the desired upgrade and revision 3 the temporary change. The latest operation must roll back to 2. If you added extra upgrades before establishing this sequence, restart the disposable lab and follow the sequence once.
+The chart-release check compares the saved chart and values to the deployed manifest, then checks the live application response. Stop the watch and submit the final attempt when it passes. Practice history-based recovery in the next independent lab.

@@ -4,7 +4,9 @@ Solve this question on: `terminal`
 
 The `scout` application runs in the namespace `starfleet` at version `6.14.0`. Argo CD delivers it from the private Gitea repository `starfleet/scout-deploy`, with automated sync, prune and self-heal. The source repository `starfleet/scout-app` now has a `VERSION` file that says `6.15.0`. The base image `registry.registry.svc:5000/starfleet/podinfo:6.15.0` is in the in-cluster registry.
 
-The Tasks `fetch-source`, `publish-image` and `update-deploy` already exist in `starfleet`. There is no Pipeline, no Git credential and no service account for the pipeline. Build the release and deliver version `6.15.0` through Git. Do not change the Deployment with `kubectl`, and do not turn off or change the sync policy of the Argo CD `Application` `scout`.
+The supplied `publish-image` Task copies an already-built image with `crane copy`; it does not compile source or build a container image.
+
+The Tasks `fetch-source`, `publish-image` and `update-deploy` already exist in `starfleet`. There is no Pipeline, no Git credential and no service account for the pipeline. Assemble the release pipeline and deliver version `6.15.0` through Git. Do not change the Deployment with `kubectl`, and do not turn off or change the sync policy of the Argo CD `Application` `scout`.
 
 When you finish, these must be true:
 
