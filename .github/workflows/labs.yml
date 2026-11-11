@@ -120,6 +120,14 @@ jobs:
           chmod +x "$HOME/bin/kind" "$HOME/bin/astrona"
           echo "$HOME/bin" >>"$GITHUB_PATH"
 
+      - name: Install the Argo Rollouts plugin required by section 050
+        if: startsWith(matrix.env.path, 'sections/section-050/')
+        run: |
+          curl -fsSLo "$HOME/bin/kubectl-argo-rollouts" https://github.com/argoproj/argo-rollouts/releases/download/v1.10.0/kubectl-argo-rollouts-linux-amd64
+          echo "57a464e80c3e716076c9760e1d15ff06b853e3bcab3e22e30f4dba8a3e9f29b2  $HOME/bin/kubectl-argo-rollouts" | sha256sum -c -
+          chmod +x "$HOME/bin/kubectl-argo-rollouts"
+          kubectl argo rollouts version --short
+
       # Docker on a hosted runner sometimes answers slowly right after the job
       # starts, and `astrona check` then fails with "context deadline exceeded".
       - name: Wait for Docker
