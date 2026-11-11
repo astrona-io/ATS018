@@ -1,0 +1,75 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: deploy-workload
+  namespace: starfleet
+spec:
+  entrypoint: main
+  serviceAccountName: deployment-writer
+  arguments:
+    parameters:
+      - name: image
+      - name: name
+      - name: namespace
+      - name: task
+        value: release-check
+  templates:
+    - name: main
+      steps:
+        - - name: deploy
+            template: deploy
+            arguments:
+              parameters:
+                - name: image
+                  value: "{{workflow.parameters.image}}"
+                - name: name
+                  value: "{{workflow.parameters.name}}"
+                - name: namespace
+                  value: "{{workflow.parameters.namespace}}"
+                - name: task
+                  value: "{{workflow.parameters.task}}"
+    - name: deploy
+      inputs:
+        parameters:
+          - name: image
+          - name: name
+          - name: namespace
+          - name: task
+      resource:
+        action: create
+        successCondition: status.availableReplicas > 0
+        manifest: |
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: "{{inputs.parameters.name}}"
+            namespace: "{{inputs.parameters.namespace}}"
+            annotations:
+              training.astrona.io/workflow-uid: "{{workflow.uid}}"
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: "{{inputs.parameters.name}}"
+            template:
+              metadata:
+                labels:
+                  app: "{{inputs.parameters.name}}"
+              spec:
+                containers:
+                  - name: workload
+                    image: "{{inputs.parameters.image}}"
+                    env:
+                      - name: PODINFO_UI_MESSAGE
+                        value: "{{inputs.parameters.task}}"
+                    ports:
+                      - name: http
+                        containerPort: 9898
+                    readinessProbe:
+                      httpGet:
+                        path: /readyz
+                        port: http
+                    resources:
+                      requests:
+                        cpu: 10m
+                        memory: 32Mi

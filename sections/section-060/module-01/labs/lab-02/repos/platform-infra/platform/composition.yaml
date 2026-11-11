@@ -1,0 +1,101 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+  name: scoutenvironment
+spec:
+  compositeTypeRef:
+    apiVersion: platform.starfleet.dev/v1alpha1
+    kind: ScoutEnvironment
+  mode: Pipeline
+  pipeline:
+    - step: compose-scout
+      functionRef:
+        name: function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          - name: deployment
+            base:
+              apiVersion: kubernetes.m.crossplane.io/v1alpha1
+              kind: Object
+              spec:
+                providerConfigRef:
+                  kind: ClusterProviderConfig
+                  name: default
+                readiness:
+                  policy: DeriveFromCelQuery
+                  celQuery: has(object.status.availableReplicas) && has(object.status.updatedReplicas) && object.status.availableReplicas == object.spec.replicas && object.status.updatedReplicas == object.spec.replicas
+                forProvider:
+                  manifest:
+                    apiVersion: apps/v1
+                    kind: Deployment
+                    metadata:
+                      name: scout
+                    spec:
+                      selector:
+                        matchLabels:
+                          app: scout
+                      template:
+                        metadata:
+                          labels:
+                            app: scout
+                        spec:
+                          containers:
+                            - name: scout
+                              image: ghcr.io/stefanprodan/podinfo
+                              ports:
+                                - name: http
+                                  containerPort: 9898
+                              env:
+                                - name: PODINFO_UI_MESSAGE
+                                  value: hello
+                              readinessProbe:
+                                httpGet:
+                                  path: /readyz
+                                  port: http
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: spec.forProvider.manifest.metadata.namespace
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.replicas
+                toFieldPath: spec.forProvider.manifest.spec.replicas
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.message
+                toFieldPath: spec.forProvider.manifest.spec.template.spec.containers[0].env[0].value
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.version
+                toFieldPath: spec.forProvider.manifest.spec.template.spec.containers[0].image
+                transforms:
+                  - type: string
+                    string:
+                      type: Format
+                      fmt: ghcr.io/stefanprodan/podinfo:%s
+          - name: service
+            base:
+              apiVersion: kubernetes.m.crossplane.io/v1alpha1
+              kind: Object
+              spec:
+                providerConfigRef:
+                  kind: ClusterProviderConfig
+                  name: default
+                forProvider:
+                  manifest:
+                    apiVersion: v1
+                    kind: Service
+                    metadata:
+                      name: scout
+                    spec:
+                      selector:
+                        app: scout
+                      ports:
+                        - name: http
+                          port: 80
+                          targetPort: http
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: spec.forProvider.manifest.metadata.namespace

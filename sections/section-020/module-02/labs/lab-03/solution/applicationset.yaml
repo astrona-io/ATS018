@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: platform-apps
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: http://gitea-http.gitea.svc:3000/starfleet/platform-apps.git
+        revision: main
+        directories:
+          - path: apps/*
+  template:
+    metadata:
+      name: '{{.path.basename}}'
+      labels:
+        team: starfleet
+    spec:
+      project: default
+      source:
+        repoURL: http://gitea-http.gitea.svc:3000/starfleet/platform-apps.git
+        targetRevision: main
+        path: '{{.path.path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: starfleet
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true

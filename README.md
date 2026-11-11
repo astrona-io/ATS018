@@ -11,8 +11,11 @@ Everything lives under `sections/`. Each section is a set of modules, and each m
 
 - a **landing page** (`course.md`) plus, where the subject needs it, ordered **deep-dive parts** (`course-0N-*.md`), woven with hands-on "Try it" checkpoints and Mermaid diagrams;
 - an ungraded **playground** — a throwaway environment to explore in;
+- independent graded labs after their preparation readings, with reference solutions and live checks.
 
 Each section ends with a **capstone lab** combining its modules and a knowledge-check quiz.
+
+The [coverage map](LAB-COVERAGE.md) connects readings to labs in both directions. The [coverage review](COVERAGE-REVIEW.md) explains the comparison with ATS020 and the limits of the exercises.
 
 [`astrona.yaml`](astrona.yaml) is the manifest: every section, module, reading, playground, lab and capstone in the order they are meant to be taken.
 
@@ -38,7 +41,7 @@ Everything targets **kind 0.33.0**, **kind_node_image kindest/node:v1.35.8**, **
 1. Open the section's `README.md` for the map.
 2. Read each module's `course.md`, then its deep-dive parts in order.
 3. Boot the module playground and run the "Try it" checkpoints alongside the text.
-4. Solve the section capstone without looking at the walkthrough.
+4. Complete the labs after their preparation readings, then solve the section capstone without looking at the walkthrough.
 5. Take the section quiz, then the final domain quiz once every section is done.
 
 ---

@@ -171,6 +171,9 @@ modules:
         path: sections/section-010/module-02/quiz.yaml
         question_count: 10
       - type: reading
+        title: Trace A Kustomize Overlay From Source To Response
+        path: sections/section-010/capstone/course-01-trace-a-kustomize-overlay-from-source-to-response.md
+      - type: reading
         title: Question
         path: sections/section-010/capstone/labs/lab-01/question.md
       - type: lab
@@ -191,6 +194,9 @@ modules:
           - name: "Kustomize reference"
             url: https://kubectl.docs.kubernetes.io/references/kustomize/
 
+      - type: reading
+        title: Verify Helm And Kustomize Deliveries Separately
+        path: sections/section-010/capstone/course-02-verify-helm-and-kustomize-deliveries-separately.md
       - type: reading
         title: Question
         path: sections/section-010/capstone/labs/lab-02/question.md
@@ -268,6 +274,28 @@ modules:
         title: "Helm Charts As A Source"
         path: sections/section-020/module-01/course-04-helm-charts-as-a-source.md
       - type: reading
+        title: Question
+        path: sections/section-020/module-01/labs/lab-02/question.md
+      - type: lab
+        title: Deliver A Helm Chart With Argo CD Lab
+        path: sections/section-020/module-01/labs/lab-02
+        difficulty: intermediate
+        estimated_duration: 15m
+        topic: argocd
+        task_kind: build
+        tags:
+        - argocd-application
+        - helm-chart
+        - helm-values
+        - sync-policy
+        - health-status
+        learning_goals:
+        - Render podinfo from a chart source with explicit values
+        - Verify Argo CD ownership and the live response
+        resources:
+        - name: Argo CD Helm sources
+          url: https://argo-cd.readthedocs.io/en/stable/user-guide/helm/
+      - type: reading
         title: "Summary"
         path: sections/section-020/module-01/course-05-summary.md
       - type: quiz
@@ -282,8 +310,50 @@ modules:
         title: "App Of Apps"
         path: sections/section-020/module-02/course-01-app-of-apps.md
       - type: reading
+        title: Question
+        path: sections/section-020/module-02/labs/lab-02/question.md
+      - type: lab
+        title: Bootstrap Child Applications From Git Lab
+        path: sections/section-020/module-02/labs/lab-02
+        difficulty: intermediate
+        estimated_duration: 15m
+        topic: argocd
+        task_kind: build
+        tags:
+        - app-of-apps
+        - argocd-application
+        - sync-policy
+        - health-status
+        learning_goals:
+        - Deliver three child Applications through a parent
+        - Check each child and its workload independently
+        resources:
+        - name: App of apps
+          url: https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/
+      - type: reading
         title: "ApplicationSets And Generators"
         path: sections/section-020/module-02/course-02-applicationsets-and-generators.md
+      - type: reading
+        title: Question
+        path: sections/section-020/module-02/labs/lab-03/question.md
+      - type: lab
+        title: Generate Applications From Git Directories Lab
+        path: sections/section-020/module-02/labs/lab-03
+        difficulty: intermediate
+        estimated_duration: 15m
+        topic: argocd
+        task_kind: build
+        tags:
+        - applicationset
+        - argocd-application
+        - repository-credentials
+        - sync-policy
+        learning_goals:
+        - Generate Applications from directory names and paths
+        - Add a service through Git and verify controller ownership
+        resources:
+        - name: Git directory generator
+          url: https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Generators-Git/
       - type: reading
         title: "AppProjects For A Second Tenant"
         path: sections/section-020/module-02/course-03-appprojects-for-a-second-tenant.md
@@ -323,6 +393,27 @@ modules:
       - type: reading
         title: "Sync Failures, Waves And Hooks"
         path: sections/section-020/module-03/course-02-sync-failures-waves-and-hooks.md
+      - type: reading
+        title: Question
+        path: sections/section-020/module-03/labs/lab-03/question.md
+      - type: lab
+        title: Order A Sync With A Hook And Waves Lab
+        path: sections/section-020/module-03/labs/lab-03
+        difficulty: intermediate
+        estimated_duration: 15m
+        topic: argocd
+        task_kind: build
+        tags:
+        - sync-hooks
+        - sync-waves
+        - argocd-application
+        - health-status
+        learning_goals:
+        - Run a PreSync Job before ordinary resources
+        - Deliver a ConfigMap in wave -1 and inspect the completed sync
+        resources:
+        - name: Sync phases and waves
+          url: https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/
       - type: reading
         title: "Permanent Drift And ignoreDifferences"
         path: sections/section-020/module-03/course-03-permanent-drift-and-ignore-differences.md
@@ -371,6 +462,9 @@ modules:
         title: "Knowledge Check: Diagnose Sync And Health Failures In Argo CD"
         path: sections/section-020/module-03/quiz.yaml
         question_count: 10
+      - type: reading
+        title: Trace GitOps Ownership And Tenant Scope
+        path: sections/section-020/capstone/course-01-trace-gitops-ownership-and-tenant-scope.md
       - type: reading
         title: Question
         path: sections/section-020/capstone/labs/lab-01/question.md
@@ -524,6 +618,9 @@ modules:
         path: sections/section-030/module-03/quiz.yaml
         question_count: 8
       - type: reading
+        title: Separate Flux Source, Apply And Release Failures
+        path: sections/section-030/capstone/course-01-separate-flux-source-apply-and-release-failures.md
+      - type: reading
         title: Question
         path: sections/section-030/capstone/labs/lab-01/question.md
       - type: lab
@@ -596,6 +693,28 @@ modules:
       - type: reading
         title: "Shared Tasks With Resolvers"
         path: sections/section-040/module-01/course-04-shared-tasks-with-resolvers.md
+      - type: reading
+        title: Question
+        path: sections/section-040/module-01/labs/lab-03/question.md
+      - type: lab
+        title: Repair Cluster And Git Task Resolution Lab
+        path: sections/section-040/module-01/labs/lab-03
+        difficulty: intermediate
+        estimated_duration: 15m
+        topic: ci-pipelines
+        task_kind: troubleshooting
+        tags:
+        - tekton-task
+        - tekton-pipeline
+        - resolvers
+        - params-results
+        - workspaces
+        learning_goals:
+        - Resolve shared Tasks from a namespace and Git
+        - Verify a successful run and the resolved Git commit
+        resources:
+        - name: Tekton Git resolver
+          url: https://tekton.dev/docs/pipelines/git-resolver/
       - type: reading
         title: "Parallel Tasks, tkn Runs And Cluster Access"
         path: sections/section-040/module-01/course-05-parallel-tasks-tkn-runs-and-cluster-access.md
@@ -790,12 +909,39 @@ modules:
           - name: "Argo Workflows output parameters"
             url: https://argo-workflows.readthedocs.io/en/stable/walk-through/output-parameters/
       - type: reading
+        title: "Create A Deployment From Workflow Inputs"
+        path: sections/section-040/module-03/course-07-create-a-deployment-from-workflow-inputs.md
+      - type: reading
+        title: Question
+        path: sections/section-040/module-03/labs/lab-04/question.md
+      - type: lab
+        title: Create Deployments From Workflow Inputs Lab
+        path: sections/section-040/module-03/labs/lab-04
+        difficulty: intermediate
+        estimated_duration: 15m
+        topic: ci-pipelines
+        task_kind: build
+        tags:
+        - argo-workflows
+        - workflowtemplate
+        - argo-cli
+        - params-results
+        learning_goals:
+        - Pass image, name, namespace and task into a resource template
+        - Submit two successful runs and verify their ready Deployments
+        resources:
+        - name: Argo resource templates
+          url: https://argo-workflows.readthedocs.io/en/latest/walk-through/kubernetes-resources/
+      - type: reading
         title: "Summary"
         path: sections/section-040/module-03/course-07-summary.md
       - type: quiz
         title: "Knowledge Check: Run CI Workflows With Argo Workflows"
         path: sections/section-040/module-03/quiz.yaml
-        question_count: 11
+        question_count: 12
+      - type: reading
+        title: Follow A Release From Tested Source To GitOps Delivery
+        path: sections/section-040/capstone/course-01-follow-a-release-from-tested-source-to-gitops-delivery.md
       - type: reading
         title: Question
         path: sections/section-040/capstone/labs/lab-01/question.md
@@ -818,6 +964,9 @@ modules:
             url: https://tekton.dev/docs/pipelines/auth/
 
 
+      - type: reading
+        title: Trace A Git Push Into A Workflow Run
+        path: sections/section-040/capstone/course-02-trace-a-git-push-into-a-workflow-run.md
       - type: reading
         title: Question
         path: sections/section-040/capstone/labs/lab-02/question.md
@@ -1054,6 +1203,28 @@ modules:
         title: "Wait For Approval Before Promotion"
         path: sections/section-050/module-03/course-06-wait-for-approval-before-promotion.md
       - type: reading
+        title: Question
+        path: sections/section-050/module-03/labs/lab-04/question.md
+      - type: lab
+        title: Approve A Canary After Analysis Lab
+        path: sections/section-050/module-03/labs/lab-04
+        difficulty: intermediate
+        estimated_duration: 15m
+        topic: progressive-delivery
+        task_kind: build
+        tags:
+        - flagger
+        - canary
+        - promotion
+        - istio
+        - prometheus
+        learning_goals:
+        - Hold promotion with a confirm-promotion webhook
+        - Retain waiting evidence and approve the healthy candidate
+        resources:
+        - name: Flagger webhooks
+          url: https://docs.flagger.app/usage/webhooks
+      - type: reading
         title: "Summary"
         path: sections/section-050/module-03/course-07-summary.md
       - type: quiz
@@ -1100,6 +1271,9 @@ modules:
         path: sections/section-050/module-04/quiz.yaml
         question_count: 10
       - type: reading
+        title: Prove A Canary Gate With A Failing And A Passing Candidate
+        path: sections/section-050/capstone/course-01-prove-a-canary-gate-with-a-failing-and-a-passing-candidate.md
+      - type: reading
         title: Question
         path: sections/section-050/capstone/labs/lab-01/question.md
       - type: lab
@@ -1119,6 +1293,9 @@ modules:
             url: https://argo-rollouts.readthedocs.io/en/stable/features/analysis/
           - name: "Argo Rollouts canary strategy"
             url: https://argo-rollouts.readthedocs.io/en/stable/features/canary/
+      - type: reading
+        title: Connect Header Routing, Traffic Weights And Analysis
+        path: sections/section-050/capstone/course-02-connect-header-routing-traffic-weights-and-analysis.md
       - type: reading
         title: Question
         path: sections/section-050/capstone/labs/lab-02/question.md
@@ -1195,6 +1372,27 @@ modules:
         title: "Deliver The Platform With Flux"
         path: sections/section-060/module-01/course-05-deliver-the-platform-with-flux.md
       - type: reading
+        title: Question
+        path: sections/section-060/module-01/labs/lab-02/question.md
+      - type: lab
+        title: Deliver Crossplane Resources With Flux Lab
+        path: sections/section-060/module-01/labs/lab-02
+        difficulty: intermediate
+        estimated_duration: 15m
+        topic: flux
+        task_kind: build
+        tags:
+        - flux-gitrepository
+        - flux-kustomization
+        - depends-on
+        - reconcile
+        learning_goals:
+        - Order platform and environment reconciliation with Flux
+        - Repair the Git version and verify both composite resources and responses
+        resources:
+        - name: Flux Kustomizations
+          url: https://fluxcd.io/flux/components/kustomize/kustomizations/
+      - type: reading
         title: "Summary"
         path: sections/section-060/module-01/course-06-summary.md
       - type: quiz
@@ -1245,6 +1443,9 @@ modules:
         path: sections/section-060/module-02/quiz.yaml
         question_count: 10
       - type: reading
+        title: Follow GitOps Delivery Through Crossplane Reconciliation
+        path: sections/section-060/capstone/course-01-follow-gitops-delivery-through-crossplane-reconciliation.md
+      - type: reading
         title: Question
         path: sections/section-060/capstone/labs/lab-01/question.md
       - type: lab
@@ -1264,6 +1465,9 @@ modules:
             url: https://argo-cd.readthedocs.io/en/stable/operator-manual/health/
           - name: "Crossplane Compositions"
             url: https://docs.crossplane.io/latest/composition/compositions/
+      - type: reading
+        title: Distinguish Pending Changes, New Resources And Live Drift
+        path: sections/section-060/capstone/course-02-distinguish-pending-changes-new-resources-and-live-drift.md
       - type: reading
         title: Question
         path: sections/section-060/capstone/labs/lab-02/question.md
