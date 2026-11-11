@@ -1,0 +1,69 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-018-lab-040-01-03
+  docs:
+    question: question.md
+    solution: solution.md
+    prerequisites: prerequisites.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+    - curlimages/curl:8.22.0
+    - alpine:3.23
+    - alpine/git:2.52.0
+    - alpine/kubectl:1.35.4
+    - ghcr.io/stefanprodan/podinfo:6.14.0
+    - ghcr.io/stefanprodan/podinfo:6.15.0
+    - gitea/gitea:28.1.0-rootless
+  portForwards:
+  - name: git
+    description: The Git server (git over HTTP)
+    namespace: gitea
+    resource: svc/gitea-http
+    targetPort: 3000
+    hostPort: 3000
+    scheme: http
+bootstrap:
+  manifests:
+  - name: lab-start
+    type: file
+    source: manifests/lab-start.yaml
+  init:
+  - name: install-gitea
+    description: Starts the in-cluster Git server
+    type: file
+    source: bootstrap/01-install-gitea.sh
+  - name: install-tekton
+    description: Installs Tekton Pipelines 1.17.0
+    type: file
+    source: bootstrap/02-install-tekton.sh
+  - name: seed
+    description: Seed shared Tasks and a Pipeline with incorrect resolver locations
+    type: file
+    source: bootstrap/03-seed.sh
+  waitFor:
+  - resource: deploy/shuttle
+    namespace: starfleet
+teardown:
+  keepCluster: false
+testing:
+  init:
+  - name: verify-unfinished-state
+    description: Require an explicit rejection before solving
+    type: file
+    source: testing/verify-start.sh
+    timeout: 10m
+  - name: solution
+    description: Apply the reference solution and wait for the live result
+    type: file
+    source: solution/apply.sh
+    timeout: 15m
+validation:
+  scripts:
+  - name: live-result
+    description: Resolve shared Tasks from a namespace and Git; Verify a successful run and the resolved Git commit
+    type: file
+    source: validation/validate.sh

@@ -1,0 +1,36 @@
+apiVersion: flagger.app/v1beta1
+kind: Canary
+metadata:
+  name: scout
+  namespace: starfleet
+spec:
+  provider: istio
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: scout
+  progressDeadlineSeconds: 120
+  service:
+    port: 80
+    targetPort: http
+  analysis:
+    interval: 15s
+    threshold: 3
+    maxWeight: 50
+    stepWeight: 10
+    metrics:
+    - name: request-success-rate
+      thresholdRange:
+        min: 99
+      interval: 30s
+    webhooks:
+    - name: scout-approval
+      type: confirm-promotion
+      url: http://flagger-loadtester.starfleet/gate/check
+      timeout: 5s
+    - name: load-test
+      type: rollout
+      url: http://flagger-loadtester.starfleet/
+      timeout: 5s
+      metadata:
+        cmd: hey -z 1m -q 10 -c 2 http://scout-canary.starfleet/

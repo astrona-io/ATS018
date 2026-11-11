@@ -12,7 +12,7 @@ def link(title, path):
 
 
 def technical(path):
-    return '/module-' in path and '/course-' in path and 'summary' not in path
+    return ('/module-' in path or '/capstone/' in path) and '/course-' in path and 'summary' not in path
 
 
 def validate(course, coverage):
@@ -35,12 +35,20 @@ def validate(course, coverage):
                 raise ValueError(f'{path}: preparation must precede the lab: {reading}')
             if not reading.startswith(scope + '/'):
                 raise ValueError(f'{path}: preparation must belong to the same module or capstone section')
-        if '/module-' in path:
-            used.update(prep)
+        used.update(p for p in prep if '/module-' in path or '/capstone/' in p)
+    previous_lab = -1
+    for entry in entries:
+        if entry.get('type') != 'lab':
+            continue
+        path = entry['path']
+        prep = coverage['labs'][path]['preparation']
+        if not any(previous_lab < positions[p] < positions[path] for p in prep):
+            raise ValueError(f'{path}: each lab needs its own preparation reading after the previous lab')
+        previous_lab = positions[path]
     additional = coverage.get('additional_readings', [])
     expected = {path for path in readings if technical(path)} - used
     if len(additional) != len(set(additional)) or set(additional) != expected:
-        raise ValueError('additional_readings must list exactly the technical readings without a module-lab link')
+        raise ValueError('additional_readings must list exactly the technical readings without a practice link')
     return readings, labs
 
 
@@ -69,15 +77,15 @@ def render(root=ROOT):
         runtime = config['runtime']['type']
         lifecycle = link(runtime + ' reference lifecycle', path + '/config.yaml')
         lines.append(f'| {prep} | {task} | {descriptions} | {lifecycle} |')
-        if '/module-' in path:
-            for reading in preparation:
+        for reading in preparation:
+            if '/module-' in path or '/capstone/' in reading:
                 reverse[reading].append(task)
-    lines += ['', '## Readings and their module labs', '',
-              'Section capstones integrate several modules and are listed above. '
+    lines += ['', '## Readings and their practice', '',
+              'Capstone readings link to their integration tasks. Earlier module readings retain their module-lab links. '
               'They do not make every preceding reading a separately graded skill.', '',
-              '| Technical reading | Related module task |', '| --- | --- |']
+              '| Technical reading | Related task |', '| --- | --- |']
     for path, tasks in reverse.items():
-        result = '<br>'.join(tasks) if tasks else 'Supporting concepts or ungraded practice; no module-lab link'
+        result = '<br>'.join(tasks) if tasks else 'Supporting concepts or ungraded practice; no practice link'
         lines.append(f"| {link(readings[path]['title'], path)} | {result} |")
     lines += ['', 'Module labs check the unfinished state, apply the reference solution and '
               'run live graders. Each configuration records its waits and any deliberate '

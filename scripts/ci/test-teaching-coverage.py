@@ -48,5 +48,49 @@ class CoverageTests(unittest.TestCase):
             module.validate(self.course, self.coverage)
 
 
+    def stack_first_two_labs(self):
+        for section in self.course['modules']:
+            content = section.get('content', [])
+            labs = [e for e in content if e.get('type') == 'lab']
+            if len(labs) < 2:
+                continue
+            first, second = labs[:2]
+            start, end = content.index(first), content.index(second)
+            between = content[start + 1:end]
+            content[start:end + 1] = between + [first, second]
+            return content, first, second
+        self.fail('fixture needs two labs in one section')
+
+    def test_stacked_labs_rejected_even_when_preparation_is_earlier(self):
+        self.stack_first_two_labs()
+        with self.assertRaisesRegex(ValueError, 'after the previous lab'):
+            module.validate(self.course, self.coverage)
+
+    def test_question_between_labs_is_not_teaching(self):
+        content, first, second = self.stack_first_two_labs()
+        question = next(e for e in content if e['path'] == second['path'] + '/question.md')
+        content.remove(question)
+        content.insert(content.index(first) + 1, question)
+        with self.assertRaisesRegex(ValueError, 'after the previous lab'):
+            module.validate(self.course, self.coverage)
+
+    def test_unmapped_reading_between_labs_does_not_hide_gap(self):
+        content, first, second = self.stack_first_two_labs()
+        content.insert(content.index(first) + 1, {
+            'type': 'reading', 'title': 'Unrelated reading',
+            'path': 'sections/section-999/module-01/course-01-extra.md'})
+        self.coverage['additional_readings'].append('sections/section-999/module-01/course-01-extra.md')
+        with self.assertRaisesRegex(ValueError, 'after the previous lab'):
+            module.validate(self.course, self.coverage)
+
+    def test_capstone_needs_fresh_teaching(self):
+        for path, mapping in self.coverage['labs'].items():
+            if '/capstone/' in path:
+                mapping['preparation'] = [p for p in mapping['preparation'] if '/capstone/' not in p]
+                break
+        with self.assertRaisesRegex(ValueError, 'after the previous lab'):
+            module.validate(self.course, self.coverage)
+
+
 if __name__ == '__main__':
     unittest.main()

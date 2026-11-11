@@ -1,0 +1,75 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-018-lab-060-01-02
+  docs:
+    question: question.md
+    solution: solution.md
+    prerequisites: prerequisites.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+    - curlimages/curl:8.22.0
+    - ghcr.io/stefanprodan/podinfo:6.15.0
+    - gitea/gitea:28.1.0-rootless
+  portForwards:
+  - name: gitea
+    description: The Git server (git over HTTP)
+    namespace: gitea
+    resource: svc/gitea-http
+    targetPort: 3000
+    hostPort: 3000
+    scheme: http
+bootstrap:
+  init:
+  - name: lab-start
+    description: Creates the namespaces and the shuttle client
+    type: file
+    source: bootstrap/00-lab-start.sh
+  - name: install-gitea
+    description: Starts the in-cluster Git server
+    type: file
+    source: bootstrap/01-install-gitea.sh
+  - name: install-flux
+    description: Install the pinned Flux controllers
+    type: file
+    source: bootstrap/02-install-flux.sh
+  - name: install-crossplane
+    description: Installs Crossplane 2.4.3 (core and RBAC manager only)
+    type: file
+    source: bootstrap/03-install-crossplane.sh
+  - name: install-crossplane-packages
+    description: Installs provider-kubernetes v1.4.1 and function-patch-and-transform v0.11.2 with permissions and
+      a provider configuration
+    type: file
+    source: bootstrap/04-install-crossplane-packages.sh
+  - name: seed
+    description: Seed the platform repository and Flux read credentials
+    type: file
+    source: bootstrap/05-seed.sh
+  waitFor:
+  - resource: deploy/shuttle
+    namespace: starfleet
+testing:
+  init:
+  - name: verify-unfinished-state
+    description: Require an explicit rejection before solving
+    type: file
+    source: testing/verify-start.sh
+    timeout: 10m
+  - name: solution
+    description: Apply the reference solution and wait for the live result
+    type: file
+    source: solution/apply.sh
+    timeout: 15m
+validation:
+  scripts:
+  - name: live-result
+    description: Order platform and environment reconciliation with Flux; Repair the Git version and verify both
+      composite resources and responses
+    type: file
+    source: validation/validate.sh
+teardown:
+  keepCluster: false

@@ -23,4 +23,6 @@ Key facts:
 
 Step groups establish order, and output parameters carry values between them. A checksum comparison must use the exact input bytes and the output of the specific run being inspected.
 
+A resource template can create or apply a Deployment from workflow inputs and wait for an available replica. The workflow namespace and the target namespace are separate; the executor needs permissions in each destination.
+
 <!-- astrona:playground:destroy -->

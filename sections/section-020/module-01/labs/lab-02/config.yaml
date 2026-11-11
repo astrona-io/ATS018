@@ -1,0 +1,60 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-018-lab-020-01-02
+  docs:
+    question: question.md
+    solution: solution.md
+    prerequisites: prerequisites.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+    - curlimages/curl:8.22.0
+    - ghcr.io/stefanprodan/podinfo:6.15.0
+    - ghcr.io/stefanprodan/podinfo:6.14.0
+    - quay.io/argoproj/argocd:v3.5.4
+    - public.ecr.aws/docker/library/redis:8.2.3-alpine
+  portForwards:
+  - name: argocd
+    description: Argo CD API server and web page
+    namespace: argocd
+    resource: svc/argocd-server
+    targetPort: 443
+    hostPort: 8080
+    scheme: https
+bootstrap:
+  manifests:
+  - name: lab-start
+    type: file
+    source: manifests/lab-start.yaml
+  init:
+  - name: install-argocd
+    description: Installs Argo CD 3.5.4 (non-HA, without Dex and notifications)
+    type: file
+    source: bootstrap/02-install-argocd.sh
+  waitFor:
+  - resource: deploy/shuttle
+    namespace: starfleet
+teardown:
+  keepCluster: false
+testing:
+  init:
+  - name: verify-unfinished-state
+    description: Require an explicit rejection before solving
+    type: file
+    source: testing/verify-start.sh
+    timeout: 10m
+  - name: solution
+    description: Apply the reference solution and wait for the live result
+    type: file
+    source: solution/apply.sh
+    timeout: 15m
+validation:
+  scripts:
+  - name: live-result
+    description: Render podinfo from a chart source with explicit values; Verify Argo CD ownership and the live
+      response
+    type: file
+    source: validation/validate.sh

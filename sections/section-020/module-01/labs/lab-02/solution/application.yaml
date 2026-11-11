@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: scout-preview
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/stefanprodan/charts
+    chart: podinfo
+    targetRevision: 6.15.0
+    helm:
+      releaseName: scout
+      valuesObject:
+        fullnameOverride: scout
+        replicaCount: 2
+        ui:
+          message: preview
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: starfleet-preview
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

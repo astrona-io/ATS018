@@ -266,3 +266,25 @@ questions:
     correct_option: b
     explanation: Order prepare, checksum and publish steps. Pass the parameter as data and preserve its bytes when
       computing the digest.
+  - id: ats018-040-03-q12
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: Pass workflow inputs into a Deployment resource template.
+    source_readings:
+      - sections/section-040/module-03/course-07-create-a-deployment-from-workflow-inputs.md
+    prompt: A Workflow in starfleet receives namespace=outpost and creates a Deployment through a resource template. Which statement is correct?
+    options:
+      - id: a
+        text: The namespace parameter moves the Workflow and its ServiceAccount to outpost.
+        explanation: The Workflow remains in the namespace selected when it was submitted.
+      - id: b
+        text: The step passes arguments into local inputs, and the executor needs Deployment permissions in outpost.
+        explanation: Parameter substitution selects the destination but does not grant permissions.
+      - id: c
+        text: Declaring an input automatically gives the executor permission to create its resource.
+        explanation: Roles and RoleBindings grant permissions; input declarations do not.
+      - id: d
+        text: The resource step must succeed as soon as the API accepts the manifest.
+        explanation: A successCondition can wait for an available Deployment replica.
+    correct_option: b
+    explanation: Pass the values through step arguments to the resource template inputs, and grant the workflow ServiceAccount the required rights in the target namespace.
