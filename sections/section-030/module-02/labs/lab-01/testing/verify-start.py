@@ -44,7 +44,7 @@ def verify(lab, graders):
     raise RuntimeError('all graders passed before the reference solution')
 
 
-GRADERS = ['validation/validate-release-repaired.sh', 'validation/validate-remediation.sh']
+GRADERS = ['validation/validate-project.sh', 'validation/validate-applicationset.sh', 'validation/validate-outpost.sh']
 
 if __name__ == '__main__':
     try:

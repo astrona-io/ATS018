@@ -1,16 +1,18 @@
 # yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
 #
-# Run CI Workflows With Argo Workflows (PLAYGROUND) — playground environment.
-# Argo Workflows v4.1.6 (namespaced install in `starfleet`, Argo server off),
-# Argo Events v1.9.11 with a one-pod JetStream EventBus, and a public Git
-# repository `starfleet/scout-app` (in-cluster Gitea, plumbing only) that has a
-# push webhook. The `run-tests` WorkflowTemplate fails on purpose because of a
-# wrong working directory. No EventSource, no Sensor. No task, no grading.
+# Automate Image Updates With Flux (PLAYGROUND) — playground environment.
+# Flux 2.9.6 with the source, kustomize, image reflector and image automation
+# controllers, Gitea (plumbing only) with starfleet/scout-deploy, and an
+# in-cluster registry that holds starfleet/scout:6.14.0 and :6.15.0. Flux
+# already delivers scout 6.14.0 from Git, and a read-write Git credential
+# Secret is ready. Deliberately absent: no ImageRepository, ImagePolicy or
+# ImageUpdateAutomation. No task, no grading.
 apiVersion: astrona.io/v1
 metadata:
   name: ats-018-playground-040-03
   docs:
     guide: docs/overview.md
+
 runtime:
   type: kind
   kind:
@@ -18,50 +20,50 @@ runtime:
     preloadImages:
       - curlimages/curl:8.22.0
       - alpine:3.23
-      - alpine/git:2.52.0
+      - gcr.io/go-containerregistry/crane/debug:v0.22.1
+      - registry:3.1.2
       - gitea/gitea:28.1.0-rootless
-      - quay.io/argoproj/workflow-controller:v4.1.6
-      - quay.io/argoproj/argoexec:v4.1.6
-      - quay.io/argoproj/argo-events:v1.9.11
-      - nats:2.10.29
-      - natsio/prometheus-nats-exporter:0.14.0
-      - natsio/nats-server-config-reloader:0.14.0
+      - ghcr.io/fluxcd/source-controller:v1.9.6
+      - ghcr.io/fluxcd/kustomize-controller:v1.9.6
+      - ghcr.io/fluxcd/notification-controller:v1.9.4
+      - ghcr.io/fluxcd/image-reflector-controller:v1.2.5
+      - ghcr.io/fluxcd/image-automation-controller:v1.2.5
   portForwards:
-    - name: git
+    - name: gitea
       description: "The Git server (git over HTTP)"
       namespace: gitea
       resource: svc/gitea-http
       targetPort: 3000
       hostPort: 3000
       scheme: http
+
 bootstrap:
   manifests:
     - name: lab-start
       type: file
       source: manifests/lab-start.yaml
   init:
-    - name: install-argo-cli
-      description: "Installs the argo command-line tool v4.1.6 in ~/.astrona/bin unless argo is already on the PATH"
-      type: file
-      source: bootstrap/00-install-argo-cli.sh
     - name: install-gitea
       description: "Starts the in-cluster Git server"
       type: file
       source: bootstrap/01-install-gitea.sh
-    - name: install-argo-workflows
-      description: "Installs Argo Workflows v4.1.6 into starfleet"
+    - name: install-registry
+      description: "Starts the in-cluster registry and copies scout 6.14.0 and 6.15.0 into it"
       type: file
-      source: bootstrap/02-install-argo-workflows.sh
-    - name: install-argo-events
-      description: "Installs Argo Events v1.9.11 and a one-pod EventBus"
+      source: bootstrap/02-install-registry.sh
+    - name: install-flux
+      description: "Installs Flux 2.9.6 with the image reflector and image automation controllers"
       type: file
-      source: bootstrap/03-install-argo-events.sh
+      source: bootstrap/03-install-flux.sh
     - name: seed
-      description: "Pushes scout-app into Git, adds the push webhook and installs the run-tests WorkflowTemplate"
+      description: "Pushes scout-deploy into Git, creates the Git credential Secret and starts the delivery of scout 6.14.0"
       type: file
       source: bootstrap/04-seed.sh
   waitFor:
     - resource: deploy/shuttle
       namespace: starfleet
+    - resource: deploy/scout
+      namespace: starfleet
+
 teardown:
   keepCluster: false

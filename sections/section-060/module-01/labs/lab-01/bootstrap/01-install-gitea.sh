@@ -10,4 +10,4 @@ for i in $(seq 1 30); do
 done
 kubectl -n gitea exec deploy/gitea -- gitea admin user create --username platform \
   --password starfleet-gitops --email platform@starfleet.local --admin --must-change-password=false \
-  >/dev/null 2>&1 || echo "[playground] Gitea user platform already exists"
+  >/dev/null 2>&1 || echo "[lab] Gitea user platform already exists"

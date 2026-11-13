@@ -30,36 +30,3 @@ spec:
               memory: 16Mi
             limits:
               memory: 32Mi
----
-# The service account that workflow pods run as. The executor sidecar of each
-# pod writes its node result into a WorkflowTaskResult object, so the account
-# needs this one Role.
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: workflow-runner
-  namespace: starfleet
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: workflow-executor
-  namespace: starfleet
-rules:
-  - apiGroups: ["argoproj.io"]
-    resources: ["workflowtaskresults"]
-    verbs: ["create", "patch"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: workflow-executor
-  namespace: starfleet
-subjects:
-  - kind: ServiceAccount
-    name: workflow-runner
-    namespace: starfleet
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: workflow-executor

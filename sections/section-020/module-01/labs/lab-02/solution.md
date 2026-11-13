@@ -1,50 +1,22 @@
-# Solution
+# Solution Walkthrough
 
-Save this as `application-scout-preview.yaml`:
-
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: scout-preview
-  namespace: argocd
-spec:
-  project: default
-  source:
-    repoURL: ghcr.io/stefanprodan/charts
-    chart: podinfo
-    targetRevision: 6.15.0
-    helm:
-      releaseName: scout
-      valuesObject:
-        fullnameOverride: scout
-        replicaCount: 2
-        ui:
-          message: preview
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: starfleet-preview
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-```
-
-Apply it:
+Compare the stored values with the current response before choosing a target:
 
 ```sh
-kubectl apply -f application-scout-preview.yaml
+export PATH="$HOME/.astrona/bin:$PATH"
+helm history scout -n starfleet-production
+helm get values scout -n starfleet-production --revision 2 --all
+helm get values scout -n starfleet-production --revision 3 --all
+kubectl -n starfleet exec deploy/shuttle -- curl -fsS http://scout.starfleet-production/
 ```
 
-Wait for reconciliation, then check both ownership and behavior:
+Revision 2 contains `release-ready`; revision 3 contains `temporary`. Restore the stored working revision:
 
 ```sh
-kubectl -n argocd get application scout-preview
-kubectl -n starfleet-preview rollout status deploy/scout --timeout=180s
-kubectl -n starfleet-preview get deploy scout -o yaml
-kubectl -n starfleet exec deploy/shuttle -- curl -fsS http://scout.starfleet-preview:9898/
+helm rollback scout 2 -n starfleet-production --wait=watcher --timeout 180s
+kubectl -n starfleet-production rollout status deploy/scout --timeout=180s
+helm history scout -n starfleet-production
+kubectl -n starfleet exec deploy/shuttle -- curl -fsS http://scout.starfleet-production/
 ```
 
-The response must contain version `6.15.0` and message `preview`. Argo CD renders the chart and applies the resulting objects; it does not create Helm release history.
+The rollback adds a revision rather than erasing history. Check that the latest operation names revision 2 as its rollback target and that the response contains version `6.15.0` and message `release-ready`. Chart authoring is covered in the preceding independent lab.

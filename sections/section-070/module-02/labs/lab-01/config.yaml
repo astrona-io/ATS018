@@ -1,0 +1,68 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-018-lab-070-02
+  docs:
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - curlimages/curl:8.22.0
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - quay.io/argoproj/argo-rollouts:v1.10.0
+      - quay.io/prometheus-operator/prometheus-operator:v0.94.1
+      - quay.io/prometheus-operator/prometheus-config-reloader:v0.94.1
+      - quay.io/prometheus/prometheus:v3.15.0-distroless
+      - ghcr.io/jkroepke/kube-webhook-certgen:1.8.9
+
+bootstrap:
+  init:
+    - name: install-argo-rollouts
+      description: Installs the Argo Rollouts 1.10.0 controller
+      type: file
+      source: bootstrap/01-install-argo-rollouts.sh
+    - name: install-prometheus
+      description: Installs a trimmed kube-prometheus-stack 92.3.0 in monitoring
+      type: file
+      source: bootstrap/02-install-prometheus.sh
+    - name: start-scout
+      description: Creates the blue/green Rollout scout without analysis, its Services and its PodMonitor
+      type: file
+      source: bootstrap/03-start-scout.sh
+    - name: install-gate-recorder
+      description: Installs a watcher that records the pause and the pre-promotion AnalysisRun before each switch
+      type: file
+      source: bootstrap/04-install-gate-recorder.sh
+  waitFor:
+    - resource: deploy/shuttle
+      namespace: starfleet
+
+testing:
+  init:
+    - name: verify-unfinished-state
+      description: Require a ready API and an explicit grader rejection before solving
+      type: file
+      source: testing/verify-start.sh
+      timeout: 10m
+    - name: solution
+      description: Reference solution applied by `astrona test`
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: gate-definition
+      description: The AnalysisTemplate queries Prometheus in the cluster and the Rollout runs it before promotion with the latest hash
+      type: file
+      source: validation/validate-gate-definition.sh
+    - name: gate-behaviour
+      description: One AnalysisRun passed a good candidate, one failed a bad candidate, and the Rollout is Healthy on the good template
+      type: file
+      source: validation/validate-gate-behaviour.sh
+
+teardown:
+  keepCluster: false

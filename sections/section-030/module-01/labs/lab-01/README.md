@@ -2,9 +2,9 @@
 estimated_duration: 25m
 ---
 
-# Reconcile A Git Source With Flux
+# Deliver An Application From Git With Argo CD
 
-Graded lab for the Flux Kustomization module. The learner gets a `GitRepository` that follows a branch that does not exist and a `scout` `Kustomization` that has no dependency. They repair the source, add a `platform` `Kustomization`, order the two with `dependsOn` and deliver a change from Git. They also find a third `Kustomization`, `scout-production`, which starts suspended with a drifted live Deployment, and resume it with `flux resume`.
+Graded lab for the Argo CD module. The cluster has Argo CD and a private Git repository for `scout`, but no `Application` and no repository credentials. The learner connects the repository, creates an `Application` with automated sync, prune and self-heal, and proves that Argo CD delivers `scout` and reverts manual changes.
 
 ```sh
 astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-030/module-01/labs/lab-01

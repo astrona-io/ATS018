@@ -2,21 +2,14 @@
 
 Solve this question on: `terminal`
 
-The platform team keeps the Kubernetes files for the `scout` application in a private Git repository: `http://gitea-http.gitea.svc:3000/starfleet/scout-deploy.git`. The user is `platform` and the password is `starfleet-gitops`. The repository has a Kustomize base and the overlays `overlays/staging` and `overlays/production` on the branch `main`. Argo CD is installed in the namespace `argocd`, but it has no credentials for the repository and no `Application` yet.
+## Scenario
 
-Deliver the staging environment from Git with Argo CD. Do not apply the overlay with `kubectl apply -k`, and do not create the namespace `starfleet-staging` yourself.
+The `outpost` team needs a repeatable Helm release for `scout`. Helm is a tool that renders chart templates and manages installed releases. A chart packages templates and values; a release is one installed copy of a chart. The starter chart is in `~/resources/scout`. No release exists yet.
 
-When you finish, these must be true:
+## Tasks
 
-- **Repository access**: Argo CD has a repository Secret in the namespace `argocd` for the repository URL above.
-- **Application** `scout-staging` in the namespace `argocd`:
-  - It uses the project `default` and syncs the path `overlays/staging` of the branch `main` to the namespace `starfleet-staging` on the same cluster.
-  - Automated sync is on, with `prune` and `selfHeal` both `true`.
-  - Argo CD creates the namespace `starfleet-staging` for you.
-- **Result**:
-  - The `Application` is `Synced` and `Healthy`.
-  - The Deployment `scout` in `starfleet-staging` is created by Argo CD and runs `ghcr.io/stefanprodan/podinfo:6.15.0`.
-  - A request from the `shuttle` pod (namespace `starfleet`) to `http://scout.starfleet-staging/` returns version `6.15.0` and the message `staging`.
-  - If someone scales the Deployment by hand, Argo CD puts the replica count back to 1.
+1. **Install the baseline.** Install the untouched starter chart as release `scout` in `starfleet-production`. Revision 1 must use the starter image `ghcr.io/stefanprodan/podinfo:6.14.0`.
+2. **Complete the chart.** In `~/resources/scout`, add an environment variable named `PODINFO_UI_MESSAGE` to the Deployment template. Read its value from `.Values.message`. Set chart `version` to `0.2.0` and `appVersion` to `"6.15.0"`. Save overrides as `~/resources/production-values.yaml`: `replicaCount: 2`, `image.tag: "6.15.0"` and `message: release-ready`. Keep the starter `values.yaml` and Service template unchanged. Keep the existing image repository, resource names, selectors and probes. Lint and render the chart, then upgrade the release so revision 2 uses these settings.
+3. **Verify the upgrade.** Wait for two ready replicas. From `shuttle` in `starfleet`, request `http://scout.starfleet-production/` and check version `6.15.0` and message `release-ready`. Keep the saved chart and values equal to the installed configuration.
 
-Check your work with `astrona submit`.
+Do not patch the live Deployment or recreate the release. Learner work: about 15 minutes; allow extra time for cluster startup and rollouts. Rollback recovery has its own independent lab.

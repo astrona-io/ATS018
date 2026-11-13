@@ -1,13 +1,18 @@
 # Summary
 
-Flux separates chart fetching from release management. An OCIRepository publishes a chart artifact directly. A HelmRepository supplies a chart repository index, which a HelmRelease uses to select a chart and version. Source readiness proves the package was fetched, while HelmRelease readiness describes the install or upgrade result.
+Many applications need two things that a single `Application` cannot give: a way to create them without copying, and a way to keep teams apart. Argo CD answers the first with app of apps and `ApplicationSet` objects, and the second with `AppProject` objects.
 
-A HelmRelease holds chart references, values, timeouts and remediation rules. Inline values override values loaded through `valuesFrom`. A ConfigMap can hold a shared values document, and a watch label lets its changes request reconciliation. The helm controller renders those values and changes the workload; the ConfigMap does not change pods directly.
+## What you learned
 
-History records numbered release revisions separately from chart versions. A values-only change can create a new revision of the same chart. Read each record's revision and status; a failed upgrade can leave an older successful revision deployed, and rollback history need not be sorted numerically.
+The app of apps pattern keeps `Application` manifests in a Git folder and delivers them with one parent `Application` whose destination namespace is `argocd`. It moves the copies into Git, but every child is still hand-written. The parent does not judge its children's health by default, and deleting an `Application` only deletes its objects when it carries the finalizer `resources-finalizer.argocd.argoproj.io`.
 
-Install remediation removes a failed install before retrying. Upgrade remediation can roll back to the last successful configuration. Retries count extra attempts, and final remediation can restore a working application after that budget is exhausted. Ready stays false while the current desired values still fail, even when Remediated is true and client requests succeed.
+An `ApplicationSet` combines a generator with a template. The list generator takes its parameter sets from `elements`; the Git directory generator makes one parameter set per matching folder, with `{{.path.path}}` and `{{.path.basename}}`. With `goTemplate: true` and `missingkey=error`, placeholders use Go template syntax and a misspelled parameter fails instead of rendering empty. Generated applications have an owner reference to their `ApplicationSet`, are set back if edited by hand, carry the cascading-delete finalizer, and take over existing applications with the same name. The Git generator polls every three minutes; the annotation `argocd.argoproj.io/application-set-refresh=true` skips the wait.
 
-Fix the desired values before requesting another attempt. A reset clears failure counters; it cannot repair the configuration. Flux release management also differs from Argo CD chart delivery: Argo CD renders and syncs manifests, while the Flux helm controller manages release operations and their history.
+An `AppProject` limits its applications through `sourceRepos`, `destinations`, `clusterResourceWhitelist` and `namespaceResourceWhitelist`. The `default` project allows everything. A repository or destination outside the rules makes the whole application invalid with an `InvalidSpecError` condition, while a kind that is not whitelisted blocks only that object with the message `resource <group>:<kind> is not permitted in project`. The key facts to remember are these:
+
+- An `ApplicationSet` owns what it generates; change the template or the generator, never the `Application`.
+- Removing an element or a folder deletes the generated application and its workloads unless `preserveResourcesOnDeletion` is set.
+- The core API group is written as `''` in project whitelists.
+- Put every tenant in its own project.
 
 <!-- astrona:playground:destroy -->

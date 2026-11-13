@@ -29,7 +29,7 @@ on:
   workflow_dispatch:
     inputs:
       paths:
-        description: "Space-separated paths to test, for example sections/section-030"
+        description: "Space-separated paths to test, for example sections/section-040"
         required: false
         default: "sections"
 
@@ -124,8 +124,8 @@ jobs:
           chmod +x "$HOME/bin/kind" "$HOME/bin/astrona"
           echo "$HOME/bin" >>"$GITHUB_PATH"
 
-      - name: Install the Argo Rollouts plugin required by section 050
-        if: startsWith(matrix.env.path, 'sections/section-050/')
+      - name: Install the Argo Rollouts plugin required by section 070
+        if: startsWith(matrix.env.path, 'sections/section-070/')
         run: |
           curl -fsSLo "$HOME/bin/kubectl-argo-rollouts" https://github.com/argoproj/argo-rollouts/releases/download/v1.10.0/kubectl-argo-rollouts-linux-amd64
           echo "57a464e80c3e716076c9760e1d15ff06b853e3bcab3e22e30f4dba8a3e9f29b2  $HOME/bin/kubectl-argo-rollouts" | sha256sum -c -

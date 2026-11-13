@@ -1,44 +1,44 @@
-# Overview: Gate A Blue/Green Release With Analysis (Playground)
+# Overview: Hand Off From A Tekton Pipeline To GitOps (Playground)
 
-This playground starts a fresh Kubernetes cluster for testing releases. There is no grading or submission. A blue/green release runs a stable configuration and a new configuration separately, then switches the active Service to the new pods in one step. A Service is a Kubernetes resource that selects ready pods by labels and gives them a stable address.
+This is a **playground**, not a lab. It starts a cluster with Tekton, a registry, two Git repositories and Argo CD, and then waits. There is no task, no `astrona submit` and no pass or fail. Build the release pipeline, connect it to Git, break it, `astrona destroy`, start over.
 
 ## What's in the box
 
-The single-node cluster runs Kubernetes 1.35.8. The Argo Rollouts 1.10.0 controller manages releases; its command-line plugin must be on your machine's `PATH`. Prometheus collects application metrics every 15 seconds, and the Prometheus Operator configures that collection from Kubernetes resources.
-
-| Namespace | What is in it |
-| --- | --- |
-| `argo-rollouts` | Argo Rollouts controller and custom resource definitions |
-| `monitoring` | Prometheus Operator and one small Prometheus instance |
-| `starfleet` | A two-replica `scout` Rollout, active Service `scout`, preview Service `scout-preview`, a PodMonitor and the `shuttle` client |
-
-A Rollout is the Argo Rollouts resource that manages ReplicaSets for a release. A ReplicaSet keeps pods from one template running. Both Services initially select the same stable podinfo 6.15.0 configuration, which returns the message `stable`. Automatic promotion is disabled, and no AnalysisTemplate exists yet. An AnalysisTemplate defines metric queries and the conditions used to judge a release.
-
-A PodMonitor tells the Prometheus Operator which pods to scrape. It copies the pod template hash to a Prometheus label named `rollouts_pod_template_hash`, so a query can select only the candidate configuration. Prometheus scrapes the dedicated metrics port 9797, where podinfo does not inject random errors. The readiness probe checks whether application port 9898 accepts a connection. The `shuttle` client sends one request per second to each Service. Keep preview traffic running: the active Service cannot generate measurements for a candidate it does not select.
-
-Prometheus is available at `http://127.0.0.1:9090` while the playground runs. Inside the cluster its address is `http://kps-prometheus.monitoring.svc:9090`. The bootstrap installs its chart as hidden plumbing; the exercises use Prometheus and Argo Rollouts directly.
+- A single-node `kind` cluster running Kubernetes 1.35. `kubectl` is already pointed at it.
+- **Tekton Pipelines 1.17.0** and **Tekton Triggers 0.36.4** (controller, webhook and core interceptors) in `tekton-pipelines`.
+- A **container registry** at `registry.registry.svc:5000` inside the cluster, over plain HTTP. It holds the podinfo base images `starfleet/podinfo:6.14.0`, `6.14.1` and `6.15.0`, and `starfleet/scout:6.14.0`. The node pulls images from the same address. Read it from `shuttle` with `curl http://registry.registry.svc:5000/v2/starfleet/scout/tags/list`.
+- Two **private Git repositories** at `http://gitea-http.gitea.svc:3000` (from your machine: `http://127.0.0.1:3000`), user `platform`, password `starfleet-gitops`:
+  - `starfleet/scout-app`: the source. Its `VERSION` file says `6.14.0`.
+  - `starfleet/scout-deploy`: the GitOps repository, a Deployment, a Service and a `kustomization.yaml` whose `newTag` sets the `scout` image tag.
+- **Argo CD 3.5.4** in `argocd`, reachable on `https://127.0.0.1:8080`, user `admin`, password in the Secret `argocd-initial-admin-secret`. The `Application` `scout` syncs `scout-deploy` into `starfleet` with automated sync, prune and self-heal.
+- In `starfleet`: `scout` (version `6.14.0`), `shuttle` (a client pod with `curl`), and the Task `fetch-source`, which clones a repository at a revision into the workspace `source` and reports the results `commit` and `version`.
+- Deliberately absent: no Git credential Secret for the pipeline, no `EventListener`, and no webhook on `scout-app`.
 
 ## Helpers
 
-Paste these functions into each new terminal. `ask_scout` prints a Service response's version and message. `show_release` shows release progress, Service selectors and analysis phases. Service selector hashes identify the selected ReplicaSets.
+Paste these once in each new terminal. `argocd_login` logs the `argocd` tool in as `admin`. `ask_scout` sends one request from `shuttle` to `scout` and prints its version. `show_scout_tags` lists the `scout` tags in the registry. `show_last_release` prints the status and logs of the newest PipelineRun.
 
 ```sh
-ask_scout() {
-  kubectl -n starfleet exec deploy/shuttle -- curl -s "http://$1" | grep -E '"(version|message)"'
+argocd_login() {
+  argocd login 127.0.0.1:8080 --username admin --insecure \
+    --password "$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d)"
 }
-show_release() {
-  kubectl argo rollouts get rollout scout -n starfleet --no-color
-  kubectl -n starfleet get service scout scout-preview -o custom-columns='NAME:.metadata.name,HASH:.spec.selector.rollouts-pod-template-hash'
-  kubectl -n starfleet get analysisrun
+ask_scout() {
+  kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.starfleet | grep '"version"'
+}
+show_scout_tags() {
+  kubectl -n starfleet exec deploy/shuttle -- curl -s http://registry.registry.svc:5000/v2/starfleet/scout/tags/list
+}
+show_last_release() {
+  tkn -n starfleet pipelinerun describe --last
+  tkn -n starfleet pipelinerun logs --last
 }
 ```
 
-Use `ask_scout scout` to test active traffic and `ask_scout scout-preview` to test the candidate. Use `show_release` to compare routing with the controller's decision. A failed release can leave a working stable application serving active requests.
-
 ## Practice tasks
 
-- Change the podinfo message in a saved Rollout manifest. Apply it, compare the two Service responses and selectors, then promote the candidate.
-- Create an AnalysisTemplate that accepts at least 99% non-error responses. Pass the candidate's template hash as an argument and attach it as pre-promotion analysis.
-- Enable podinfo's `--random-error` flag in a candidate. Read the failed AnalysisRun and prove that the active Service still selects the stable ReplicaSet.
-- Remove preview test traffic and inspect what the query returns. Explain why no measurements must not count as a passing release.
-- Compare a check before promotion with a check after promotion. Decide which one can prevent a faulty candidate from serving active users at all.
+- Run the `fetch-source` Task against `scout-app` with the `default` service account, read the error, then fix it without changing the Task.
+- Write a Task that sets the image tag in `scout-deploy` and pushes a commit. Run it twice with the same version and make sure the second run succeeds without an empty commit.
+- Chain clone, publish and commit in one Pipeline. Ask for a version the registry has no base image for, and check that `scout-deploy` gets no commit.
+- Add an `EventListener` with a `cel` filter for pushes to `main`, connect a webhook, and push a new `VERSION`. Prove the release with `tkn`, `argocd app get` and a request from `shuttle`.
+- Push to another branch and show that no PipelineRun starts.

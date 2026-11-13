@@ -1,5 +1,7 @@
 # Solution
 
+Argo CD can only deliver what it can read, so the work has three parts: give Argo CD access to the repository, tell it what to deliver in an `Application`, and check the result.
+
 Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
 
 ```sh
@@ -8,177 +10,108 @@ astrona submit --watch -c sections/section-030/module-01/labs/lab-01
 
 Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
 
-## Step 1: read the status of the source and the Kustomization
+## Step 1: save the repository Secret
 
-```sh
-flux get sources git -n flux-system
-flux get kustomizations -n flux-system
-```
+Argo CD reads repository credentials from Secrets in its own namespace that carry the label `argocd.argoproj.io/secret-type: repository`. The `url` in the Secret must match the `repoURL` of the `Application`.
 
-The `GitRepository` `scout` is not `Ready`, and the `Kustomization` `scout` waits for a source artifact. The other objects in the list come back in a later step. Read the reason:
-
-```sh
-kubectl -n flux-system describe gitrepository scout
-```
-
-The source controller reports that it cannot find the reference for the branch `master`. The repository has the branch `main`.
-
-## Step 2: fix the branch of the source
-
-Save this as `gitrepository-scout.yaml`:
+Save this as `secret-repo-scout-deploy.yaml`:
 
 ```yaml
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: GitRepository
+apiVersion: v1
+kind: Secret
 metadata:
-  name: scout
-  namespace: flux-system
-spec:
-  interval: 1m
+  name: repo-scout-deploy
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: repository
+stringData:
+  type: git
   url: http://gitea-http.gitea.svc:3000/starfleet/scout-deploy.git
-  ref:
-    branch: main
-  secretRef:
-    name: scout-readonly
+  username: platform
+  password: starfleet-gitops
 ```
 
 Apply it:
 
 ```sh
-kubectl apply -f gitrepository-scout.yaml
+kubectl apply -f secret-repo-scout-deploy.yaml
 ```
 
-Then check the result:
+Without this Secret, the `repo-server` cannot clone the private repository, and the `Application` shows a `ComparisonError` condition.
 
-```sh
-flux get sources git -n flux-system
-```
+## Step 2: save the Application
 
-The source is `Ready` and shows the revision `main@sha1:<commit>`.
+The `Application` says which Git path to render and which cluster and namespace to sync it to. `CreateNamespace=true` lets Argo CD create `starfleet-staging`. `automated` with `prune` and `selfHeal` makes Argo CD follow Git, delete what leaves Git and revert manual changes.
 
-## Step 3: add the platform Kustomization and the dependency
-
-The `scout` `Kustomization` deploys into `starfleet-staging`, but only the `platform` path creates that namespace. Save this as `kustomization-platform.yaml`:
+Save this as `application-scout-staging.yaml`:
 
 ```yaml
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
+apiVersion: argoproj.io/v1alpha1
+kind: Application
 metadata:
-  name: platform
-  namespace: flux-system
+  name: scout-staging
+  namespace: argocd
 spec:
-  interval: 1m
-  path: ./platform
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: scout
+  project: default
+  source:
+    repoURL: http://gitea-http.gitea.svc:3000/starfleet/scout-deploy.git
+    targetRevision: main
+    path: overlays/staging
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: starfleet-staging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
 ```
 
-Save this as `kustomization-scout.yaml`:
-
-```yaml
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: scout
-  namespace: flux-system
-spec:
-  interval: 1m
-  path: ./overlays/staging
-  prune: true
-  targetNamespace: starfleet-staging
-  wait: true
-  timeout: 1m
-  dependsOn:
-    - name: platform
-  sourceRef:
-    kind: GitRepository
-    name: scout
-```
-
-Apply both:
+Apply it:
 
 ```sh
-kubectl apply -f kustomization-platform.yaml -f kustomization-scout.yaml
+kubectl apply -f application-scout-staging.yaml
 ```
 
-Then check the result:
+## Step 3: check the result
+
+Read the sync status and the health status of the `Application`. Both can take up to a minute to settle while the pod starts:
 
 ```sh
-flux get kustomizations -n flux-system
+kubectl -n argocd get application scout-staging
 ```
 
-The `platform` and `scout` objects become `Ready`. The `kustomize-controller` applies `platform` first and applies `scout` only after `platform` is `Ready`.
+The columns `SYNC STATUS` and `HEALTH STATUS` must read `Synced` and `Healthy`. If the sync status is `Unknown`, read the conditions with `kubectl -n argocd get application scout-staging -o jsonpath='{.status.conditions}'`; a repository error there means Step 1 is wrong.
 
-## Step 4: change the message in Git
-
-Clone the repository, change the value and push:
-
-```sh
-git clone http://platform:starfleet-gitops@127.0.0.1:3000/starfleet/scout-deploy.git
-cd scout-deploy
-sed -i 's/value: staging$/value: staging-v2/' overlays/staging/message.yaml
-git add overlays/staging/message.yaml
-git commit -m "Update staging message"
-git push origin main
-```
-
-On macOS, use `sed -i ''` instead of `sed -i`, or edit the file with an editor.
-
-Ask Flux to fetch the commit now instead of waiting for the interval:
-
-```sh
-flux reconcile kustomization scout -n flux-system --with-source
-```
-
-## Step 5: prove the staging result
+Send a request from `shuttle`:
 
 ```sh
 kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.starfleet-staging/
 ```
 
-The response shows `"message": "staging-v2"`.
+The JSON response must contain `"version": "6.15.0"` and `"message": "staging"`.
 
-## Step 6: find the suspended Kustomization
+## Step 4: check self-heal
 
-A suspended `Kustomization` is a Flux object that the `kustomize-controller` no longer reconciles. It keeps the objects it applied, but it stops applying changes and correcting drift. Drift is a difference between the live cluster and Git. List every `Kustomization`:
-
-```sh
-flux get kustomizations -n flux-system
-```
-
-Read the `SUSPENDED` column. The row for `scout-production` says `True`. Its `READY` column can still say `True`, because that value records the last completed reconciliation. It does not prove the live objects match Git.
-
-Compare the live workload with Git. The Git value is in `overlays/production/message.yaml` in your clone, and the live value comes from the running pods:
+Scale the Deployment by hand, then read the replica count again after a few seconds:
 
 ```sh
-cat overlays/production/message.yaml
-kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.starfleet-production/
+kubectl -n starfleet-staging scale deploy/scout --replicas=3
+kubectl -n starfleet-staging get deploy scout
 ```
 
-Git says `production`. The `message` field in the response has a different value, so the live Deployment has drifted.
-
-## Step 7: resume it and prove the drift is gone
-
-Do not change Git to match the drift, because Git holds the desired state. Clear the suspension instead, so the controller reconciles again:
-
-```sh
-flux resume kustomization scout-production -n flux-system
-```
-
-The `flux resume` command clears `spec.suspend` and waits for the reconciliation to finish. The `kustomize-controller` applies the desired state from Git over the changed value. That starts a rollout of new pods, so wait for it and send the request again:
-
-```sh
-kubectl -n starfleet-production rollout status deployment/scout
-kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.starfleet-production/
-flux get kustomizations -n flux-system
-```
-
-The response shows `"message": "production"`. All three `Kustomization` objects show `False` under `SUSPENDED` and `True` under `READY`.
+The application controller sees the drift and syncs again, so the Deployment returns to 1 replica. If it stays at 3, check that `selfHeal: true` is in the `Application` under `spec.syncPolicy.automated`.
 
 Stop the watch with Ctrl-C, then run the plain command once:
 
 ```sh
 astrona submit -c sections/section-030/module-01/labs/lab-01
 ```
+
+## Common mistakes
+
+- Applying the overlay with `kubectl apply -k`. The objects then have no Argo CD tracking annotation, and the grader rejects them.
+- Writing the repository URL without `.git` in the Secret but with it in the `Application` (or the other way round). Argo CD then finds no credentials.
+- Putting `selfHeal` or `prune` directly under `syncPolicy` instead of under `syncPolicy.automated`.
+- Creating the namespace by hand instead of using `CreateNamespace=true`.

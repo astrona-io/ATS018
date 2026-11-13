@@ -1,36 +1,7 @@
-# Starting state: the Services of scout and the client pod shuttle.
-# The Rollout and the AnalysisTemplate are in scout.yaml, because they need
-# the Argo Rollouts custom resource definitions first.
 apiVersion: v1
 kind: Namespace
 metadata:
   name: starfleet
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: scout
-  namespace: starfleet
-spec:
-  selector:
-    app: scout
-  ports:
-    - name: http
-      port: 80
-      targetPort: http
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: scout-canary
-  namespace: starfleet
-spec:
-  selector:
-    app: scout
-  ports:
-    - name: http
-      port: 80
-      targetPort: http
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -59,3 +30,33 @@ spec:
               memory: 16Mi
             limits:
               memory: 32Mi
+---
+# The account for runs of outpost-onboard.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: outpost-provisioner
+  namespace: starfleet
+---
+# A Namespace is a cluster-scoped object, so its rights need a ClusterRole.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: namespace-provisioner
+rules:
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: namespace-provisioner
+subjects:
+  - kind: ServiceAccount
+    name: outpost-provisioner
+    namespace: starfleet
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: namespace-provisioner

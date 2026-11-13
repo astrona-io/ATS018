@@ -1,0 +1,91 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-018-lab-060-01-05
+  docs:
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - curlimages/curl:8.22.0
+      - alpine:3.23
+      - alpine/git:2.52.0
+      - gitea/gitea:28.1.0-rootless
+      - quay.io/argoproj/workflow-controller:v4.1.6
+      - quay.io/argoproj/argoexec:v4.1.6
+      - quay.io/argoproj/argo-events:v1.9.11
+      - nats:2.10.29
+      - natsio/prometheus-nats-exporter:0.14.0
+      - natsio/nats-server-config-reloader:0.14.0
+  portForwards:
+    - name: git
+      description: The Git server (Gitea)
+      namespace: gitea
+      resource: svc/gitea-http
+      targetPort: 3000
+      hostPort: 3000
+      scheme: http
+
+bootstrap:
+  manifests:
+    - name: lab-start
+      type: file
+      source: manifests/lab-start.yaml
+  init:
+    - name: install-gitea
+      description: Starts the in-cluster Git server
+      type: file
+      source: bootstrap/01-install-gitea.sh
+    - name: install-argo-workflows
+      description: Installs Argo Workflows v4.1.6 into starfleet
+      type: file
+      source: bootstrap/02-install-argo-workflows.sh
+    - name: install-argo-events
+      description: Installs Argo Events v1.9.11 and a one-pod EventBus
+      type: file
+      source: bootstrap/03-install-argo-events.sh
+    - name: seed
+      description: Pushes scout-app into Git, adds the push webhook and installs the EventSource, the Sensor and the run-tests WorkflowTemplate, all with faults
+      type: file
+      source: bootstrap/04-seed.sh
+  waitFor:
+    - resource: deploy/shuttle
+      namespace: starfleet
+
+testing:
+  init:
+    - name: verify-unfinished-state
+      description: Require a ready API and an explicit grader rejection before solving
+      type: file
+      source: testing/verify-start.sh
+      timeout: 10m
+    - name: solution
+      description: Reference solution applied by `astrona test`
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: template-fixed
+      description: The run-tests WorkflowTemplate still clones scout-app and runs test.sh, and now starts in the cloned folder
+      type: file
+      source: validation/validate-template-fixed.sh
+    - name: sensor-fixed
+      description: The Sensor push-ci filters refs/heads/main, passes body.after as the revision and its pod runs
+      type: file
+      source: validation/validate-sensor-fixed.sh
+    - name: results-permission
+      description: The workflow-runner service account may write workflow task results, without broad rights
+      type: file
+      source: validation/validate-results-permission.sh
+    - name: push-ran-workflow
+      description: A Workflow created by the Sensor for the newest commit on main Succeeded
+      type: file
+      source: validation/validate-push-workflow.sh
+
+teardown:
+  keepCluster: false

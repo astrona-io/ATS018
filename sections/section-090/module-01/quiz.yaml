@@ -1,0 +1,244 @@
+# Knowledge check for section 090, module 01. Listed in astrona.yaml as a
+# `type: quiz` entry right after the module summary. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats018-060-01
+course_id: ATS018
+exam_code: CNPE
+status: alpha
+provenance: "Original practice material written for this course; not official exam questions."
+scope:
+  type: module
+  id: section-090/module-01
+  title: "Deliver Infrastructure Objects With Crossplane And GitOps"
+questions:
+  - id: ats018-060-01-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Tell a Provider from a Function."
+    source_readings:
+      - sections/section-090/module-01/course-01-providers-and-functions.md
+    prompt: "What is the job of a Crossplane `Provider` and of a `Function`?"
+    options:
+      - id: a
+        text: "A `Provider` runs a controller and adds kinds for one kind of external system. A `Function` is a small service that a `Composition` calls to decide which objects a composite resource needs"
+        explanation: "Correct. In this module `provider-kubernetes` creates the objects and `function-patch-and-transform` copies fields."
+      - id: b
+        text: "A `Provider` defines the new API kind, and a `Function` applies it to Git"
+        explanation: "The `CompositeResourceDefinition` defines a new kind, and neither package talks to Git."
+      - id: c
+        text: "Both are Helm charts that start the `crossplane` core pod"
+        explanation: "The chart starts the core pods. Providers and functions are packages that Crossplane installs."
+      - id: d
+        text: "A `Provider` stores credentials, and a `Function` stores the pod template"
+        explanation: "Credentials go in a `ClusterProviderConfig`."
+    correct_option: a
+    explanation: "Core Crossplane stores and compares objects. The packages add the ability to create things."
+
+  - id: ats018-060-01-q02
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Check a package is working."
+    source_readings:
+      - sections/section-090/module-01/course-01-providers-and-functions.md
+    prompt: "`kubectl get providers.pkg.crossplane.io` shows `INSTALLED True` and `HEALTHY False`. What does this mean?"
+    options:
+      - id: a
+        text: "The package works and you can create objects"
+        explanation: "`HEALTHY False` means it does not answer yet."
+      - id: b
+        text: "The core controller downloaded the package, but the package pod is still starting or cannot pull its image"
+        explanation: "Correct. Check `HEALTHY True` before you create anything that depends on the package."
+      - id: c
+        text: "The package version is not pinned"
+        explanation: "The version has no link to these columns."
+      - id: d
+        text: "The `ClusterProviderConfig` is missing"
+        explanation: "A missing configuration is a different problem."
+    correct_option: b
+    explanation: "`INSTALLED` and `HEALTHY` are two different checks."
+
+  - id: ats018-060-01-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Give the provider permissions."
+    source_readings:
+      - sections/section-090/module-01/course-01-providers-and-functions.md
+    prompt: "`provider-kubernetes` uses `credentials.source: InjectedIdentity`. It cannot create Deployments. What is missing?"
+    options:
+      - id: a
+        text: "A `Function` for Deployments"
+        explanation: "Functions do not grant permissions."
+      - id: b
+        text: "A larger `package` version"
+        explanation: "A version does not grant permissions."
+      - id: c
+        text: "A `ClusterRole` and a `ClusterRoleBinding` for the provider service account"
+        explanation: "Correct. The provider acts as its own service account, and Kubernetes denies what no role allows."
+      - id: d
+        text: "A second `Provider`"
+        explanation: "One provider is enough."
+    correct_option: c
+    explanation: "Add the API group and resource of every kind you wrap in an `Object` to the `ClusterRole`."
+
+  - id: ats018-060-01-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Define a new kind."
+    source_readings:
+      - sections/section-090/module-01/course-02-define-an-api-with-an-xrd-and-a-composition.md
+    prompt: "Which object defines the new kind `ScoutEnvironment` and its fields, and which maps it to real objects?"
+    options:
+      - id: a
+        text: "A `Composition` defines the kind, and the XRD maps it"
+        explanation: "The roles are the other way around."
+      - id: b
+        text: "A `CompositeResourceDefinition` defines the kind, and a `Composition` maps it to the objects Crossplane creates"
+        explanation: "Correct. The XRD name is the plural name plus the group."
+      - id: c
+        text: "A `ClusterProviderConfig` defines the kind, and a `Function` maps it"
+        explanation: "A `ClusterProviderConfig` holds connection and credential details."
+      - id: d
+        text: "An `Object` defines the kind, and a `Provider` maps it"
+        explanation: "An `Object` wraps one Kubernetes manifest."
+    correct_option: b
+    explanation: "The XRD says what a team can ask for. The `Composition` says what Crossplane creates."
+
+  - id: ats018-060-01-q05
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Write a safe readiness rule."
+    source_readings:
+      - sections/section-090/module-01/course-02-define-an-api-with-an-xrd-and-a-composition.md
+    prompt: "By default an `Object` is Ready when the provider created it. Why does the `Composition` add a CEL readiness query on the Deployment?"
+    options:
+      - id: a
+        text: "So the Deployment starts faster"
+        explanation: "A query does not speed up pods."
+      - id: b
+        text: "So the XR is Ready only when all replicas are updated and available, not when pods cannot start"
+        explanation: "Correct. The query reads the observed Deployment."
+      - id: c
+        text: "So Argo CD can read the sync wave"
+        explanation: "Argo CD reads an annotation, not the query."
+      - id: d
+        text: "So the namespace is copied into the manifest"
+        explanation: "A patch does that."
+    correct_option: b
+    explanation: "Without a rule, an environment is Ready even when its pods fail."
+
+  - id: ats018-060-01-q06
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Order objects in Argo CD."
+    source_readings:
+      - sections/section-090/module-01/course-03-deliver-the-platform-with-argo-cd.md
+    prompt: "How does the `Application` apply the XRD before the XRs on an empty cluster?"
+    options:
+      - id: a
+        text: "It sorts files by name"
+        explanation: "Names do not decide the order."
+      - id: b
+        text: "It uses sync waves, and `SkipDryRunOnMissingResource=true` skips the dry run for kinds that do not exist yet"
+        explanation: "Correct. The lowest wave applies first, and Argo CD waits until its objects are healthy."
+      - id: c
+        text: "It uses `dependsOn`"
+        explanation: "`dependsOn` belongs to Flux."
+      - id: d
+        text: "It applies all objects at once and retries forever"
+        explanation: "A dry run of the XR fails while its kind is missing."
+    correct_option: b
+    explanation: "The repository uses wave -2 for the XRD, -1 for the Composition and 0 for the XRs."
+
+  - id: ats018-060-01-q07
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Close the health gap in Argo CD."
+    source_readings:
+      - sections/section-090/module-01/course-03-deliver-the-platform-with-argo-cd.md
+    prompt: "The Application is `Healthy`, but production is not Ready, and the `HEALTH` column of the XRs is blank. What is the fix?"
+    options:
+      - id: a
+        text: "Turn on self-heal"
+        explanation: "Self-heal does not add a health check."
+      - id: b
+        text: "Add a Lua health check for `ScoutEnvironment` in the key `resource.customizations.health.platform.starfleet.dev_ScoutEnvironment` of `argocd-cm`"
+        explanation: "Correct. The script reads the `Ready` condition of the XR."
+      - id: c
+        text: "Delete the production XR"
+        explanation: "That removes the problem from view only."
+      - id: d
+        text: "Restart the Crossplane pods"
+        explanation: "The blank column is an Argo CD gap."
+    correct_option: b
+    explanation: "Argo CD has no built-in check for a kind it has never seen. A wrong key is silently ignored."
+
+  - id: ats018-060-01-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Trace a failing composite resource."
+    source_readings:
+      - sections/section-090/module-01/course-04-diagnose-a-composite-resource-that-is-not-ready.md
+    prompt: "An XR is `Ready=False`. The `Object` for the Deployment shows `Synced=True` and `Ready=False`. Where is the problem?"
+    options:
+      - id: a
+        text: "In the provider, because it could not create the Deployment"
+        explanation: "`Synced=True` means the provider created it without an error."
+      - id: b
+        text: "In Crossplane, because it could not compose"
+        explanation: "Crossplane composed the resources."
+      - id: c
+        text: "In the real Deployment or its pods, so read the pods and events next"
+        explanation: "Correct. The readiness rule is not met, so check the image or the pod."
+      - id: d
+        text: "In Argo CD, because it did not sync"
+        explanation: "Argo CD is not part of these layers."
+    correct_option: c
+    explanation: "Go down: XR, `Object`, real objects, pods. In the module the cause was an image tag that does not exist."
+
+  - id: ats018-060-01-q09
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Place the fix."
+    source_readings:
+      - sections/section-090/module-01/course-04-diagnose-a-composite-resource-that-is-not-ready.md
+    prompt: "Production asks for the version `6.99.0`, which does not exist. Where do you change it?"
+    options:
+      - id: a
+        text: "In the Deployment with `kubectl edit`"
+        explanation: "Crossplane restores the value from the XR."
+      - id: b
+        text: "In the pod events"
+        explanation: "Events are output, not input."
+      - id: c
+        text: "In the `Object`"
+        explanation: "The `Object` is owned by Crossplane."
+      - id: d
+        text: "In `spec.version` of the XR in Git, so the delivery tool applies it"
+        explanation: "Correct. The XR is the single source of the value."
+    correct_option: d
+    explanation: "With self-heal, the controller also reverts a live edit of the XR."
+
+  - id: ats018-060-01-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Map Argo CD to Flux."
+    source_readings:
+      - sections/section-090/module-01/course-05-deliver-the-platform-with-flux.md
+    prompt: "Which Flux feature replaces sync waves, and which replaces the Lua health script?"
+    options:
+      - id: a
+        text: "`dependsOn` between two Kustomizations replaces sync waves, and `wait: true` replaces the Lua script"
+        explanation: "Correct. `wait` reads the `Ready` condition that Crossplane sets."
+      - id: b
+        text: "`prune: true` replaces sync waves, and `interval` replaces the script"
+        explanation: "`prune` removes what left Git."
+      - id: c
+        text: "`GitRepository` replaces sync waves, and `timeout` replaces the script"
+        explanation: "A `GitRepository` fetches Git."
+      - id: d
+        text: "Flux has no replacement"
+        explanation: "Flux has both."
+    correct_option: a
+    explanation: "Keep the API and the instances in two Kustomizations so the kind exists first."

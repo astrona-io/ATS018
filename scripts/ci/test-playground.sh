@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Starts one playground, runs its smoke test, and always destroys it.
 #
-#   scripts/ci/test-playground.sh sections/section-030/module-10/playground
+#   scripts/ci/test-playground.sh sections/section-040/module-10/playground
 #
 # 1. `astrona run` must finish: the bootstrap and every waitFor in config.yaml
 #    pass.

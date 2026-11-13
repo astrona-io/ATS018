@@ -1,10 +1,10 @@
 ---
-estimated_duration: 30m
+estimated_duration: 20m
 ---
 
-# Hand Off A Release From Tekton To Argo CD
+# Repair A Failing HelmRelease And Add Remediation
 
-Graded lab for the Tekton hand-off module. The learner gets three finished Tasks, a private Git repository and an Argo CD `Application`, but no Pipeline and no Git credentials. They give a service account Git credentials, chain the Tasks in a Pipeline, run it and prove that Argo CD serves the new version.
+Graded lab for the HelmRelease module. The learner gets a `scout` `HelmRelease` whose last upgrade failed because the pods never become ready. They repair the values of the existing release and configure rollback remediation for future failed upgrades.
 
 ```sh
 astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-040/module-02/labs/lab-01

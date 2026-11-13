@@ -1,37 +1,41 @@
-# Overview: Deliver Helm Releases With Flux (Playground)
+# Overview: Manage Many Applications With ApplicationSets (Playground)
 
-Flux installs a chart through a HelmRelease, an object that defines an
-installed package and its values. This playground starts with a failed
-upgrade so you can read its status and configure recovery.
+This is a **playground**, not a lab. It starts a cluster with Argo CD and two private Git repositories, and then waits. There is no task, no `astrona submit` and no pass or fail. Generate applications, restrict them, `astrona destroy`, start over.
 
 ## What's in the box
 
-- Kubernetes 1.35, Flux 2.9.6 and the source, kustomize, helm and notification controllers.
-- The `podinfo` OCIRepository in `starfleet`, which fetches a chart from an Open Container Initiative (OCI) registry.
-- The HelmRelease `scout`, with a successful revision followed by a failed upgrade.
-- The `shuttle` client in `starfleet` and podinfo images preloaded.
+- A single-node `kind` cluster running Kubernetes 1.35. `kubectl` is already pointed at it.
+- **Argo CD 3.5.4** in `argocd`, reachable on `https://127.0.0.1:8080`. The user is `admin`; the password is in the Secret `argocd-initial-admin-secret`.
+- Two **private Git repositories**, reachable from your machine on `http://127.0.0.1:3000` (user `platform`, password `starfleet-gitops`). Argo CD reaches them at `http://gitea-http.gitea.svc:3000/starfleet/...` with a credential template that covers the whole organisation:
 
-The failed upgrade sets `faults.unready: true`, so podinfo rejects readiness
-checks. No install or upgrade remediation is configured.
+  | Repository | Content |
+  | --- | --- |
+  | `platform-apps` | `apps/scout`, `apps/probe`, `apps/bridge`; `envs/staging`, `envs/production`; `argocd-apps/` with one `Application` per service |
+  | `outpost-apps` | `scout/`, the `outpost` team's service |
+
+- Namespaces `starfleet` (with the `shuttle` client) and `outpost` (empty).
+- Deliberately absent: no `Application`, no `ApplicationSet`, and no `AppProject` other than `default`.
 
 ## Helpers
 
-Paste these functions in a terminal. `show_release` reads release status and
-history. `ask_scout` checks the Service from the client pod.
+Paste these once in each new terminal. `argocd_login` logs the `argocd` tool in as `admin`. `refresh_appset` makes an `ApplicationSet` read Git at once instead of waiting up to three minutes.
 
 ```sh
-show_release() {
-  flux get helmreleases -n starfleet
-  kubectl -n starfleet get helmrelease scout -o jsonpath='{.status.history}'
+argocd_login() {
+  argocd login 127.0.0.1:8080 --username admin --insecure \
+    --password "$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d)"
 }
-ask_scout() {
-  kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout-podinfo:9898
+refresh_appset() {
+  kubectl -n argocd annotate applicationset "$1" argocd.argoproj.io/application-set-refresh=true --overwrite
 }
 ```
 
+Use them like this: `argocd_login`, `refresh_appset platform-apps`.
+
 ## Practice tasks
 
-- Read the failed upgrade message and compare it with the Deployment's container arguments.
-- Enable upgrade remediation with rollback, retry the upgrade, and check the successful revision still answers.
-- Put application values in a ConfigMap and reference it with valuesFrom.
-- Compare the Ready condition with the deployed revision in history after rollback.
+- Add a third environment to the list generator and predict the `Application` name and namespace before you apply it.
+- Misspell a parameter in the template (`{{.evn}}`), apply it with and without `missingkey=error`, and compare the `ApplicationSet` conditions.
+- Change the Git directory generator to `apps/*` with an `exclude: true` entry for `apps/bridge`, and watch what happens to `bridge`.
+- Set `preserveResourcesOnDeletion: true`, remove a folder, and check which objects remain.
+- Generate the `outpost` team's application from an `ApplicationSet` with `project: outpost`, then try to point it at `platform-apps`.

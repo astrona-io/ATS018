@@ -1,0 +1,76 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-018-lab-070-01-02
+  docs:
+    question: question.md
+    solution: solution.md
+    prerequisites: prerequisites.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - curlimages/curl:8.22.0
+      - ghcr.io/stefanprodan/podinfo:6.14.0
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - quay.io/argoproj/argo-rollouts:v1.10.0
+
+bootstrap:
+  init:
+    - name: install-argo-rollouts
+      description: Installs the Argo Rollouts 1.10.0 controller
+      type: file
+      source: bootstrap/01-install-argo-rollouts.sh
+    - name: start-scout
+      description: Creates the canary Rollout scout, its Services, shuttle and an unfinished AnalysisTemplate
+      type: file
+      source: bootstrap/02-start-scout.sh
+    - name: install-release-recorder
+      description: Installs a watcher that records the canary steps and full promotions of each release
+      type: file
+      source: bootstrap/03-install-release-recorder.sh
+    - name: pause-release
+      description: Starts the 6.15.0 release and waits at its first pause
+      type: file
+      source: bootstrap/04-pause-release.sh
+  waitFor:
+    - resource: deploy/shuttle
+      namespace: starfleet
+    - resource: deploy/release-recorder
+      namespace: starfleet
+
+testing:
+  init:
+    - name: verify-unfinished-state
+      description: Require a ready API and an explicit grader rejection before solving
+      type: file
+      source: testing/verify-start.sh
+      timeout: 10m
+    - name: solution
+      description: Reference solution applied by `astrona test`
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: full-promotion
+      description: The paused 6.15.0 release reached its second pause and finished with a full promotion
+      type: file
+      source: validation/validate-full-promotion.sh
+    - name: web-analysis-step
+      description: The AnalysisTemplate checks the canary Service and an inline analysis step replaced the first pause
+      type: file
+      source: validation/validate-web-analysis-step.sh
+    - name: gated-release
+      description: An environment change passed the analysis step, finished with a normal promotion and reaches shuttle
+      type: file
+      source: validation/validate-gated-release.sh
+    - name: saved-analysisrun
+      description: The saved AnalysisRun name, phase and measurement value match the live AnalysisRun
+      type: file
+      source: validation/validate-saved-analysisrun.sh
+
+teardown:
+  keepCluster: false

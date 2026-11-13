@@ -3,231 +3,177 @@
 Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
 
 ```sh
-astrona submit --watch -c sections/section-050/module-02/labs/lab-01
+astrona submit --watch
 ```
 
 Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
 
-## Step 1: write the gate
+## Step 1: write the Pipeline
 
-An AnalysisTemplate holds the Prometheus query and the conditions. The controller runs inside the cluster, so the address is the in-cluster Service address of Prometheus. The argument `candidate-hash` selects the pods of one template through the label `rollouts_pod_template_hash`. The first measurement waits 45 seconds because a new pod needs several 15-second scrapes before its rate has data.
-
-Save this as `analysistemplate-scout-success.yaml`:
+The three Tasks already exist. Save this as `pipeline-scout-release.yaml`:
 
 ```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: AnalysisTemplate
+apiVersion: tekton.dev/v1
+kind: Pipeline
 metadata:
-  name: scout-success
+  name: scout-release
   namespace: starfleet
 spec:
-  args:
-    - name: candidate-hash
-  metrics:
-    - name: success-rate
-      initialDelay: 45s
-      interval: 15s
-      count: 3
-      failureLimit: 1
-      successCondition: len(result) == 1 && result[0] >= 0.99
-      failureCondition: len(result) != 1 || result[0] < 0.99
-      provider:
-        prometheus:
-          address: http://kps-prometheus.monitoring.svc:9090
-          query: |
-            sum(rate(http_request_duration_seconds_count{namespace="starfleet",path="root",rollouts_pod_template_hash="{{args.candidate-hash}}",status=~"2.."}[2m]))
-            /
-            sum(rate(http_request_duration_seconds_count{namespace="starfleet",path="root",rollouts_pod_template_hash="{{args.candidate-hash}}"}[2m]))
+  params:
+    - name: revision
+      type: string
+      default: main
+  workspaces:
+    - name: source
+  tasks:
+    - name: fetch-source
+      taskRef:
+        name: fetch-source
+      params:
+        - name: url
+          value: http://gitea-http.gitea.svc:3000/starfleet/scout-app.git
+        - name: revision
+          value: $(params.revision)
+      workspaces:
+        - name: source
+          workspace: source
+    - name: publish-image
+      taskRef:
+        name: publish-image
+      params:
+        - name: version
+          value: $(tasks.fetch-source.results.version)
+    - name: update-deploy
+      runAfter:
+        - publish-image
+      taskRef:
+        name: update-deploy
+      params:
+        - name: version
+          value: $(tasks.fetch-source.results.version)
+  results:
+    - name: deploy-commit
+      value: $(tasks.update-deploy.results.commit)
 ```
+
+`publish-image` uses a result of `fetch-source`, so Tekton starts it after the clone. `update-deploy` takes no result from `publish-image`, so it needs `runAfter` to wait for the publish.
 
 Apply it:
 
 ```sh
-kubectl apply -f analysistemplate-scout-success.yaml
+kubectl apply -f pipeline-scout-release.yaml
 ```
 
-Then check the result:
+## Step 2: run it and read the first failure
 
-```sh
-kubectl -n starfleet get analysistemplate scout-success
-```
-
-## Step 2: release the good candidate through the gate
-
-Add `prePromotionAnalysis` to the Rollout and change the message to `gated-good`. The message change is a new pod template, so it starts a release. `podTemplateHashValue: Latest` passes the candidate's hash to the query.
-
-Save this as `rollout-scout-gated.yaml`:
+Save this as `pipelinerun-scout-release.yaml`:
 
 ```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Rollout
+apiVersion: tekton.dev/v1
+kind: PipelineRun
 metadata:
-  name: scout
+  generateName: scout-release-
   namespace: starfleet
 spec:
-  replicas: 2
-  revisionHistoryLimit: 3
-  selector:
-    matchLabels:
-      app: scout
-  template:
-    metadata:
-      labels:
-        app: scout
-    spec:
-      containers:
-      - name: scout
-        image: ghcr.io/stefanprodan/podinfo:6.15.0
-        command:
-        - ./podinfo
-        - --port=9898
-        - --port-metrics=9797
-        env:
-        - name: PODINFO_UI_MESSAGE
-          value: gated-good
-        ports:
-        - name: http
-          containerPort: 9898
-        - name: metrics
-          containerPort: 9797
-        readinessProbe:
-          tcpSocket:
-            port: http
-        resources:
-          requests:
-            cpu: 10m
-            memory: 32Mi
-          limits:
-            memory: 64Mi
-  strategy:
-    blueGreen:
-      activeService: scout
-      previewService: scout-preview
-      autoPromotionEnabled: false
-      scaleDownDelaySeconds: 30
-      prePromotionAnalysis:
-        templates:
-        - templateName: scout-success
-        args:
-        - name: candidate-hash
-          valueFrom:
-            podTemplateHashValue: Latest
+  pipelineRef:
+    name: scout-release
+  workspaces:
+    - name: source
+      emptyDir: {}
 ```
 
-Apply it:
+Create the run and read its logs after about 40 seconds:
 
 ```sh
-kubectl apply -f rollout-scout-gated.yaml
+kubectl create -f pipelinerun-scout-release.yaml
+tkn -n starfleet pipelinerun logs --last
 ```
 
-Then check the result after about 90 seconds:
+The run fails in `fetch-source` with `fatal: could not read Username for 'http://gitea-http.gitea.svc:3000'`. The repository is private, and the run uses the service account `default`, which has no Git credentials. `publish-image` and `update-deploy` are skipped.
 
-```sh
-kubectl -n starfleet get analysisrun
-kubectl argo rollouts get rollout scout -n starfleet --no-color
-```
+## Step 3: give the pipeline Git credentials
 
-The AnalysisRun is `Successful` and the Rollout is `Paused` with `BlueGreenPause`. Active requests still return the old message. The `gate-recorder` watcher writes the pause and the passed analysis into the ConfigMap `gate-trace`. Promote the candidate with a normal promotion. The watcher then records that the active Service switched after both:
-
-```sh
-kubectl argo rollouts promote scout -n starfleet
-kubectl argo rollouts status scout -n starfleet --timeout 180s
-```
-
-## Step 3: release the faulty candidate
-
-Save this as `rollout-scout-bad.yaml`. It adds `--random-error` and the message `bad-release`:
+Tekton writes Git credentials into every step of a run when the run's service account lists a Secret of type `kubernetes.io/basic-auth` with the annotation `tekton.dev/git-0`. Save this as `secret-gitea-credentials.yaml`:
 
 ```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Rollout
+apiVersion: v1
+kind: Secret
 metadata:
-  name: scout
+  name: gitea-credentials
   namespace: starfleet
-spec:
-  replicas: 2
-  revisionHistoryLimit: 3
-  selector:
-    matchLabels:
-      app: scout
-  template:
-    metadata:
-      labels:
-        app: scout
-    spec:
-      containers:
-      - name: scout
-        image: ghcr.io/stefanprodan/podinfo:6.15.0
-        command:
-        - ./podinfo
-        - --port=9898
-        - --port-metrics=9797
-        - --random-error
-        env:
-        - name: PODINFO_UI_MESSAGE
-          value: bad-release
-        ports:
-        - name: http
-          containerPort: 9898
-        - name: metrics
-          containerPort: 9797
-        readinessProbe:
-          tcpSocket:
-            port: http
-        resources:
-          requests:
-            cpu: 10m
-            memory: 32Mi
-          limits:
-            memory: 64Mi
-  strategy:
-    blueGreen:
-      activeService: scout
-      previewService: scout-preview
-      autoPromotionEnabled: false
-      scaleDownDelaySeconds: 30
-      prePromotionAnalysis:
-        templates:
-        - templateName: scout-success
-        args:
-        - name: candidate-hash
-          valueFrom:
-            podTemplateHashValue: Latest
+  annotations:
+    tekton.dev/git-0: http://gitea-http.gitea.svc:3000
+type: kubernetes.io/basic-auth
+stringData:
+  username: platform
+  password: starfleet-gitops
 ```
 
-Apply it:
+Save this as `serviceaccount-scout-ci.yaml`:
+
+```yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: scout-ci
+  namespace: starfleet
+secrets:
+  - name: gitea-credentials
+```
+
+Apply both:
 
 ```sh
-kubectl apply -f rollout-scout-bad.yaml
+kubectl apply -f secret-gitea-credentials.yaml -f serviceaccount-scout-ci.yaml
 ```
 
-Then check the result after about 90 seconds:
+## Step 4: run the Pipeline with the service account
+
+Change `pipelinerun-scout-release.yaml` so that the `spec` has a `taskRunTemplate` field before `workspaces`:
+
+```yaml
+  taskRunTemplate:
+    serviceAccountName: scout-ci
+```
+
+Create a new run and read its logs after about 40 seconds:
 
 ```sh
-kubectl -n starfleet get analysisrun
-kubectl argo rollouts get rollout scout -n starfleet --no-color
-kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout | grep '"message"'
+kubectl create -f pipelinerun-scout-release.yaml
+tkn -n starfleet pipelinerun logs --last
 ```
 
-The newest AnalysisRun is `Failed` with measurements below `0.99`. The Rollout is `Degraded` with `RolloutAborted`, and the active Service still returns `gated-good`. Do not use `promote --full`: it skips the analysis and switches the active Service before the analysis passes. The `gate-recorder` records that, and `astrona submit` fails.
+The last lines of the log are:
 
-## Step 4: restore the good template
+```text
+[publish-image : copy] Published registry.registry.svc:5000/starfleet/scout:6.15.0 (sha256:<digest>)
 
-An abort does not change the desired template. Apply the saved good Rollout again:
+[update-deploy : commit-tag] Pushed <commit>: Deploy scout 6.15.0
+```
+
+The `fetch-source` Task read `VERSION` from `scout-app`, `publish-image` copied the image to the tag `6.15.0`, and `update-deploy` pushed the commit to `scout-deploy`. The digest and the commit ID differ in your run.
+
+## Step 5: check that Argo CD delivers the commit
+
+Argo CD checks Git about every three minutes. Ask it to refresh now, then check the application, the rollout and the version:
 
 ```sh
-kubectl apply -f rollout-scout-gated.yaml
-kubectl argo rollouts status scout -n starfleet --timeout 180s
+argocd app get scout --refresh
+argocd app wait scout --sync --health
+kubectl -n starfleet rollout status deploy/scout
+kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.starfleet | grep version
 ```
 
-The Rollout is `Healthy` on the accepted template. Send a request from `shuttle`:
+The application is `Synced` and `Healthy`, and the request returns `"version": "6.15.0"`. If it still shows `6.14.0`, send the request again after a few seconds: the old pod can stay in the Service endpoints for a short time.
 
-```sh
-kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout | grep '"message"'
-```
+Do not fix the version with `kubectl set image` or `kubectl edit`. With self-heal on, Argo CD reverts the change, and Git would still say `6.14.0`.
+
+## Step 6: submit
 
 Stop the watch with Ctrl-C, then run the plain command once:
 
 ```sh
-astrona submit -c sections/section-050/module-02/labs/lab-01
+astrona submit
 ```
+
+The first check reads the Pipeline, the service account and a `Succeeded` run. The second check reads the registry tag and compares the newest commit in `scout-deploy` with the `deploy-commit` result of a run. The third check reads the Argo CD `Application` and sends a request from `shuttle`.

@@ -83,11 +83,11 @@ class CoverageTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'after the previous lab'):
             module.validate(self.course, self.coverage)
 
-    def test_capstone_needs_fresh_teaching(self):
-        for path, mapping in self.coverage['labs'].items():
-            if '/capstone/' in path:
-                mapping['preparation'] = [p for p in mapping['preparation'] if '/capstone/' not in p]
-                break
+    def test_back_to_back_lab_needs_fresh_teaching(self):
+        lab = 'sections/section-100/module-01/labs/lab-02'
+        fresh = 'sections/section-100/module-01/course-04-tell-three-kinds-of-plan-changes-apart.md'
+        self.coverage['labs'][lab]['preparation'].remove(fresh)
+        self.coverage['additional_readings'].append(fresh)
         with self.assertRaisesRegex(ValueError, 'after the previous lab'):
             module.validate(self.course, self.coverage)
 

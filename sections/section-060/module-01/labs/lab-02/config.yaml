@@ -3,73 +3,76 @@ apiVersion: astrona.io/v1
 metadata:
   name: ats-018-lab-060-01-02
   docs:
+    prerequisites: prerequisites.md
     question: question.md
     solution: solution.md
-    prerequisites: prerequisites.md
+
 runtime:
   type: kind
   kind:
     image: kindest/node:v1.35.8
     preloadImages:
-    - curlimages/curl:8.22.0
-    - ghcr.io/stefanprodan/podinfo:6.15.0
-    - gitea/gitea:28.1.0-rootless
-  portForwards:
-  - name: gitea
-    description: The Git server (git over HTTP)
-    namespace: gitea
-    resource: svc/gitea-http
-    targetPort: 3000
-    hostPort: 3000
-    scheme: http
+      - curlimages/curl:8.22.0
+      - alpine:3.23
+      - quay.io/argoproj/workflow-controller:v4.1.6
+      - quay.io/argoproj/argoexec:v4.1.6
+
 bootstrap:
+  manifests:
+    - name: lab-start
+      type: file
+      source: manifests/lab-start.yaml
   init:
-  - name: lab-start
-    description: Creates the namespaces and the shuttle client
-    type: file
-    source: bootstrap/00-lab-start.sh
-  - name: install-gitea
-    description: Starts the in-cluster Git server
-    type: file
-    source: bootstrap/01-install-gitea.sh
-  - name: install-flux
-    description: Install the pinned Flux controllers
-    type: file
-    source: bootstrap/02-install-flux.sh
-  - name: install-crossplane
-    description: Installs Crossplane 2.4.3 (core and RBAC manager only)
-    type: file
-    source: bootstrap/03-install-crossplane.sh
-  - name: install-crossplane-packages
-    description: Installs provider-kubernetes v1.4.1 and function-patch-and-transform v0.11.2 with permissions and
-      a provider configuration
-    type: file
-    source: bootstrap/04-install-crossplane-packages.sh
-  - name: seed
-    description: Seed the platform repository and Flux read credentials
-    type: file
-    source: bootstrap/05-seed.sh
+    - name: install-argo-cli
+      description: Installs the argo command-line tool v4.1.6 in ~/.astrona/bin unless argo is already on the PATH
+      type: file
+      source: bootstrap/00-install-argo-cli.sh
+    - name: install-argo-workflows
+      description: Installs Argo Workflows v4.1.6 into starfleet
+      type: file
+      source: bootstrap/01-install-argo-workflows.sh
+    - name: seed
+      description: Installs the WorkflowTemplates scout-check and outpost-config and leaves one failed run
+      type: file
+      source: bootstrap/02-seed.sh
   waitFor:
-  - resource: deploy/shuttle
-    namespace: starfleet
+    - resource: deploy/shuttle
+      namespace: starfleet
+
 testing:
   init:
-  - name: verify-unfinished-state
-    description: Require an explicit rejection before solving
-    type: file
-    source: testing/verify-start.sh
-    timeout: 10m
-  - name: solution
-    description: Apply the reference solution and wait for the live result
-    type: file
-    source: solution/apply.sh
-    timeout: 15m
+    - name: verify-unfinished-state
+      description: Require a ready API and an explicit grader rejection before solving
+      type: file
+      source: testing/verify-start.sh
+      timeout: 10m
+    - name: solution
+      description: Reference solution applied by `astrona test`
+      type: file
+      source: solution/apply.sh
+
 validation:
   scripts:
-  - name: live-result
-    description: Order platform and environment reconciliation with Flux; Repair the Git version and verify both
-      composite resources and responses
-    type: file
-    source: validation/validate.sh
+    - name: template-fixed
+      description: The check-version template of scout-check reads the file its ConfigMap provides and still compares the version
+      type: file
+      source: validation/validate-template-fixed.sh
+    - name: parallel-steps
+      description: scout-check runs prepare first, then check-version and check-version-copy in one step group
+      type: file
+      source: validation/validate-parallel-steps.sh
+    - name: scout-check-run
+      description: A Succeeded run of scout-check ran both copies of the step in one group
+      type: file
+      source: validation/validate-scout-check-run.sh
+    - name: outpost-run
+      description: A Succeeded run of outpost-config targeted outpost with outpost-provisioner and created the objects
+      type: file
+      source: validation/validate-outpost-run.sh
+    - name: one-success-each
+      description: Only one Workflow remains for each WorkflowTemplate, and each one Succeeded
+      type: file
+      source: validation/validate-one-success-each.sh
+
 teardown:
   keepCluster: false

@@ -1,10 +1,10 @@
 ---
-estimated_duration: 35m
+estimated_duration: 30m
 ---
 
-# Gate A Blue/Green Release With Analysis
+# Hand Off A Release From Tekton To Argo CD
 
-Graded lab for the blue/green analysis module. The learner adds a Prometheus pre-promotion gate to the `scout` Rollout, releases a good and a faulty candidate, and ends on the good template.
+Graded lab for the Tekton hand-off module. The learner gets three finished Tasks, a private Git repository and an Argo CD `Application`, but no Pipeline and no Git credentials. They give a service account Git credentials, chain the Tasks in a Pipeline, run it and prove that Argo CD serves the new version.
 
 ```sh
 astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-050/module-02/labs/lab-01

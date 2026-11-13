@@ -3,7 +3,7 @@
 
 [![Liberapay](https://img.shields.io/badge/Liberapay-Support_Astrona.io-F6C915?logo=liberapay&logoColor=black&style=for-the-badge)](https://liberapay.com/Astrona.io)
 
-Training material covering the Certified Cloud Native Platform Engineer (CNPE) GitOps and Continuous Delivery domain: packaging applications with Kustomize and Helm, continuous delivery from Git with Argo CD and Flux, continuous integration pipelines with Tekton that hand a new image to a GitOps repository, progressive delivery with Argo Rollouts and Flagger, and infrastructure changes with Crossplane and OpenTofu. Each module pairs a layered reader with an ungraded hands-on playground on a local kind cluster. Delivery modules supply an in-cluster Gitea server when needed. Each section closes with an integration capstone.
+Training material covering the Certified Cloud Native Platform Engineer (CNPE) GitOps and Continuous Delivery domain: packaging applications with Kustomize and Helm, continuous delivery from Git with Argo CD and Flux, continuous integration pipelines with Tekton and Argo Workflows that hand a new image to a GitOps repository, progressive delivery with Argo Rollouts and Flagger, and infrastructure changes with Crossplane and OpenTofu. Each module pairs a layered reader with an ungraded hands-on playground on a local kind cluster. Delivery modules supply an in-cluster Gitea server when needed. Each section teaches one tool.
 
 This course covers the **GitOps and Continuous Delivery** domain of the Certified Cloud Native Platform Engineer (CNPE) exam, **25% of the exam**.
 
@@ -13,13 +13,13 @@ Everything lives under `sections/`. Each section is a set of modules, and each m
 - an ungraded **playground** — a throwaway environment to explore in;
 - independent graded labs after their preparation readings, with reference solutions and live checks.
 
-Each section ends with a **capstone lab** combining its modules and a knowledge-check quiz.
+Each module ends with a knowledge-check quiz. Graded labs sit right after the reading they practise; there are no section capstones.
 
-The [coverage map](LAB-COVERAGE.md) connects readings to labs in both directions. The [coverage review](COVERAGE-REVIEW.md) explains the comparison with ATS020 and the limits of the exercises.
+The [coverage map](LAB-COVERAGE.md) connects readings to labs in both directions.
 
-[`astrona.yaml`](astrona.yaml) is the manifest: every section, module, reading, playground, lab and capstone in the order they are meant to be taken.
+[`astrona.yaml`](astrona.yaml) is the manifest: every section, module, reading and lab in the order they are meant to be taken.
 
-Everything targets **kind 0.33.0**, **kind_node_image kindest/node:v1.35.8**, **kubernetes 1.35**, **kustomize 5.7.1 (embedded in kubectl 1.35)**, **helm 4.3.0 (chart authoring and release management)**, **opentofu 1.13.2 / Kubernetes provider 3.4.0**, **argocd 3.5.4**, **flux 2.9.6**, **tekton_pipelines 1.17.0**, **tekton_triggers 0.36.4**, **tkn 0.46.1**, **argo_rollouts 1.10.0**, **flagger 1.45.0**, **istio 1.30.7**, **kube_prometheus_stack_chart 92.3.0**, **gitea 28.1.0-rootless (plumbing only, not taught)**, **podinfo 6.15.0**, **go_httpbin 2.25.0** on `kind`.
+Everything targets **kind 0.33.0**, **kind_node_image kindest/node:v1.35.8**, **kubernetes 1.35**, **kustomize 5.7.1 (embedded in kubectl 1.35)**, **helm 4.3.0 (chart authoring and release management)**, **opentofu 1.13.2 / Kubernetes provider 3.4.0**, **argocd 3.5.4**, **flux 2.9.6**, **tekton_pipelines 1.17.0**, **tekton_triggers 0.36.4**, **tkn 0.46.1**, **argo_workflows v4.1.6**, **argo_events v1.9.11**, **argo_rollouts 1.10.0**, **flagger 1.45.0**, **istio 1.30.7**, **crossplane 2.4.3**, **kube_prometheus_stack_chart 92.3.0**, **gitea 28.1.0-rootless (plumbing only, not taught)**, **podinfo 6.15.0**, **go_httpbin 2.25.0** on `kind`.
 
 ---
 
@@ -27,12 +27,16 @@ Everything targets **kind 0.33.0**, **kind_node_image kindest/node:v1.35.8**, **
 
 | Section | Title | Modules | Curriculum item |
 | --- | --- | --- | --- |
-| [010](sections/section-010) | Packaging Applications For GitOps | 2 | Implementing GitOps Workflows for Application and Infrastructure Deployment |
-| [020](sections/section-020) | Continuous Delivery With Argo CD | 3 | Implementing GitOps Workflows for Application and Infrastructure Deployment |
-| [030](sections/section-030) | Continuous Delivery With Flux | 3 | Implementing GitOps Workflows for Application and Infrastructure Deployment |
-| [040](sections/section-040) | Continuous Integration Pipelines (Tekton, Argo Workflows and Events) | 3 | Building and Configuring CI/CD Pipelines Integrated with Kubernetes |
-| [050](sections/section-050) | Progressive Delivery | 4 | Deploying Applications Using Progressive Delivery Strategies (for example Blue/Green or Canary) |
-| [060](sections/section-060) | Infrastructure Deployment Through GitOps (Crossplane and OpenTofu) | 2 | Implementing GitOps Workflows for Application and Infrastructure Deployment |
+| [010](sections/section-010) | Build Manifests With Kustomize | 1 | Implementing GitOps Workflows for Application and Infrastructure Deployment |
+| [020](sections/section-020) | Package Applications With Helm | 1 | Implementing GitOps Workflows for Application and Infrastructure Deployment |
+| [030](sections/section-030) | Continuous Delivery With Argo CD | 3 | Implementing GitOps Workflows for Application and Infrastructure Deployment |
+| [040](sections/section-040) | Continuous Delivery With Flux | 3 | Implementing GitOps Workflows for Application and Infrastructure Deployment |
+| [050](sections/section-050) | Continuous Integration Pipelines With Tekton | 2 | Building and Configuring CI/CD Pipelines Integrated with Kubernetes |
+| [060](sections/section-060) | Continuous Integration With Argo Workflows And Argo Events | 1 | Building and Configuring CI/CD Pipelines Integrated with Kubernetes |
+| [070](sections/section-070) | Progressive Delivery With Argo Rollouts | 3 | Deploying Applications Using Progressive Delivery Strategies (for example Blue/Green or Canary) |
+| [080](sections/section-080) | Progressive Delivery With Flagger | 1 | Deploying Applications Using Progressive Delivery Strategies (for example Blue/Green or Canary) |
+| [090](sections/section-090) | Infrastructure Delivery With Crossplane | 1 | Implementing GitOps Workflows for Application and Infrastructure Deployment |
+| [100](sections/section-100) | Plan And Apply Infrastructure With OpenTofu | 1 | Implementing GitOps Workflows for Application and Infrastructure Deployment |
 
 ---
 
@@ -41,7 +45,7 @@ Everything targets **kind 0.33.0**, **kind_node_image kindest/node:v1.35.8**, **
 1. Open the section's `README.md` for the map.
 2. Read each module's `course.md`, then its deep-dive parts in order.
 3. Boot the module playground and run the "Try it" checkpoints alongside the text.
-4. Complete the labs after their preparation readings, then solve the section capstone without looking at the walkthrough.
+4. Complete each lab right after its preparation reading, without looking at the walkthrough.
 5. Take the section quiz, then the final domain quiz once every section is done.
 
 ---

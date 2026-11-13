@@ -2,14 +2,17 @@
 
 Solve this question on: `terminal`
 
-Argo CD is installed. No Application or Helm release exists for `scout-preview`.
+Release `scout` in `starfleet-production` has three revisions. Revision 1 used podinfo 6.14.0. Revision 2 deployed two replicas of 6.15.0 with message `release-ready`. Revision 3 changed the message to `temporary`. The chart is already complete; recover the working release from its stored history.
 
 ## Tasks
 
-1. Create Application `scout-preview` in `argocd`. Use chart `podinfo` version `6.15.0` from `ghcr.io/stefanprodan/charts` and release name `scout`.
-2. Set `valuesObject` to use `fullnameOverride: scout`, two replicas and `ui.message: preview`. Deliver into `starfleet-preview` on this cluster with automated sync, prune, self-heal and `CreateNamespace=true`.
-3. Wait for Synced and Healthy. Inspect the Deployment's Argo CD tracking annotation and confirm that `http://scout.starfleet-preview:9898/` returns version `6.15.0` and message `preview` from `shuttle` in `starfleet`.
+1. Inspect `helm history` and the values stored in revisions 2 and 3. Confirm the current response from `shuttle` in `starfleet`.
+2. Roll back to revision 2 using Helm. Wait for the release to be deployed and both replicas to be ready.
+3. Confirm that history records the rollback and that `http://scout.starfleet-production/` returns version `6.15.0` and message `release-ready` from `shuttle`.
 
-Use the Application to deliver the chart. Do not install it with Helm or apply its rendered workloads yourself.
+## Constraints
 
-Learner work: about 15 minutes. Cluster startup, controller reconciliation and rollouts take additional time.
+- Preserve the release and its history. Do not uninstall it, edit its storage Secrets or patch the Deployment directly.
+- Keep the image repository, selectors and readiness probe unchanged.
+
+Learner work: about 10 minutes. Cluster startup and the seeded release rollouts take additional time.

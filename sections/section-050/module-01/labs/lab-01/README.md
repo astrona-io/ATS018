@@ -1,10 +1,10 @@
 ---
-estimated_duration: 25m
+estimated_duration: 20m
 ---
 
-# Release A New Version With A Canary Rollout
+# Fix A Failing Tekton Pipeline
 
-Graded lab for the Argo Rollouts canary module. The learner converts the `scout` Deployment into a canary Rollout and releases podinfo 6.15.0 through its pause steps.
+Graded lab for the Tekton Tasks and Pipelines module. The learner gets a Pipeline whose `run-tests` Task starts in a directory that does not exist. They start a `PipelineRun`, read the failure down to the step log, fix the Task and get a `Succeeded` run.
 
 ```sh
 astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-050/module-01/labs/lab-01

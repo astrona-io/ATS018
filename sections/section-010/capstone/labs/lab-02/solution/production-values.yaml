@@ -1,4 +1,0 @@
-replicaCount: 2
-image:
-  tag: "6.15.0"
-message: chart-production

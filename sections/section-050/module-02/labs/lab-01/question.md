@@ -2,20 +2,21 @@
 
 Solve this question on: `terminal`
 
-The `scout` application in the namespace `starfleet` is an Argo Rollouts `Rollout` with a `blueGreen` strategy. The Service `scout` is the active Service and `scout-preview` is the preview Service. Promotion is manual (`autoPromotionEnabled: false`), and the Rollout has no analysis yet. The `shuttle` pod sends one request per second to both Services.
+The `scout` application runs in the namespace `starfleet` at version `6.14.0`. Argo CD delivers it from the private Gitea repository `starfleet/scout-deploy`, with automated sync, prune and self-heal. The source repository `starfleet/scout-app` now has a `VERSION` file that says `6.15.0`. The base image `registry.registry.svc:5000/starfleet/podinfo:6.15.0` is in the in-cluster registry.
 
-Prometheus is at `http://kps-prometheus.monitoring.svc:9090`. It scrapes every `scout` pod every 15 seconds. The metric `http_request_duration_seconds_count` has the labels `namespace`, `path` (requests to `/` use `root`), `status` and `rollouts_pod_template_hash`. A new pod needs about 45 seconds before its rate has data.
+The supplied `publish-image` Task copies an already-built image with `crane copy`; it does not compile source or build a container image.
 
-Gate the releases with a pre-promotion analysis, then prove it works with a good and a faulty candidate. Do not delete the analysis to get a release through and do not use `promote --full`. A watcher named `gate-recorder` in `starfleet` records, for each pod template hash, the `BlueGreenPause`, the `Successful` pre-promotion `AnalysisRun` and whether the active Service switched only after both. Do not delete it or its ConfigMap `gate-trace`. A release promoted with `--full` switches the active Service too early, and `astrona submit` rejects it.
+The Tasks `fetch-source`, `publish-image` and `update-deploy` already exist in `starfleet`. There is no Pipeline, no Git credential and no service account for the pipeline. Assemble the release pipeline and deliver version `6.15.0` through Git. Do not change the Deployment with `kubectl`, and do not turn off or change the sync policy of the Argo CD `Application` `scout`.
 
 When you finish, these must be true:
 
-- An `AnalysisTemplate` named `scout-success` in `starfleet` has a Prometheus metric that reads the in-cluster address above. It measures the fraction of status `2xx` responses on `path="root"` for one pod template hash, and succeeds at `0.99` or higher. It allows one failed measurement (`failureLimit: 1`).
-- The Rollout runs `scout-success` in `prePromotionAnalysis` and passes the hash of the latest (candidate) template to it. `autoPromotionEnabled` stays `false`.
-- A good candidate was released first: the pod template environment variable `PODINFO_UI_MESSAGE` is `gated-good`. Its analysis passed and you promoted it.
-- A faulty candidate was released next: `PODINFO_UI_MESSAGE` was `bad-release` and the container command had the extra argument `--random-error` (podinfo then answers some requests with status 400, 409 or 500). Its analysis failed and the release was aborted.
-- At the end the Rollout is `Healthy` on the good `gated-good` template without `--random-error`, both Services select that template, and a request from the `shuttle` pod to `http://scout.starfleet/` returns the message `gated-good`.
+- The Secret `gitea-credentials` in `starfleet` has the type `kubernetes.io/basic-auth`, the annotation `tekton.dev/git-0: http://gitea-http.gitea.svc:3000`, the user `platform` and the password `starfleet-gitops`. The service account `scout-ci` lists it.
+- The Pipeline `scout-release` in `starfleet` runs `fetch-source` on `http://gitea-http.gitea.svc:3000/starfleet/scout-app.git`, then `publish-image` and then `update-deploy`, both with the `version` result of `fetch-source`. The Pipeline has the result `deploy-commit` with the `commit` result of `update-deploy`.
+- A `PipelineRun` of `scout-release` that uses the service account `scout-ci` has the status `Succeeded`.
+- The registry holds the image `starfleet/scout:6.15.0`.
+- The newest commit on `main` of `scout-deploy` is the commit the pipeline pushed. It sets `newTag: 6.15.0`.
+- The `Application` `scout` is `Synced` and `Healthy`, and a request from the `shuttle` pod to `http://scout.starfleet` returns the version `6.15.0`.
 
-The podinfo container needs the command `./podinfo --port=9898 --port-metrics=9797` (the second port is the metrics port that Prometheus scrapes; keep it).
+You can reach Gitea from the lab terminal at `http://127.0.0.1:3000` and Argo CD at `https://127.0.0.1:8080`. The Gitea user is `platform` with the password `starfleet-gitops`.
 
 Check your work with `astrona submit`.

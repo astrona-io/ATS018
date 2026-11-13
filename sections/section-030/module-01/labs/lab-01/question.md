@@ -2,19 +2,21 @@
 
 Solve this question on: `terminal`
 
-The `scout` application is delivered from the Gitea repository `starfleet/scout-deploy` into the namespace `starfleet-staging`. The Flux objects for it are in the namespace `flux-system`, but nothing is delivered to that namespace: the `GitRepository` named `scout` and the `Kustomization` named `scout` exist and are not working. The repository has the folders `platform` (it creates the namespace `starfleet-staging`), `overlays/staging` (it deploys `scout`) and `overlays/production` (it deploys `scout` for production).
+The platform team keeps the Kubernetes files for the `scout` application in a private Git repository: `http://gitea-http.gitea.svc:3000/starfleet/scout-deploy.git`. The user is `platform` and the password is `starfleet-gitops`. The repository has a Kustomize base and the overlays `overlays/staging` and `overlays/production` on the branch `main`. Argo CD is installed in the namespace `argocd`, but it has no credentials for the repository and no `Application` yet.
 
-Make Flux deliver the application from Git. Do not apply the `scout` workloads with `kubectl`, and do not suspend any Flux object.
+Deliver the staging environment from Git with Argo CD. Do not apply the overlay with `kubectl apply -k`, and do not create the namespace `starfleet-staging` yourself.
 
 When you finish, these must be true:
 
-- The `GitRepository` `scout` follows the branch `main` of `http://gitea-http.gitea.svc:3000/starfleet/scout-deploy.git`, keeps the Secret `scout-readonly`, and is `Ready`.
-- A `Kustomization` named `platform` in `flux-system` applies the path `./platform` from that source with `prune: true`.
-- The `Kustomization` `scout` applies `./overlays/staging`, keeps `prune: true`, and depends on `platform`.
-- Both `Kustomization` objects are `Ready` and not suspended.
-- Another `Kustomization` that already exists in `flux-system` was left suspended, and the workload it delivers has drifted from Git. Find it and resume it with `flux resume`. Do not delete it, and do not change Git to match the drift. Every `Kustomization` in `flux-system` must end `Ready` and not suspended, and a request from the `shuttle` pod to that workload's Service must return the message that Git holds.
-- The staging message is changed in Git: in `overlays/staging/message.yaml` on the branch `main`, the value of `PODINFO_UI_MESSAGE` is `staging-v2`. Flux applies that commit, and a request from the `shuttle` pod to `http://scout.starfleet-staging/` returns the message `staging-v2`.
-
-Use the user `platform` (password `starfleet-gitops`) to clone and push at `http://127.0.0.1:3000/starfleet/scout-deploy.git`.
+- **Repository access**: Argo CD has a repository Secret in the namespace `argocd` for the repository URL above.
+- **Application** `scout-staging` in the namespace `argocd`:
+  - It uses the project `default` and syncs the path `overlays/staging` of the branch `main` to the namespace `starfleet-staging` on the same cluster.
+  - Automated sync is on, with `prune` and `selfHeal` both `true`.
+  - Argo CD creates the namespace `starfleet-staging` for you.
+- **Result**:
+  - The `Application` is `Synced` and `Healthy`.
+  - The Deployment `scout` in `starfleet-staging` is created by Argo CD and runs `ghcr.io/stefanprodan/podinfo:6.15.0`.
+  - A request from the `shuttle` pod (namespace `starfleet`) to `http://scout.starfleet-staging/` returns version `6.15.0` and the message `staging`.
+  - If someone scales the Deployment by hand, Argo CD puts the replica count back to 1.
 
 Check your work with `astrona submit`.

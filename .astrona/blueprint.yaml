@@ -21,7 +21,7 @@ course:
     GitOps repository, and progressive delivery with Argo Rollouts and
     Flagger. Each module pairs a layered reader with an ungraded hands-on
     playground on a local kind cluster. Delivery modules supply an in-cluster
-    Gitea server when needed. Each section closes with an integration capstone.
+    Gitea server when needed.
   certification:
     name: Certified Cloud Native Platform Engineer
     code: CNPE
@@ -54,19 +54,19 @@ course:
 defaults:
   playground: true
   module_lab: false
-  capstone: true
+  capstone: false
   section_quiz: true
   final_quiz: true
 
 sections:
   - id: section-010
-    title: Packaging Applications For GitOps
+    title: Build Manifests With Kustomize
     curriculum_item: Implementing GitOps Workflows for Application and Infrastructure Deployment
     description: >
-      Package applications with Kustomize overlays and Helm charts. Render
-      the intended configuration before applying it, choose values or template
-      changes, and manage namespaced Helm releases through upgrades and rollback.
-      The compact Helm module is the simulator exception approved 2026-11-04.
+      Every GitOps controller applies manifests that a packaging tool renders
+      from Git. This section teaches Kustomize, the packaging tool built into
+      kubectl: a shared base, one overlay per environment, generated
+      configuration, and how to read its build errors.
     modules:
       - id: module-01
         title: Build Environment Overlays With Kustomize
@@ -98,7 +98,16 @@ sections:
           kubectl embeds its own kustomize version, which can lag the
           standalone 5.8.3 binary. State which one each command uses and
           check `kubectl version --client` output at build.
-      - id: module-02
+  - id: section-020
+    title: Package Applications With Helm
+    curriculum_item: Implementing GitOps Workflows for Application and Infrastructure Deployment
+    description: >
+      Package an application as a Helm chart, render it before applying it,
+      choose values or template changes, and manage a namespaced Helm release
+      through upgrades and rollback. The compact Helm section is the simulator
+      exception approved 2026-11-04.
+    modules:
+      - id: module-01
         title: Package And Configure Applications With Helm
         objectives:
           - Read Chart.yaml, values.yaml and templates and render and lint a chart
@@ -122,25 +131,7 @@ sections:
         notes: >
           Compact simulator exception approved 2026-11-04. One 25-minute lab
           covers chart edits, versioning, values, upgrade and rollback.
-    capstone:
-      title: Packaging Applications For GitOps Capstone
-      objective: >
-        The `scout` service must ship to staging and production from one
-        source. Fix a broken Kustomize base and overlays so they render, set
-        the right image tag, replica count and generated configuration per
-        environment, and apply cleanly, proving both environments answer
-        from `shuttle` with the expected version and message.
-    additional_capstones:
-      - id: lab-02
-        title: Deploy With Helm And A Kustomize Overlay
-        path: sections/section-010/capstone/labs/lab-02
-        estimated_duration: 35m
-        objective: >
-          Complete a Helm chart that delivers two production replicas and a
-          values-driven message. Complete a Kustomize staging overlay with a
-          generated ConfigMap. Prove both configurations through shuttle.
-
-  - id: section-020
+  - id: section-030
     title: Continuous Delivery With Argo CD
     curriculum_item: Implementing GitOps Workflows for Application and Infrastructure Deployment
     description: >
@@ -239,16 +230,7 @@ sections:
           (permanent OutOfSync), and one that references an image tag that
           does not exist (Degraded). The Git repository is writable by the
           reader through the Gitea web UI and git over HTTP.
-    capstone:
-      title: Continuous Delivery With Argo CD Capstone
-      objective: >
-        Onboard the `outpost` tenant: create an AppProject that limits it to
-        its own repository and namespace, generate its staging and production
-        Applications with an ApplicationSet, and repair an existing `starfleet`
-        Application that is OutOfSync and Degraded, proving self-heal reverts
-        a manual change and both tenants answer from `shuttle`.
-
-  - id: section-030
+  - id: section-040
     title: Continuous Delivery With Flux
     curriculum_item: Implementing GitOps Workflows for Application and Infrastructure Deployment
     description: >
@@ -331,16 +313,7 @@ sections:
           in-cluster registry holding scout tags 6.14.0 and 6.15.0. A read-write
           Git credential Secret is ready. Deliberately absent: no ImageRepository,
           ImagePolicy or ImageUpdateAutomation.
-    capstone:
-      title: Continuous Delivery With Flux Capstone
-      objective: >
-        Deliver `scout` to `starfleet` with Flux from Gitea, apply the
-        configuration only after a dependent namespace Kustomization is ready,
-        and repair a HelmRelease stuck after a failed upgrade so it rolls
-        back automatically next time, proving the service answers from
-        `shuttle`.
-
-  - id: section-040
+  - id: section-050
     title: Continuous Integration Pipelines With Tekton
     curriculum_item: Building and Configuring CI/CD Pipelines Integrated with Kubernetes
     description: >
@@ -413,7 +386,17 @@ sections:
           tag in the in-cluster registry (for example with crane) instead of
           building a container image; say so in the text. Check the playground
           fits the 10 GiB Podman budget with Argo CD, Tekton and Gitea running.
-      - id: module-03
+  - id: section-060
+    title: Continuous Integration With Argo Workflows And Argo Events
+    curriculum_item: Building and Configuring CI/CD Pipelines Integrated with Kubernetes
+    description: >
+      Argo Workflows is the second CI tool the exam allows. It runs each step
+      of a Workflow as a pod and stores reusable steps in a WorkflowTemplate.
+      Argo Events receives events, such as a Git push, and starts a Workflow
+      from them. This section teaches both tools and the argo command-line
+      tool.
+    modules:
+      - id: module-01
         title: Run CI Workflows With Argo Workflows
         objectives:
           - Write a Workflow with a DAG of templates and pass parameters and artifacts between them
@@ -444,24 +427,14 @@ sections:
           prefer parameters over MinIO. A later reading part teaches the argo CLI
           (v4.1.6, installed in ~/.astrona/bin unless an argo exists), and
           labs/lab-02 grades it.
-    capstone:
-      title: Continuous Integration Pipelines With Tekton Capstone
-      objective: >
-        Repair a CI pipeline for `scout` that fails at its test step and
-        cannot push its GitOps commit, then wire a Gitea webhook so a push to
-        `scout-app` starts it, proving one push ends with the new version
-        serving traffic in `starfleet` through Argo CD.
-
-  - id: section-050
-    title: Progressive Delivery
+  - id: section-070
+    title: Progressive Delivery With Argo Rollouts
     curriculum_item: Deploying Applications Using Progressive Delivery Strategies (for example Blue/Green or Canary)
     description: >
       A new version should reach users a step at a time and stop on bad
-      metrics. This section teaches canary and blue/green releases with
-      Argo Rollouts, the primary tool, including an automatic gate on a
-      Prometheus metric, and then the same canary with Flagger, the
-      alternative the exam allows. It comes last because it reuses delivery,
-      packaging and metrics from the earlier sections.
+      metrics. This section teaches canary and blue/green releases with Argo
+      Rollouts, including an automatic gate on a Prometheus metric and canary
+      traffic shifted by a Gateway API traffic router.
     modules:
       - id: module-01
         title: Roll Out A Canary With Argo Rollouts
@@ -527,6 +500,41 @@ sections:
           request counter and status label) and its random error option at
           build before writing PromQL.
       - id: module-03
+        title: Shift Canary Traffic With Argo Rollouts And A Traffic Router
+        objectives:
+          - Configure a canary with a Gateway API traffic router, stableService and canaryService
+          - Show that the weight now moves requests, not replica counts
+          - Add a header-based route so only tagged requests reach the canary
+          - Run a background analysis during the canary and abort on a bad metric
+          - Say when a traffic router is needed and which routers Rollouts and Flagger support
+        outline:
+          - Replica weights versus request weights
+          - stableService, canaryService and the generated HTTPRoute weights
+          - Header routing
+          - Background analysis during steps
+          - Traffic routers supported by Rollouts and Flagger
+        diagrams:
+          - type: flowchart
+            shows: HTTPRoute with weighted backends for the stable and canary Services
+        playground: true
+        playground_env: >
+          kind cluster with the gatewayAPI addon, the Argo Rollouts Gateway API
+          plugin, Prometheus from module 2 trimmed, and `scout` as a Rollout
+          with two Services and an HTTPRoute. Deliberately absent: no canary
+          steps with weights.
+        notes: >
+          Verify the Gateway API plugin install and the kind addon at build.
+  - id: section-080
+    title: Progressive Delivery With Flagger
+    curriculum_item: Deploying Applications Using Progressive Delivery Strategies (for example Blue/Green or Canary)
+    description: >
+      Flagger is the second progressive delivery tool the exam allows. A
+      Flagger Canary takes over a Deployment, creates primary and canary
+      copies and shifts traffic based on metrics. This section teaches a
+      Flagger canary with Istio, a mesh-free blue/green release and manual
+      approval gates.
+    modules:
+      - id: module-01
         title: Automate Canary Analysis With Flagger
         objectives:
           - Create a Canary resource that targets a Deployment and read the primary and canary objects Flagger creates
@@ -564,49 +572,15 @@ sections:
           an empty metrics list. Lab-03 reuses this stack with an initialized
           ungated Canary and preloaded podinfo 6.14.0 and 6.15.0 for manual
           rollout approval. Do not change the existing Istio lab.
-      - id: module-04
-        title: Shift Canary Traffic With Argo Rollouts And A Traffic Router
-        objectives:
-          - Configure a canary with a Gateway API traffic router, stableService and canaryService
-          - Show that the weight now moves requests, not replica counts
-          - Add a header-based route so only tagged requests reach the canary
-          - Run a background analysis during the canary and abort on a bad metric
-          - Say when a traffic router is needed and which routers Rollouts and Flagger support
-        outline:
-          - Replica weights versus request weights
-          - stableService, canaryService and the generated HTTPRoute weights
-          - Header routing
-          - Background analysis during steps
-          - Traffic routers supported by Rollouts and Flagger
-        diagrams:
-          - type: flowchart
-            shows: HTTPRoute with weighted backends for the stable and canary Services
-        playground: true
-        playground_env: >
-          kind cluster with the gatewayAPI addon, the Argo Rollouts Gateway API
-          plugin, Prometheus from module 2 trimmed, and `scout` as a Rollout
-          with two Services and an HTTPRoute. Deliberately absent: no canary
-          steps with weights.
-        notes: >
-          Verify the Gateway API plugin install and the kind addon at build.
-    capstone:
-      title: Progressive Delivery Capstone
-      objective: >
-        Release a new `scout` version with Argo Rollouts: convert it to a
-        canary with an analysis step on the Prometheus success rate, prove a
-        bad version is aborted automatically while the stable version keeps
-        serving `shuttle`, then promote a good version to full traffic.
 
-  - id: section-060
-    title: Infrastructure Deployment Through GitOps
+  - id: section-090
+    title: Infrastructure Delivery With Crossplane
     curriculum_item: Implementing GitOps Workflows for Application and Infrastructure Deployment
     description: >
-      The first competency covers infrastructure as well as applications.
-      This section teaches Crossplane, which turns infrastructure into
-      Kubernetes objects, and delivers those objects with Argo CD and Flux so
-      one Git repository drives both. OpenTofu adds an explicit plan and apply
-      workflow with the Kubernetes provider. It comes last because it reuses the
-      delivery controllers and packaging from earlier sections.
+      The first competency covers infrastructure as well as applications. This
+      section teaches Crossplane, which turns infrastructure into Kubernetes
+      objects. A GitOps controller delivers those objects from Git, so one
+      repository drives both applications and infrastructure.
     modules:
       - id: module-01
         title: Deliver Infrastructure Objects With Crossplane And GitOps
@@ -633,7 +607,16 @@ sections:
           needed. One claim is deliberately broken.
         notes: >
           Pin Crossplane and check v2 versus v1 API names at build.
-      - id: module-02
+  - id: section-100
+    title: Plan And Apply Infrastructure With OpenTofu
+    curriculum_item: Implementing GitOps Workflows for Application and Infrastructure Deployment
+    description: >
+      OpenTofu adds an explicit plan and apply workflow. This section uses it
+      with the Kubernetes provider to read state, change a Deployment
+      attribute and add a Service. The compact OpenTofu section is the
+      simulator exception approved 2026-11-04.
+    modules:
+      - id: module-01
         title: Plan And Apply Kubernetes Resources With OpenTofu
         objectives:
           - Read a working directory and its existing state
@@ -650,11 +633,5 @@ sections:
         playground: true
         playground_env: OpenTofu 1.13.2 and Kubernetes provider 3.4.0 on the terminal; one provider-managed
           Deployment and real local state; no Service.
-        notes: Compact simulator exception approved 2026-11-04. Adds capstone/labs/lab-02 with scale, expose
-          and drift directories; lab-01 is unchanged.
-    capstone:
-      title: Infrastructure Deployment Through GitOps Capstone
-      objective: >
-        Deliver a `scout` environment claim from Git with Argo CD, repair the
-        claim that is not Ready, and prove the composed resources and the
-        application answer from `shuttle`.
+        notes: Compact simulator exception approved 2026-11-04. Its second lab has scale, expose
+          and drift directories.

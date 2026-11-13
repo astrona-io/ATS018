@@ -1,0 +1,244 @@
+# Knowledge check for section 070, module 02. Listed in astrona.yaml as a
+# `type: quiz` entry right after the module summary. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats018-050-02
+course_id: ATS018
+exam_code: CNPE
+status: alpha
+provenance: "Original practice material written for this course; not official exam questions."
+scope:
+  type: module
+  id: section-070/module-02
+  title: "Gate A Blue/Green Release With Analysis"
+questions:
+  - id: ats018-050-02-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Say which Service reaches the candidate before promotion."
+    source_readings:
+      - sections/section-070/module-02/course-01-active-and-preview-services.md
+    prompt: "A blue/green Rollout with `activeService: scout` and `previewService: scout-preview` waits at `BlueGreenPause` with a new pod template. Where do you send a test request to reach the candidate?"
+    options:
+      - id: a
+        text: "`http://scout`, because active clients test every new version"
+        explanation: "The active Service still selects the stable template before promotion."
+      - id: b
+        text: "`http://scout-preview`, because it selects the candidate template"
+        explanation: "Correct. The preview Service selects the candidate hash, and the active Service keeps the stable hash."
+      - id: c
+        text: "`http://scout-preview`, but only after you promote"
+        explanation: "Promotion switches the active Service. The preview Service already selects the candidate."
+      - id: d
+        text: "Either one, because both Services select the same hash"
+        explanation: "They select different hashes during the pause."
+    correct_option: b
+    explanation: "Compare the `rollouts-pod-template-hash` selector of both Services to see which template each one selects."
+
+  - id: ats018-050-02-q02
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Read the replica counts of a blue/green pause."
+    source_readings:
+      - sections/section-070/module-02/course-01-active-and-preview-services.md
+    prompt: "A blue/green Rollout has `Desired: 2` and shows `Current: 4`, `Updated: 2`, `Ready: 2` at `BlueGreenPause`. Why are four pods running?"
+    options:
+      - id: a
+        text: "The stable ReplicaSet and the candidate ReplicaSet each run two pods"
+        explanation: "Correct. `Current` counts both two-pod ReplicaSets, and `Updated` counts the candidate."
+      - id: b
+        text: "The Rollout creates two extra pods for the analysis"
+        explanation: "The AnalysisRun does not start application pods."
+      - id: c
+        text: "A failed pod is restarting in a loop"
+        explanation: "`Ready: 2` and the status `Paused` show no failure."
+      - id: d
+        text: "`maxSurge` adds two pods for every blue/green release"
+        explanation: "`maxSurge` belongs to the canary example with a rolling replacement."
+    correct_option: a
+    explanation: "Budget for both configurations in a blue/green release. The peak pod count is higher than the steady replica count."
+
+  - id: ats018-050-02-q03
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Repair desired state after an abort."
+    source_readings:
+      - sections/section-070/module-02/course-04-abort-on-failed-analysis.md
+    prompt: "A faulty candidate with `--random-error` was aborted. The Rollout is `Degraded`, and `spec.template` still holds the flag. What is the right fix?"
+    options:
+      - id: a
+        text: "Run `kubectl argo rollouts retry rollout scout`, because the retry removes the flag"
+        explanation: "Retry attempts the same template again and runs the same faulty application."
+      - id: b
+        text: "Delete the failed AnalysisRun"
+        explanation: "Deleting the AnalysisRun does not repair the desired application."
+      - id: c
+        text: "Wait, because the abort already removed the flag"
+        explanation: "The abort does not edit `spec.template`."
+      - id: d
+        text: "Apply a corrected pod template without the flag, for example the saved `rollout-scout-gated.yaml`"
+        explanation: "Correct. In a GitOps environment, commit the correction to Git instead of changing the live object."
+    correct_option: d
+    explanation: "The abort keeps the stable pods serving. The desired template stays faulty until you change it."
+
+  - id: ats018-050-02-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Read a Service selector after promotion."
+    source_readings:
+      - sections/section-070/module-02/course-02-promote-and-measure-the-candidate.md
+    prompt: "Right after `kubectl argo rollouts promote scout`, both Services select the new hash, but the old ReplicaSet still shows two ready pods. What does this mean?"
+    options:
+      - id: a
+        text: "The Service splits new requests evenly between the two templates"
+        explanation: "The Service selects only the new hash. Old pods still running does not mean they get new requests."
+      - id: b
+        text: "The promotion failed and the Rollout must be aborted"
+        explanation: "The configured `scaleDownDelaySeconds: 30` keeps the old pods briefly, so this is expected."
+      - id: c
+        text: "The old pods stay for the configured scale-down delay, and the selector is the proof of routing"
+        explanation: "Correct. Read the Service selector as well as the replica counts."
+      - id: d
+        text: "The old ReplicaSet is the new stable one"
+        explanation: "The new ReplicaSet is the one the active Service selects."
+    correct_option: c
+    explanation: "After about 30 seconds the old ReplicaSet has `DESIRED 0`. Check routing and counts separately."
+
+  - id: ats018-050-02-q05
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Pick the right podinfo metric for a request check."
+    source_readings:
+      - sections/section-070/module-02/course-02-promote-and-measure-the-candidate.md
+    prompt: "You want the success rate of requests to `/` for one pod template. `http_requests_total` has only a `status` label. Which series do you use?"
+    options:
+      - id: a
+        text: "`http_requests_total` with the filter `path=\"root\"`"
+        explanation: "That counter has no `path` label, so the filter selects nothing."
+      - id: b
+        text: "`http_request_duration_seconds_count` with `path=\"root\"` and the `rollouts_pod_template_hash` of the candidate"
+        explanation: "Correct. The histogram count has `method`, `path` and `status`, and it excludes readiness checks."
+      - id: c
+        text: "The container CPU usage of the candidate pods"
+        explanation: "CPU usage does not say whether responses succeed."
+      - id: d
+        text: "The `up` metric of the preview Service"
+        explanation: "`up` says whether Prometheus can scrape a target, not whether responses succeed."
+    correct_option: b
+    explanation: "Count the status codes 200 to 299 as success. Query the candidate hash only, because good stable requests can hide candidate errors."
+
+  - id: ats018-050-02-q06
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Guard an analysis against missing data."
+    source_readings:
+      - sections/section-070/module-02/course-03-pre-promotion-analysis.md
+    prompt: "A Prometheus query returns no samples and the condition is guarded. What is the result?"
+    options:
+      - id: a
+        text: "The measurement passes, because no errors were counted"
+        explanation: "No data is not a pass."
+      - id: b
+        text: "The AnalysisRun waits forever"
+        explanation: "An empty result fails the guarded condition."
+      - id: c
+        text: "The measurement is skipped"
+        explanation: "It is recorded as a failed measurement."
+      - id: d
+        text: "The measurement fails, because an empty result must never stand in for a passing application"
+        explanation: "Correct. The guarded condition fails on an empty result."
+    correct_option: d
+    explanation: "An empty result fails the guarded condition. A value that is not a number (`NaN`) satisfies neither comparison and gives `Inconclusive`, not `Successful`."
+
+  - id: ats018-050-02-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Know that a passing analysis can still pause."
+    source_readings:
+      - sections/section-070/module-02/course-03-pre-promotion-analysis.md
+    prompt: "A blue/green Rollout has `autoPromotionEnabled: false`. The pre-promotion AnalysisRun is `Successful`. What happens?"
+    options:
+      - id: a
+        text: "The active Service switches at once"
+        explanation: "Automatic promotion is off."
+      - id: b
+        text: "The Rollout still pauses until someone promotes"
+        explanation: "Correct. A passing pre-promotion analysis does not promote on its own when automatic promotion is off."
+      - id: c
+        text: "The release aborts"
+        explanation: "A successful analysis does not abort."
+      - id: d
+        text: "The analysis runs again"
+        explanation: "It finished."
+    correct_option: b
+    explanation: "A `Successful` result still leaves an operator pause when automatic promotion is disabled."
+
+  - id: ats018-050-02-q08
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Pass the candidate hash into the query."
+    source_readings:
+      - sections/section-070/module-02/course-03-pre-promotion-analysis.md
+    prompt: "The AnalysisTemplate has the argument `candidate-hash`, and the Rollout sets `podTemplateHashValue: Latest`. What does the query judge?"
+    options:
+      - id: a
+        text: "The stable template, because it is the last good one"
+        explanation: "`Latest` passes the hash of the candidate, not the stable hash."
+      - id: b
+        text: "The candidate template only, selected by the label `rollouts_pod_template_hash`"
+        explanation: "Correct. A good stable version says nothing about candidate quality."
+      - id: c
+        text: "Every `scout` pod together"
+        explanation: "That would let good stable requests hide candidate errors."
+      - id: d
+        text: "Only the pods behind the active Service"
+        explanation: "The candidate does not sit behind the active Service before promotion."
+    correct_option: b
+    explanation: "Prometheus exposes the pod label as `rollouts_pod_template_hash`, with underscores. The pre-promotion check runs before the active Service switches."
+
+  - id: ats018-050-02-q09
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Read what a failed pre-promotion analysis leaves serving."
+    source_readings:
+      - sections/section-070/module-02/course-04-abort-on-failed-analysis.md
+    prompt: "The pre-promotion analysis of a blue/green release fails after two failed measurements with `failureLimit: 1`. Which Service selector does the active Service keep?"
+    options:
+      - id: a
+        text: "The selector of the stable pod template"
+        explanation: "Correct. Users keep getting successful responses while the Rollout reports `Degraded`."
+      - id: b
+        text: "The selector of the candidate pod template"
+        explanation: "The switch happens only on promotion."
+      - id: c
+        text: "No selector, so the Service has no endpoints"
+        explanation: "The stable pods keep serving."
+      - id: d
+        text: "The preview selector, because it is newer"
+        explanation: "The preview Service selects the candidate, and the active Service does not change."
+    correct_option: a
+    explanation: "The second failed measurement exceeds the limit and aborts the release before the planned third measurement. A failed pre-promotion analysis retains the stable active selector."
+
+  - id: ats018-050-02-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Compare pre-promotion and post-promotion analysis."
+    source_readings:
+      - sections/section-070/module-02/course-04-abort-on-failed-analysis.md
+    prompt: "A `postPromotionAnalysis` fails. What happens, and what is the cost?"
+    options:
+      - id: a
+        text: "The active selector stays on the stable template, and no user reaches the candidate"
+        explanation: "That describes a failed pre-promotion analysis."
+      - id: b
+        text: "Nothing changes, because post-promotion analysis only records values"
+        explanation: "A failed post-promotion analysis aborts the release."
+      - id: c
+        text: "Argo Rollouts switches the active selector back to the previous stable ReplicaSet, but users could receive candidate errors during the measurement window"
+        explanation: "Correct. This check gives recovery, not prevention. Keep the old replicas available for the whole window."
+      - id: d
+        text: "The Rollout deletes the candidate ReplicaSet at once and the old replicas are already gone"
+        explanation: "The old replicas must stay available long enough for the switch back."
+    correct_option: c
+    explanation: "The post-promotion check judges real active traffic. A 30-second scale-down delay is too short for a check that can take about 75 seconds."

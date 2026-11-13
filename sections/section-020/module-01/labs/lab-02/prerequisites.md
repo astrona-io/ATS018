@@ -1,3 +1,3 @@
 # Prerequisites
 
-Use kubectl to inspect namespaced resources and read YAML. Complete the preparation reading shown before this lab. The environment starts independently.
+Read the preceding Helm lesson. The lab supplies a separate kind cluster, Helm and its own release state.

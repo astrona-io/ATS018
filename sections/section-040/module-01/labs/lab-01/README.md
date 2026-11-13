@@ -1,10 +1,10 @@
 ---
-estimated_duration: 20m
+estimated_duration: 25m
 ---
 
-# Fix A Failing Tekton Pipeline
+# Reconcile A Git Source With Flux
 
-Graded lab for the Tekton Tasks and Pipelines module. The learner gets a Pipeline whose `run-tests` Task starts in a directory that does not exist. They start a `PipelineRun`, read the failure down to the step log, fix the Task and get a `Succeeded` run.
+Graded lab for the Flux Kustomization module. The learner gets a `GitRepository` that follows a branch that does not exist and a `scout` `Kustomization` that has no dependency. They repair the source, add a `platform` `Kustomization`, order the two with `dependsOn` and deliver a change from Git. They also find a third `Kustomization`, `scout-production`, which starts suspended with a drifted live Deployment, and resume it with `flux resume`.
 
 ```sh
 astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-040/module-01/labs/lab-01

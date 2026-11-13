@@ -1,6 +1,6 @@
 # Prerequisites
 
-- `kubectl` 1.35 and the `flux` command-line tool.
-- Flux 2.9.6 with the helm controller in the namespace `flux-system`. The lab installs it.
-- The `OCIRepository` `podinfo` and the `HelmRelease` `scout` (podinfo chart 6.15.0) in the namespace `starfleet`. The lab creates them and makes the latest upgrade of `scout` fail.
-- The `shuttle` client pod in the namespace `starfleet`.
+- `kubectl` 1.35.
+- Argo CD 3.5.4 in the namespace `argocd`. The lab installs it.
+- Two private Git repositories, `starfleet/platform-apps` and `starfleet/outpost-apps`, in the in-cluster Git server. Argo CD already has a credential template for the whole `starfleet` organisation. The lab creates all of this.
+- The `shuttle` client pod in the namespace `starfleet` and an empty namespace `outpost`. The lab creates them.
