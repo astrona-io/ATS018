@@ -1,0 +1,74 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-018-lab-050-02-02
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - curlimages/curl:8.22.0
+      - alpine:3.23
+
+bootstrap:
+  manifests:
+    - name: lab-start
+      type: file
+      source: manifests/lab-start.yaml
+  init:
+    - name: install-tkn
+      description: Installs tkn 0.46.1 unless tkn is already on PATH
+      type: file
+      source: bootstrap/00-install-tkn.sh
+    - name: install-tekton
+      description: Installs Pipelines 1.17.0 and Triggers 0.36.4
+      type: file
+      source: bootstrap/01-install-tekton.sh
+    - name: seed
+      description: Creates an existing Pipeline and an unwired listener without run-create permission
+      type: file
+      source: bootstrap/02-seed.sh
+  waitFor:
+    - resource: deploy/shuttle
+      namespace: starfleet
+    - resource: deploy/el-scout-push
+      namespace: starfleet
+testing:
+  init:
+    - name: verify-unfinished-state
+      description: Require a ready API and an explicit grader rejection before solving
+      type: file
+      source: testing/verify-start.sh
+      timeout: 10m
+    - name: solution
+      description: Applies the reference solution
+      type: file
+      source: solution/apply.sh
+validation:
+  scripts:
+    - name: binding
+      description: scout-push extracts revision and repository from the request body
+      type: file
+      source: validation/validate-binding.sh
+    - name: template
+      description: scout-check creates runs of scout-check with both params and scout-runner
+      type: file
+      source: validation/validate-template.sh
+    - name: listener-access
+      description: scout-push references both objects and scout-listener can read them and create runs
+      type: file
+      source: validation/validate-listener-access.sh
+    - name: student-request
+      description: An event-created run for starfleet/scout-app at refs/heads/main succeeded as scout-runner
+      type: file
+      source: validation/validate-student-request.sh
+    - name: event-runs
+      description: Two fresh requests from shuttle create new successful runs with their own payload values
+      type: file
+      source: validation/validate-event-runs.sh
+teardown:
+  keepCluster: false

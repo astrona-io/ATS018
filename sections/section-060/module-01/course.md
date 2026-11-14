@@ -1,35 +1,50 @@
-# Deliver Infrastructure Objects With Crossplane And GitOps
+# Run CI Workflows With Argo Workflows
 
-A platform team often has to give other teams a simple way to get a working environment. Writing a Deployment, a Service and the settings around them for every team does not scale. Crossplane is a Kubernetes add-on (a set of controllers and custom resource definitions) that lets the platform team define its own API for this. A team creates one small object, and Crossplane creates and maintains every object behind it.
+Argo Workflows is a Kubernetes controller that runs a job made of many steps. You describe the job in a `Workflow` object. The Workflow controller reads it and starts one pod for each step, in the order you describe. Argo Events is a second, separate project that listens for outside events, such as a Git push, and starts a Workflow when one arrives.
 
-Crossplane does not deliver anything from Git by itself. Argo CD or Flux does that. This module shows both halves: how the Crossplane objects fit together, and how a GitOps controller delivers them in the right order and reports their real health.
+Together they do the same job as a Tekton pipeline with Tekton Triggers. A push reaches a webhook, a Workflow clones the repository, runs the tests and reports the result. The CNPE exam lets you choose a tool for a CI task, so you need to know both: the objects, the commands that read their status, and the way to find out why a run failed.
 
-Keep one sentence in mind for this module: **a composite resource is Ready only when every object behind it is Ready, and a GitOps controller only knows that if you tell it how to read the status.** The module has five parts. The first installs a provider and a function. The second defines the API and creates the first environment. The third delivers it with Argo CD. The fourth finds and fixes an environment that is not Ready. The fifth delivers the same objects with Flux.
+Keep one sentence in mind for this module: **a Workflow is a graph of templates, each node of the graph is a pod, and the status of the Workflow tells you which node failed and why.**
+
+The module has eight parts. **A Workflow With A DAG** writes a Workflow with a directed acyclic graph (DAG) of tasks, passes a parameter and shared files between them, and shows the pod each task creates. **Reuse A Workflow With A WorkflowTemplate** moves the same graph into a `WorkflowTemplate` and starts runs from it with arguments. **Read A Failed Workflow** breaks runs on purpose and finds each cause with `kubectl`. **Start A Workflow From A Git Push** adds an Argo Events `EventSource`, `EventBus` and `Sensor` so a push to the source repository starts the tests. **Run Workflows With The argo Command-Line Tool** starts, reads, repairs and cleans up runs with `argo`, and runs steps in parallel in a `steps` list.
+
+**Pass A Step Output Through A Checksum Check** adds an ordered step, passes its input and output parameters, and compares its recorded digest with the input.
+
+**Create A Deployment From Workflow Inputs** passes image, name, namespace and task into a resource template, submits it with `argo`, and verifies the resulting workload.
+
+**Trace A Git Push Into A Workflow Run** gives an order for finding the one object that stops a push: the Sensor filter, the trigger parameter, the service accounts and the working folder of the test step.
 
 ## Learning objectives
 
 After this module you can:
 
-- Install a `Provider` and a `Function`, and read their `Healthy` status.
-- Connect a provider to the cluster with a `ClusterProviderConfig` and the permissions it needs.
-- Write a `CompositeResourceDefinition` and a `Composition`, and create a composite resource from them.
-- Read the `Synced` and `Ready` conditions of a composite resource and of the objects it composes.
-- Deliver Crossplane objects with an Argo CD `Application` (sync waves, custom health) and with Flux `Kustomization` objects (`dependsOn`, `wait`).
-- Diagnose a composite resource that is not Ready and fix it through Git.
+- Write a `Workflow` with a DAG, task dependencies, input and output parameters and a shared volume.
+- Create a `WorkflowTemplate` and start a `Workflow` from it with `workflowTemplateRef` and arguments.
+- Give Workflow pods a ServiceAccount with the permission the executor needs.
+- Find the failed node of a Workflow and read its pod logs with `kubectl`.
+- Start a Workflow from a Git push with an `EventSource`, an `EventBus` and a `Sensor`.
+- Start, read and delete runs and update templates with the `argo` command-line tool.
+- Run steps in parallel in a `steps` list and explain how a DAG differs.
+- Pass a prepared value through ordered steps and verify the checksum recorded as an output parameter.
+- Create a Deployment from four workflow inputs, with the ServiceAccount permissions needed in its destination namespace.
 
 ## Before you start
 
-You need Kubernetes basics: Deployments, Services, namespaces and `kubectl`. You also need to know what a GitOps controller does. The module explains each Crossplane term when it first appears.
+You need Kubernetes basics (namespaces, pods, PersistentVolumeClaims, ServiceAccounts, Roles and RoleBindings) and the commands `kubectl apply`, `kubectl get`, `kubectl logs` and `kubectl exec`. You do not need to know any other CI tool.
 
-The playground runs Kubernetes 1.35.8 and Crossplane 2.4.3, with only the core controller and the RBAC manager. It also runs Gitea, a small Git server, Argo CD 3.5.4 and Flux 2.9.6. Argo CD and Flux already have credentials for the repository.
+Your playground is a single-node `kind` cluster running Kubernetes 1.35 with these parts:
 
-| Place | What is in it |
+| Part | What it is |
 | --- | --- |
-| `crossplane-system` | The Crossplane controller and the RBAC manager. No provider and no function yet |
-| `starfleet` | The `shuttle` client pod |
-| `starfleet-staging` and `starfleet-production` | Empty namespaces for the two environments |
-| Gitea repository `starfleet/platform-infra` | The platform API in `platform/` and one environment each in `environments/staging` and `environments/production` |
+| Argo Workflows v4.1.6 | The Workflow controller, installed in `starfleet` in namespace mode. It only watches `starfleet`. The Argo Workflows web server is not installed |
+| `argo` v4.1.6 | The command-line tool in `~/.astrona/bin`, unless you already have an `argo`. It talks to the Kubernetes API through your kubeconfig |
+| Argo Events v1.9.11 | The Events controller manager in `argo-events` |
+| An `EventBus` | The object `default` in `argo-events`: one NATS JetStream pod that carries events from event sources to sensors |
+| A Git repository | `starfleet/scout-app` in Gitea, a small Git server in the cluster, at `http://gitea-http.gitea.svc:3000`. It holds a `VERSION` file that says `6.15.0` and a script `test.sh` that checks it. The repository is public |
+| `starfleet` | `shuttle` (a client pod with `curl`), the ServiceAccount `workflow-runner` with the Role the executor needs, and the `WorkflowTemplate` `run-tests` |
 
-The `argocd` command-line tool reaches Argo CD on `https://127.0.0.1:8080`. Git reaches Gitea on `http://127.0.0.1:3000` with the user `platform` and the password `starfleet-gitops`. Check that `kubectl config current-context` points at the playground before you start.
+Deliberately absent: there is no `Workflow` yet, no `EventSource`, no `Sensor`, and `run-tests` has a mistake in it. The Gitea repository already has a push webhook that points at the address where the `EventSource` will listen. One port on your machine reaches into the cluster: `http://127.0.0.1:3000` is the Git server. `kubectl` already points at the cluster.
+
+Launch your playground now, and keep it running next to you while you read the parts:
 
 <!-- astrona:playground -->

@@ -3,9 +3,9 @@ apiVersion: astrona.io/v1
 metadata:
   name: ats-018-lab-050-01-02
   docs:
+    prerequisites: prerequisites.md
     question: question.md
     solution: solution.md
-    prerequisites: prerequisites.md
 
 runtime:
   type: kind
@@ -13,32 +13,29 @@ runtime:
     image: kindest/node:v1.35.8
     preloadImages:
       - curlimages/curl:8.22.0
-      - ghcr.io/stefanprodan/podinfo:6.14.0
-      - ghcr.io/stefanprodan/podinfo:6.15.0
-      - quay.io/argoproj/argo-rollouts:v1.10.0
+      - alpine:3.23
+      - alpine/kubectl:1.35.4
 
 bootstrap:
+  manifests:
+    - name: lab-start
+      type: file
+      source: manifests/lab-start.yaml
   init:
-    - name: install-argo-rollouts
-      description: Installs the Argo Rollouts 1.10.0 controller
+    - name: install-tkn
+      description: Installs the tkn command-line tool 0.46.1 in ~/.astrona/bin unless tkn is already on the PATH
       type: file
-      source: bootstrap/01-install-argo-rollouts.sh
-    - name: start-scout
-      description: Creates the canary Rollout scout, its Services, shuttle and an unfinished AnalysisTemplate
+      source: bootstrap/00-install-tkn.sh
+    - name: install-tekton
+      description: Installs Tekton Pipelines 1.17.0
       type: file
-      source: bootstrap/02-start-scout.sh
-    - name: install-release-recorder
-      description: Installs a watcher that records the canary steps and full promotions of each release
+      source: bootstrap/01-install-tekton.sh
+    - name: seed
+      description: Installs the Tasks and the Pipeline outpost-onboard and leaves one failed run
       type: file
-      source: bootstrap/03-install-release-recorder.sh
-    - name: pause-release
-      description: Starts the 6.15.0 release and waits at its first pause
-      type: file
-      source: bootstrap/04-pause-release.sh
+      source: bootstrap/02-seed.sh
   waitFor:
     - resource: deploy/shuttle
-      namespace: starfleet
-    - resource: deploy/release-recorder
       namespace: starfleet
 
 testing:
@@ -55,22 +52,26 @@ testing:
 
 validation:
   scripts:
-    - name: full-promotion
-      description: The paused 6.15.0 release reached its second pause and finished with a full promotion
+    - name: pipeline-task
+      description: The Pipeline runs label-namespace in parallel with report-namespace and passes it a result and a param
       type: file
-      source: validation/validate-full-promotion.sh
-    - name: web-analysis-step
-      description: The AnalysisTemplate checks the canary Service and an inline analysis step replaced the first pause
+      source: validation/validate-pipeline-task.sh
+    - name: rbac
+      description: outpost-provisioner has the rights the Tasks need on namespaces and no more
       type: file
-      source: validation/validate-web-analysis-step.sh
-    - name: gated-release
-      description: An environment change passed the analysis step, finished with a normal promotion and reaches shuttle
+      source: validation/validate-rbac.sh
+    - name: site-runs
+      description: The sites vega and rigel each have a Succeeded run with their own values, and that run labelled the namespace
       type: file
-      source: validation/validate-gated-release.sh
-    - name: saved-analysisrun
-      description: The saved AnalysisRun name, phase and measurement value match the live AnalysisRun
+      source: validation/validate-site-runs.sh
+    - name: saved-log
+      description: The file /tmp/outpost-rigel-run.log holds the tkn log of a Succeeded run for the site rigel
       type: file
-      source: validation/validate-saved-analysisrun.sh
+      source: validation/validate-saved-log.sh
+    - name: failed-run-deleted
+      description: No failed run of outpost-onboard remains, and the Succeeded runs stay
+      type: file
+      source: validation/validate-failed-run-deleted.sh
 
 teardown:
   keepCluster: false

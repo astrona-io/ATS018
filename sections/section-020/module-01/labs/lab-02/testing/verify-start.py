@@ -44,8 +44,7 @@ def verify(lab, graders):
     raise RuntimeError('all graders passed before the reference solution')
 
 
-
-GRADERS = ['validation/validate.sh']
+GRADERS = ['validation/validate-rollback.sh']
 
 if __name__ == '__main__':
     try:

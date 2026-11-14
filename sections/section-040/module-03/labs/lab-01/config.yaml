@@ -13,17 +13,17 @@ runtime:
     preloadImages:
       - curlimages/curl:8.22.0
       - alpine:3.23
-      - alpine/git:2.52.0
+      - gcr.io/go-containerregistry/crane/debug:v0.22.1
+      - registry:3.1.2
       - gitea/gitea:28.1.0-rootless
-      - quay.io/argoproj/workflow-controller:v4.1.6
-      - quay.io/argoproj/argoexec:v4.1.6
-      - quay.io/argoproj/argo-events:v1.9.11
-      - nats:2.10.29
-      - natsio/prometheus-nats-exporter:0.14.0
-      - natsio/nats-server-config-reloader:0.14.0
+      - ghcr.io/fluxcd/source-controller:v1.9.6
+      - ghcr.io/fluxcd/kustomize-controller:v1.9.6
+      - ghcr.io/fluxcd/notification-controller:v1.9.4
+      - ghcr.io/fluxcd/image-reflector-controller:v1.2.5
+      - ghcr.io/fluxcd/image-automation-controller:v1.2.5
   portForwards:
-    - name: git
-      description: The Git server (Gitea)
+    - name: gitea
+      description: "The Git server (git over HTTP)"
       namespace: gitea
       resource: svc/gitea-http
       targetPort: 3000
@@ -37,23 +37,25 @@ bootstrap:
       source: manifests/lab-start.yaml
   init:
     - name: install-gitea
-      description: Starts the in-cluster Git server
+      description: "Starts the in-cluster Git server"
       type: file
       source: bootstrap/01-install-gitea.sh
-    - name: install-argo-workflows
-      description: Installs Argo Workflows v4.1.6 into starfleet
+    - name: install-registry
+      description: "Starts the in-cluster registry and copies scout 6.14.0 and 6.15.0 into it"
       type: file
-      source: bootstrap/02-install-argo-workflows.sh
-    - name: install-argo-events
-      description: Installs Argo Events v1.9.11 and a one-pod EventBus
+      source: bootstrap/02-install-registry.sh
+    - name: install-flux
+      description: "Installs Flux 2.9.6 with the image reflector and image automation controllers"
       type: file
-      source: bootstrap/03-install-argo-events.sh
+      source: bootstrap/03-install-flux.sh
     - name: seed
-      description: Pushes scout-app into Git, adds the push webhook and installs the run-tests WorkflowTemplate
+      description: "Pushes scout-deploy into Git, creates the Git credential Secret and starts the delivery of scout 6.14.0"
       type: file
       source: bootstrap/04-seed.sh
   waitFor:
     - resource: deploy/shuttle
+      namespace: starfleet
+    - resource: deploy/scout
       namespace: starfleet
 
 testing:
@@ -64,24 +66,20 @@ testing:
       source: testing/verify-start.sh
       timeout: 10m
     - name: solution
-      description: Reference solution applied by `astrona test`
+      description: "Reference solution applied by `astrona test`"
       type: file
       source: solution/apply.sh
 
 validation:
   scripts:
-    - name: template-fixed
-      description: The run-tests WorkflowTemplate still clones scout-app and runs test.sh, and now starts in the cloned folder
+    - name: image-automation-objects
+      description: "The ImageRepository, ImagePolicy and ImageUpdateAutomation exist, are Ready and select 6.15.0"
       type: file
-      source: validation/validate-template-fixed.sh
-    - name: events-wired
-      description: The EventSource push-webhook and the Sensor push-ci exist, run, and the Sensor filters body.ref for main
+      source: validation/validate-image-objects.sh
+    - name: tag-delivered-through-git
+      description: "The automation committed the tag to Git, Flux applied that commit and shuttle receives 6.15.0"
       type: file
-      source: validation/validate-events-wired.sh
-    - name: push-ran-workflow
-      description: A Workflow created by the Sensor for the newest commit on main Succeeded
-      type: file
-      source: validation/validate-push-workflow.sh
+      source: validation/validate-delivered-from-git.sh
 
 teardown:
   keepCluster: false

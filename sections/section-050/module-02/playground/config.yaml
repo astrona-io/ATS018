@@ -1,10 +1,12 @@
 # yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
 #
-# Gate A Blue/Green Release With Analysis (PLAYGROUND) — playground environment.
-# Argo Rollouts 1.10.0, a trimmed kube-prometheus-stack 92.3.0 (Prometheus
-# Operator and one Prometheus) scraping every scout pod, and `scout` as a
-# Rollout with a blueGreen strategy and no analysis. `shuttle` sends steady
-# traffic to the active and the preview Service. No task, no grading.
+# Hand Off From A Tekton Pipeline To GitOps (PLAYGROUND) — playground environment.
+# Tekton Pipelines 1.17.0 and Triggers 0.36.4, an in-cluster OCI registry,
+# Gitea (plumbing only) with the private repositories starfleet/scout-app and
+# starfleet/scout-deploy, and Argo CD 3.5.4 with the Application `scout` that
+# auto-syncs scout-deploy into `starfleet`. Deliberately absent: no Gitea
+# webhook, no EventListener and no Git credential Secret for the pipeline.
+# No task, no grading.
 apiVersion: astrona.io/v1
 metadata:
   name: ats-018-playground-050-02
@@ -17,38 +19,59 @@ runtime:
     image: kindest/node:v1.35.8
     preloadImages:
       - curlimages/curl:8.22.0
-      - ghcr.io/stefanprodan/podinfo:6.14.0
-      - ghcr.io/stefanprodan/podinfo:6.15.0
-      - quay.io/argoproj/argo-rollouts:v1.10.0
-      - quay.io/prometheus-operator/prometheus-operator:v0.94.1
-      - quay.io/prometheus-operator/prometheus-config-reloader:v0.94.1
-      - quay.io/prometheus/prometheus:v3.15.0-distroless
-      - ghcr.io/jkroepke/kube-webhook-certgen:1.8.9
+      - alpine:3.23
+      - alpine/git:2.52.0
+      - gcr.io/go-containerregistry/crane/debug:v0.22.1
+      - registry:3.1.2
+      - gitea/gitea:28.1.0-rootless
+      - quay.io/argoproj/argocd:v3.5.4
+      - public.ecr.aws/docker/library/redis:8.2.3-alpine
   portForwards:
-    - name: prometheus
-      description: "The Prometheus web page and HTTP API"
-      namespace: monitoring
-      resource: svc/kps-prometheus
-      targetPort: 9090
-      hostPort: 9090
+    - name: argocd
+      description: "Argo CD API server and web page"
+      namespace: argocd
+      resource: svc/argocd-server
+      targetPort: 443
+      hostPort: 8080
+      scheme: https
+    - name: gitea
+      description: "The Git server (git over HTTP)"
+      namespace: gitea
+      resource: svc/gitea-http
+      targetPort: 3000
+      hostPort: 3000
       scheme: http
 
 bootstrap:
+  manifests:
+    - name: lab-start
+      type: file
+      source: manifests/lab-start.yaml
   init:
-    - name: install-argo-rollouts
-      description: "Installs the Argo Rollouts 1.10.0 controller"
+    - name: install-gitea
+      description: "Starts the in-cluster Git server"
       type: file
-      source: bootstrap/01-install-argo-rollouts.sh
-    - name: install-prometheus
-      description: "Installs a trimmed kube-prometheus-stack 92.3.0 in monitoring"
+      source: bootstrap/01-install-gitea.sh
+    - name: install-registry
+      description: "Starts the in-cluster registry and copies the podinfo base images into it"
       type: file
-      source: bootstrap/02-install-prometheus.sh
-    - name: start-scout
-      description: "Creates the scout Rollout, its Services and its PodMonitor"
+      source: bootstrap/02-install-registry.sh
+    - name: install-argocd
+      description: "Installs Argo CD 3.5.4 (non-HA, without Dex and notifications)"
       type: file
-      source: bootstrap/03-start-scout.sh
+      source: bootstrap/03-install-argocd.sh
+    - name: install-tekton
+      description: "Installs Tekton Pipelines 1.17.0 and Triggers 0.36.4"
+      type: file
+      source: bootstrap/04-install-tekton.sh
+    - name: seed
+      description: "Pushes scout-app and scout-deploy into Git and creates the Argo CD Application"
+      type: file
+      source: bootstrap/05-seed.sh
   waitFor:
     - resource: deploy/shuttle
+      namespace: starfleet
+    - resource: deploy/scout
       namespace: starfleet
 
 teardown:

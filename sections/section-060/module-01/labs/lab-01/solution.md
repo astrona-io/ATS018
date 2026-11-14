@@ -3,141 +3,209 @@
 Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
 
 ```sh
-astrona submit --watch -c sections/section-060/module-01/labs/lab-01
+astrona submit --watch
 ```
 
 Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
 
-## Step 1: deliver the repository with Argo CD
+## Step 1: run the template and read the failure
 
-An Argo CD `Application` names a Git path and a destination. One `Application` with the path `.` and `directory.recurse: true` reads the platform API and both environments. Automated sync with prune and self-heal keeps the cluster equal to Git. The sync option `SkipDryRunOnMissingResource=true` lets the `ScoutEnvironment` objects apply after the definition that creates their kind. The sync wave annotations in the files set that order: the definition first, then the `Composition`, then the environments.
-
-Save this as `application-scout-platform.yaml`:
+Save this as `workflow-run-tests.yaml`:
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
-kind: Application
+kind: Workflow
 metadata:
-  name: scout-platform
-  namespace: argocd
+  generateName: run-tests-
+  namespace: starfleet
 spec:
-  project: default
-  source:
-    repoURL: http://gitea-http.gitea.svc:3000/starfleet/platform-infra.git
-    targetRevision: main
-    path: .
-    directory:
-      recurse: true
-  destination:
-    server: https://kubernetes.default.svc
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - SkipDryRunOnMissingResource=true
+  workflowTemplateRef:
+    name: run-tests
+```
+
+Create it, wait about 30 seconds and list the Workflows:
+
+```sh
+kubectl create -f workflow-run-tests.yaml
+kubectl -n starfleet get workflows
+```
+
+The Workflow is `Failed` with the message `main: Error (exit code 2)`. Read the log of its pod. Replace `<workflow-name>` with the name from the list:
+
+```sh
+kubectl -n starfleet logs -l workflows.argoproj.io/workflow=<workflow-name> -c main --prefix | grep -v INFO
+```
+
+The log says `/bin/sh: can't open 'test.sh': No such file or directory`. Read the folder the container starts in:
+
+```sh
+kubectl -n starfleet get workflowtemplate run-tests -o jsonpath='{.spec.templates[0].container.workingDir}{"\n"}'
+```
+
+The container starts in `/wrong`. The template clones the repository to `/src` (the `path` of the git artifact), so `test.sh` is in `/src`.
+
+## Step 2: fix the template
+
+Save this as `workflowtemplate-run-tests.yaml`:
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: run-tests
+  namespace: starfleet
+spec:
+  entrypoint: test
+  serviceAccountName: workflow-runner
+  arguments:
+    parameters:
+      - name: revision
+        value: main
+  templates:
+    - name: test
+      inputs:
+        parameters:
+          - name: revision
+        artifacts:
+          - name: source
+            path: /src
+            git:
+              repo: http://gitea-http.gitea.svc:3000/starfleet/scout-app.git
+              revision: "{{inputs.parameters.revision}}"
+      container:
+        image: alpine:3.23
+        workingDir: /src
+        command: [sh, test.sh]
 ```
 
 Apply it:
 
 ```sh
-kubectl apply -f application-scout-platform.yaml
+kubectl apply -f workflowtemplate-run-tests.yaml
 ```
 
-Then check the result after about a minute. The `Application` is `Synced`, but the `ScoutEnvironment` rows have an empty `HEALTH` column, because Argo CD has no health check for that kind:
+## Step 3: receive the push
 
-```sh
-kubectl -n argocd get application scout-platform
-kubectl get scoutenvironments.platform.starfleet.dev -A
-```
-
-The second command shows `READY False` for production. The `Application` still says `Healthy`.
-
-## Step 2: add a health check for ScoutEnvironment
-
-Argo CD reads health checks written in Lua from the ConfigMap `argocd-cm`. The key is `resource.customizations.health.<group>_<Kind>`. The script reads the `Ready` condition of the object.
-
-Save this as `argocd-cm-health-scoutenvironment.yaml`:
+An EventSource of the type `webhook` starts an HTTP server and a Service in front of it. The Service name is the EventSource name plus `-eventsource-svc`, which is the address Gitea calls. Save this as `eventsource-push-webhook.yaml`:
 
 ```yaml
-data:
-  resource.customizations.health.platform.starfleet.dev_ScoutEnvironment: |
-    hs = {}
-    hs.status = "Progressing"
-    hs.message = "Waiting for the Ready condition"
-    if obj.status ~= nil and obj.status.conditions ~= nil then
-      for _, condition in ipairs(obj.status.conditions) do
-        if condition.type == "Ready" then
-          if condition.status == "True" then
-            hs.status = "Healthy"
-            hs.message = "Ready"
-          else
-            hs.status = "Degraded"
-            hs.message = condition.reason .. ": " .. (condition.message or "")
-          end
-        end
-      end
-    end
-    return hs
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: push-webhook
+  namespace: argo-events
+spec:
+  service:
+    ports:
+      - port: 12000
+        targetPort: 12000
+  webhook:
+    push:
+      port: "12000"
+      endpoint: /push
+      method: POST
 ```
 
-Patch the ConfigMap with it:
+Apply it:
 
 ```sh
-kubectl -n argocd patch configmap argocd-cm --patch-file argocd-cm-health-scoutenvironment.yaml
+kubectl apply -f eventsource-push-webhook.yaml
 ```
 
-Then check the result. Argo CD picks up the change without a restart. The production row is `Degraded` and the `Application` is `Degraded`:
+## Step 4: filter the event and start the Workflow
+
+The EventSource wraps the HTTP body of the push in a field `body`, so the Sensor filters `body.ref`. The trigger copies `body.after`, the ID of the pushed commit, into the first argument of the Workflow. Save this as `sensor-push-ci.yaml`:
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: push-ci
+  namespace: argo-events
+spec:
+  template:
+    serviceAccountName: workflow-submitter
+  dependencies:
+    - name: push-main
+      eventSourceName: push-webhook
+      eventName: push
+      filters:
+        data:
+          - path: body.ref
+            type: string
+            value:
+              - refs/heads/main
+  triggers:
+    - template:
+        name: run-tests
+        argoWorkflow:
+          operation: submit
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: push-ci-
+                namespace: starfleet
+              spec:
+                workflowTemplateRef:
+                  name: run-tests
+                arguments:
+                  parameters:
+                    - name: revision
+                      value: main
+          parameters:
+            - src:
+                dependencyName: push-main
+                dataKey: body.after
+              dest: spec.arguments.parameters.0.value
+```
+
+Apply it:
 
 ```sh
-kubectl -n argocd get application scout-platform
+kubectl apply -f sensor-push-ci.yaml
 ```
 
-## Step 3: find the cause in the layers
-
-Read the `Ready` condition of the production XR. It names the composed resource that is not Ready:
+Then check that the Service and the pods exist:
 
 ```sh
-kubectl -n starfleet-production get scoutenvironments.platform.starfleet.dev scout \
-  -o jsonpath='{range .status.conditions[?(@.type=="Ready")]}{.reason}: {.message}{"\n"}{end}'
+kubectl -n argo-events get svc,pods
 ```
 
-The message says `Unready resources: deployment`. Look at the pods and the events of the namespace:
+The Service `push-webhook-eventsource-svc` exists, and the pods of the EventSource and the Sensor are `Running`. Wait until both are `Running` before you push.
+
+## Step 5: push a commit and read the run
+
+Clone the repository, change `VERSION` and push to `main`:
 
 ```sh
-kubectl -n starfleet-production get pods
-kubectl -n starfleet-production get events --field-selector reason=Failed
+git clone http://platform:starfleet-gitops@127.0.0.1:3000/starfleet/scout-app.git
+cd scout-app
+echo 6.15.1 > VERSION
+git commit -am "Bump VERSION to 6.15.1"
+git push origin main
+git rev-parse HEAD
 ```
 
-The pods are in `ImagePullBackOff`. The event says that the image `ghcr.io/stefanprodan/podinfo:6.99.0` was not found. The `Composition` copies `spec.version` of the XR into the image name, so the cause is the version in `environments/production/scoutenvironment.yaml`.
-
-## Step 4: fix the version in Git
-
-A change with `kubectl edit` would be undone: Crossplane owns the Deployment, and Argo CD self-heal restores the XR. Change the file in Git.
-
-Clone the repository, change the version and push:
+After about 30 seconds, list the Workflows and read the revision of the newest one that starts with `push-ci-`:
 
 ```sh
-git clone http://platform:starfleet-gitops@127.0.0.1:3000/starfleet/platform-infra.git platform-infra-fix
-cd platform-infra-fix
-sed -i.bak 's/version: 6.99.0/version: 6.15.0/' environments/production/scoutenvironment.yaml && rm environments/production/scoutenvironment.yaml.bak
-git commit -am "Use the published podinfo tag in production"
-git push
+kubectl -n starfleet get workflows
+kubectl -n starfleet get workflows -l events.argoproj.io/sensor=push-ci \
+  -o jsonpath='{range .items[*]}{.metadata.name}{"  "}{.status.phase}{"  "}{.spec.arguments.parameters[0].value}{"\n"}{end}'
 ```
 
-Then wait about a minute and check the chain from the top:
+The Workflow created by the Sensor is `Succeeded`, and its revision is the commit ID that `git rev-parse HEAD` printed.
 
-```sh
-kubectl -n argocd get application scout-platform
-kubectl get scoutenvironments.platform.starfleet.dev -A
-kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.starfleet-production/ | grep -E '"(version|message)"'
-kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.starfleet-staging/ | grep -E '"(version|message)"'
-```
+If no Workflow appears, read the Sensor log with `kubectl -n argo-events logs -l sensor-name=push-ci`. If you pushed before the pods were `Running`, push a new commit.
 
-The `Application` is `Synced` and `Healthy`, both XRs are `READY True`, and both environments return version `6.15.0`.
+## Step 6: submit
 
 Stop the watch with Ctrl-C, then run the plain command once:
 
 ```sh
-astrona submit -c sections/section-060/module-01/labs/lab-01
+astrona submit
 ```
+
+The first check reads the WorkflowTemplate. The second check reads the EventSource, the Sensor, their pods and the filter. The third check compares the newest commit on `main` with the revision of a `Succeeded` Workflow that carries the label of the Sensor `push-ci`.

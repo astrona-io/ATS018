@@ -38,7 +38,7 @@ spec:
             - { name: GITEA__server__ROOT_URL, value: "http://gitea-http.gitea.svc:3000/" }
             - { name: GITEA__server__OFFLINE_MODE, value: "true" }
             - { name: GITEA__service__DISABLE_REGISTRATION, value: "true" }
-            - { name: GITEA__webhook__ALLOWED_HOST_LIST, value: "private,loopback" }
+            - { name: GITEA__webhook__ALLOWED_HOST_LIST, value: "*" }
           readinessProbe:
             httpGet:
               path: /api/healthz

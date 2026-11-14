@@ -1,35 +1,24 @@
-# Overview: Deploy An Application With Argo CD (Playground)
+# Overview: Package And Configure Applications With Helm (Playground)
 
-This is a **playground**, not a lab. It starts a cluster with Argo CD and a private Git repository, and then waits. There is no task, no `astrona submit` and no pass or fail. Create Applications, break them, `astrona destroy`, start over.
+This playground provides an ungraded Kubernetes environment. Helm is the command-line tool that renders chart templates and manages releases. A chart packages templates and values; a release is one installed copy of a chart. You create the chart yourself in the terminal.
 
-## What's in the box
+## What is ready
 
-- A single-node `kind` cluster running Kubernetes 1.35. `kubectl` is already pointed at it.
-- **Argo CD 3.5.4** in the namespace `argocd`, reachable on `https://127.0.0.1:8080`. The user is `admin`; the password is in the Secret `argocd-initial-admin-secret`. Single sign-on (Dex) and the notifications controller are scaled to zero.
-- A **private Git repository** at `http://gitea-http.gitea.svc:3000/starfleet/scout-deploy.git` (from your machine: `http://127.0.0.1:3000/starfleet/scout-deploy.git`), user `platform`, password `starfleet-gitops`. It holds a Kustomize base for `scout` (podinfo, port `9898`, Service port `80`) and the overlays `overlays/staging` and `overlays/production`.
-- `shuttle`, a client pod with `curl`, in the namespace `starfleet`.
-- Deliberately absent: no `Application`, no repository Secret, and no `starfleet-staging` or `starfleet-production` namespace.
+The terminal has Helm 4.3.0 in `~/.astrona/bin` and `kubectl` connected to Kubernetes 1.35. Add `~/.astrona/bin` to your `PATH` if your shell has another Helm version first. The node holds `ghcr.io/stefanprodan/podinfo:6.14.0`, `ghcr.io/stefanprodan/podinfo:6.15.0` and `curlimages/curl:8.22.0`.
 
-## Helpers
+| Namespace | Starting state |
+| --- | --- |
+| `starfleet` | The `shuttle` client Deployment for requests |
+| `starfleet-staging` | Empty application namespace |
+| `starfleet-production` | Empty application namespace |
 
-Paste these once in each new terminal. `argocd_login` logs the `argocd` tool in as `admin`. `ask_scout` sends one request from `shuttle` to the `scout` Service in the namespace you name and prints the version and message.
+Podinfo is a web application on port `9898`. Its response includes the application version and a message. Its `PODINFO_UI_MESSAGE` environment variable sets that message.
 
-```sh
-argocd_login() {
-  argocd login 127.0.0.1:8080 --username admin --insecure \
-    --password "$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d)"
-}
-ask_scout() {
-  kubectl -n starfleet exec deploy/shuttle -- curl -s "http://scout.$1${2:+:$2}" | grep -E '"(version|message)"'
-}
-```
+## Practice ideas
 
-Use them like this: `argocd_login`, `ask_scout starfleet-staging`, `ask_scout starfleet-preview 9898`.
+- Render one chart twice with different replica values and compare the manifests before installing either.
+- Add a values key without reading it in a template. Check whether linting catches it, then inspect the rendered Deployment.
+- Install the same chart as separate releases in staging and production. List each namespace's releases.
+- Upgrade one release twice. Choose an earlier revision from history, roll back and inspect the new revision and response.
 
-## Practice tasks
-
-- Create an Application for `overlays/production` before you create the repository Secret. Read the condition, then fix it, and note which component wrote the message.
-- Sync an Application whose destination namespace does not exist, without `CreateNamespace=true`. Then fix it by putting a Namespace manifest in Git instead of using the sync option.
-- Turn on `automated` without `selfHeal`, scale the Deployment by hand, and predict the sync status before you check it.
-- Remove a file from the overlay with `prune: false`, and find the object Argo CD now marks for pruning.
-- Pin `targetRevision` to a commit ID instead of `main`, push a new commit, and explain why the application does not change.
+There is no grading or submission. Remove the playground when you finish exploring.

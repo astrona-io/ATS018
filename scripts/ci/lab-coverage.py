@@ -12,7 +12,7 @@ def link(title, path):
 
 
 def technical(path):
-    return ('/module-' in path or '/capstone/' in path) and '/course-' in path and 'summary' not in path
+    return '/module-' in path and '/course-' in path and 'summary' not in path
 
 
 def validate(course, coverage):
@@ -27,15 +27,15 @@ def validate(course, coverage):
         prep = mapping.get('preparation', [])
         if not prep or len(prep) != len(set(prep)):
             raise ValueError(f'{path}: preparation must contain unique reading paths')
-        scope = path.split('/labs/')[0] if '/module-' in path else path.split('/capstone/')[0]
+        scope = path.split('/labs/')[0]
         for reading in prep:
             if reading not in readings or not technical(reading):
                 raise ValueError(f'{path}: unknown technical reading {reading}')
             if positions[reading] >= positions[path]:
                 raise ValueError(f'{path}: preparation must precede the lab: {reading}')
             if not reading.startswith(scope + '/'):
-                raise ValueError(f'{path}: preparation must belong to the same module or capstone section')
-        used.update(p for p in prep if '/module-' in path or '/capstone/' in p)
+                raise ValueError(f'{path}: preparation must belong to the same module')
+        used.update(prep)
     previous_lab = -1
     for entry in entries:
         if entry.get('type') != 'lab':
@@ -60,8 +60,7 @@ def render(root=ROOT):
              'Generated from `TEACHING-COVERAGE.yaml`, course registration and grader descriptions. '
              'Run `python3 scripts/ci/lab-coverage.py --write` after changing them.', '',
              'Preparation links identify teaching needed for the task. They do not claim that '
-             'every skill in a linked lesson is graded. See [coverage review](COVERAGE-REVIEW.md) '
-             'for practical gaps and fixture limits. A map is not a runtime test result.', '',
+             'every skill in a linked lesson is graded. A map is not a runtime test result.', '',
              '## Labs and their preparation', '',
              '| Preparation | Independent task and starting state | Graded result | Runtime and lifecycle |',
              '| --- | --- | --- | --- |']
@@ -78,11 +77,10 @@ def render(root=ROOT):
         lifecycle = link(runtime + ' reference lifecycle', path + '/config.yaml')
         lines.append(f'| {prep} | {task} | {descriptions} | {lifecycle} |')
         for reading in preparation:
-            if '/module-' in path or '/capstone/' in reading:
-                reverse[reading].append(task)
+            reverse[reading].append(task)
     lines += ['', '## Readings and their practice', '',
-              'Capstone readings link to their integration tasks. Earlier module readings retain their module-lab links. '
-              'They do not make every preceding reading a separately graded skill.', '',
+              'Each reading links to the module labs that use it. '
+              'A link does not make every skill in the reading a separately graded skill.', '',
               '| Technical reading | Related task |', '| --- | --- |']
     for path, tasks in reverse.items():
         result = '<br>'.join(tasks) if tasks else 'Supporting concepts or ungraded practice; no practice link'

@@ -1,41 +1,41 @@
-# Gate A Blue/Green Release With Analysis
+# Hand Off From A Tekton Pipeline To GitOps
 
-A new application can start successfully and still return errors to users. A readiness probe tells Kubernetes whether a pod can receive requests. It does not decide whether a release has an acceptable error rate. A blue/green release runs stable and candidate configurations separately, then switches active traffic to the candidate in one step.
+A CI pipeline produces a new version, and a GitOps controller delivers it. The two meet in one place: a commit to the GitOps repository that changes the image tag. The pipeline never runs `kubectl apply` against the application. It publishes the image, writes the new tag into Git, and stops. Argo CD sees the commit and rolls out the new version.
 
-Argo Rollouts manages that switch through a Rollout, a Kubernetes resource that controls release progress. Its active Service selects the stable pods; its preview Service lets you test the candidate first. A Service gives selected ready pods a stable address. An AnalysisTemplate defines metric checks, and an AnalysisRun records one execution of those checks.
+This split is the hand-off. It keeps one source of truth for what runs in the cluster, it keeps cluster credentials out of the pipeline, and it gives every release a commit that you can read, review and revert.
 
-Keep one sentence in mind for this module: **query the candidate's metrics before you switch active traffic.** Prometheus, a system that collects and queries application measurements, provides the evidence. Argo Rollouts decides whether the evidence allows the release to continue.
+Keep one sentence in mind for this module: **the pipeline writes to the registry and to Git, and only Argo CD writes to the cluster.** Every step you build either publishes an image, commits a tag, or starts the pipeline.
 
-The module has four parts. **Active And Preview Services** changes the pod template and proves the two addresses select separate configurations. **Promote And Measure The Candidate** switches traffic, observes delayed scale-down and queries the candidate's success fraction. **Pre-Promotion Analysis With Prometheus** attaches a metric check and keeps manual promotion after success. **Abort A Release On Failed Analysis** deploys a ready application with random errors, checks the automatic abort and restores the desired configuration.
+The module has five parts. **Publish An Image To The Registry** explains the hand-off and writes a Task that publishes a new image tag. **Commit The New Tag With Git Credentials** writes the Task that changes the tag in the GitOps repository, and gives it credentials through a Secret and a service account. **One Pipeline From Source To Commit** chains the clone, the publish and the commit into one Pipeline and follows its commit until Argo CD serves it. **Listen For A Push With Tekton Triggers** builds the `EventListener`, `TriggerBinding` and `TriggerTemplate`, explains the order in which the listener applies them to a request, and gives it the permissions to create runs. **Start The Pipeline From A Git Push** tests the filter by hand, connects the webhook, follows one push to the new version answering requests, and shows where to look when a push creates no run.
+
+The 20-minute lab **Create PipelineRuns From JSON Requests With Tekton Triggers** practises field extraction, template substitution and listener permissions with an existing Pipeline. You send a request from inside the cluster and check that its values reach a successful run.
 
 ## Learning objectives
 
 After this module you can:
 
-- Configure `blueGreen` with active and preview Services and automatic promotion disabled.
-- Test a candidate through the preview Service before promotion.
-- Write an AnalysisTemplate that queries Prometheus for the candidate's success rate.
-- Attach pre-promotion analysis and read the AnalysisRun phase and measurements.
-- Prove that failed analysis aborts a release while the stable configuration remains active.
+- Push a newly tagged image to the in-cluster registry from a pipeline Task.
+- Update the image tag in a GitOps repository from a pipeline with a Git commit.
+- Give a Task Git credentials through a Secret and a service account.
+- Start a PipelineRun from a Git push with an `EventListener`, a `TriggerBinding` and a `TriggerTemplate`, and say in which order the listener applies interceptors, bindings and the template.
+- Prove the full flow from a push to a PipelineRun, a commit and an Argo CD sync of the new version.
 
 ## Before you start
 
-You need Kubernetes basics: namespaces, labels, selectors, Services, pod templates, ReplicaSets and readiness probes. A ReplicaSet keeps copies of one pod template running. You also need `kubectl apply`, `kubectl get` and `kubectl exec`.
+You need Kubernetes basics (namespaces, pods, Secrets, ServiceAccounts, Role and ClusterRole bindings) and the commands `kubectl apply`, `kubectl create` and `kubectl exec`. You need to know what a Tekton Task, Pipeline, TaskRun, PipelineRun, param, result and workspace are, and what an Argo CD `Application` with automated sync does. On your machine you need `git`, `tkn` 0.46 and the `argocd` command-line tool 3.5.
 
-The playground runs Kubernetes 1.35.8 and Argo Rollouts 1.10.0. Use kubectl 1.35.8 and the kubectl-argo-rollouts plugin 1.10.0 on your machine. A plugin is an executable on your shell's `PATH` that adds commands to kubectl. These pages use `kubectl argo rollouts` to inspect and promote releases.
+Your playground is a single-node `kind` cluster running Kubernetes 1.35 with these parts:
 
-| Namespace | What is in it |
+| Part | What it is |
 | --- | --- |
-| `argo-rollouts` | The release controller and its custom resource definitions |
-| `monitoring` | Prometheus Operator and a small Prometheus instance |
-| `starfleet` | Two `scout` replicas, active and preview Services, a PodMonitor and the `shuttle` request client |
+| Tekton Pipelines 1.17.0 and Triggers 0.36.4 | The pipeline controller and the Triggers controller, webhook and core interceptors, in `tekton-pipelines` |
+| A container registry | `registry.registry.svc:5000` inside the cluster, over plain HTTP. It holds the podinfo base images `starfleet/podinfo:6.14.0`, `6.14.1` and `6.15.0`, and `starfleet/scout:6.14.0` |
+| Two private Git repositories | `starfleet/scout-app` (the source, with a `VERSION` file that says `6.14.0`) and `starfleet/scout-deploy` (the GitOps repository: a Deployment, a Service and a `kustomization.yaml` that sets the image tag) at `http://gitea-http.gitea.svc:3000`, user `platform`, password `starfleet-gitops` |
+| Argo CD 3.5.4 | The `Application` `scout` syncs `scout-deploy` into `starfleet` with automated sync, prune and self-heal |
+| `starfleet` | `scout` (version `6.14.0`), `shuttle` (a client pod with `curl`) and the Task `fetch-source`, which clones a repository and reports its commit ID and `VERSION` |
 
-podinfo is a web application on port 9898 that returns its version and a configurable message. The starting configuration uses image 6.15.0 and message `stable`. Both Services initially select it. The examples keep the image tag and change configuration messages so responses identify each release. Automatic promotion is disabled, and no analysis exists yet.
+The Git repositories are served by Gitea, a small Git server in the cluster. Deliberately absent: the pipeline has no Git credentials, there is no `EventListener`, and the source repository has no webhook. Two ports on your machine reach into the cluster: `https://127.0.0.1:8080` is the Argo CD API server, and `http://127.0.0.1:3000` is the Git server. `kubectl` already points at the cluster.
 
-A PodMonitor tells the Prometheus Operator which pods to scrape and which labels to retain. Prometheus scrapes the dedicated metrics port 9797 every 15 seconds. podinfo does not inject random application errors on that port. `shuttle` sends steady requests to both Services so candidate measurements exist before promotion.
-
-Prometheus is forwarded to `http://127.0.0.1:9090`; the controller uses its separate in-cluster address.
-
-Write the manifests in an empty folder on your machine. Keep the playground running and use its Kubernetes context for every command. No GitOps controller manages these objects, so you apply changes directly; in a GitOps environment, record the same desired state in Git and let its controller apply it.
+Launch your playground now, and keep it running next to you while you read the parts:
 
 <!-- astrona:playground -->

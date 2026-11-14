@@ -57,26 +57,30 @@ Most playgrounds also run **Gitea**, a small Git server, inside the cluster. It 
 
 ## How the course is laid out
 
-The course has five sections. They follow the path of a change: first how the manifests are packaged, then how a GitOps controller delivers them, then how a pipeline produces a new version, and last how that version reaches users safely.
+The course has ten sections, and each section teaches one tool. They follow the path of a change: first how the manifests are packaged, then how a GitOps controller delivers them, then how a pipeline produces a new version, then how that version reaches users safely, and last how infrastructure is delivered.
 
 | Section | What it covers |
 | --- | --- |
-| 010 | Packaging Applications For GitOps |
-| 020 | Continuous Delivery With Argo CD |
-| 030 | Continuous Delivery With Flux |
-| 040 | Continuous Integration Pipelines With Tekton |
-| 050 | Progressive Delivery |
+| 010 | Build Manifests With Kustomize |
+| 020 | Package Applications With Helm |
+| 030 | Continuous Delivery With Argo CD |
+| 040 | Continuous Delivery With Flux |
+| 050 | Continuous Integration Pipelines With Tekton |
+| 060 | Continuous Integration With Argo Workflows And Argo Events |
+| 070 | Progressive Delivery With Argo Rollouts |
+| 080 | Progressive Delivery With Flagger |
+| 090 | Infrastructure Delivery With Crossplane |
+| 100 | Plan And Apply Infrastructure With OpenTofu |
 
-Each section has one or more **modules**, and each module teaches one skill. A module brings together four kinds of material:
+Each section has one or more **modules**, and each module teaches one skill. A module brings together three kinds of material:
 
 | What | What it is for | Graded? |
 | --- | --- | --- |
 | **Reading** | A short landing page, a few chapters that teach one idea each, and a summary | No |
 | **Playground** | A small cluster on your own machine, to try everything you read | No |
 | **Lab** | A broken or empty cluster, a task, and a grader that checks your work | Yes |
-| **Capstone** | The last lab in a section, with several tasks at once | Yes |
 
-The best order is simple: read the chapters with the playground open next to them, take each lab when a chapter sends you to it, and finish each section with its capstone. The next part of this page explains how a module's pages guide you through that order.
+The best order is simple: read the chapters with the playground open next to them, and take each lab as soon as it appears, right after the chapter it practises. The next part of this page explains how a module's pages guide you through that order.
 
 ## How to read a page
 

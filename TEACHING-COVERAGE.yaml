@@ -6,238 +6,176 @@ labs:
     - sections/section-010/module-01/course-02-overlays-and-patches.md
     - sections/section-010/module-01/course-03-generators-diff-and-apply.md
     - sections/section-010/module-01/course-04-reading-build-errors.md
-  sections/section-010/module-02/labs/lab-01:
-    preparation:
-    - sections/section-010/module-02/course-01-chart-layout-and-rendering.md
-    - sections/section-010/module-02/course-02-values-templates-and-versions.md
-  sections/section-010/capstone/labs/lab-01:
-    preparation:
-    - sections/section-010/module-01/course-01-base-and-kustomization.md
-    - sections/section-010/module-01/course-02-overlays-and-patches.md
-    - sections/section-010/module-01/course-03-generators-diff-and-apply.md
-    - sections/section-010/module-01/course-04-reading-build-errors.md
-    - sections/section-010/capstone/course-01-trace-a-kustomize-overlay-from-source-to-response.md
-  sections/section-010/capstone/labs/lab-02:
-    preparation:
-    - sections/section-010/module-01/course-01-base-and-kustomization.md
-    - sections/section-010/module-01/course-02-overlays-and-patches.md
-    - sections/section-010/module-01/course-03-generators-diff-and-apply.md
-    - sections/section-010/module-02/course-01-chart-layout-and-rendering.md
-    - sections/section-010/module-02/course-02-values-templates-and-versions.md
-    - sections/section-010/capstone/course-02-verify-helm-and-kustomize-deliveries-separately.md
   sections/section-020/module-01/labs/lab-01:
     preparation:
-    - sections/section-020/module-01/course-01-gitops-and-argo-cd-components.md
-    - sections/section-020/module-01/course-02-the-application-resource.md
-    - sections/section-020/module-01/course-03-sync-policy-drift-and-health.md
-  sections/section-020/module-02/labs/lab-01:
-    preparation:
-    - sections/section-020/module-02/course-02-applicationsets-and-generators.md
-    - sections/section-020/module-02/course-03-appprojects-for-a-second-tenant.md
-  sections/section-020/module-03/labs/lab-01:
-    preparation:
-    - sections/section-020/module-03/course-01-where-argo-cd-reports-a-problem.md
-    - sections/section-020/module-03/course-02-sync-failures-waves-and-hooks.md
-    - sections/section-020/module-03/course-04-health-failures.md
-  sections/section-020/capstone/labs/lab-01:
-    preparation:
-    - sections/section-020/module-01/course-01-gitops-and-argo-cd-components.md
-    - sections/section-020/module-01/course-02-the-application-resource.md
-    - sections/section-020/module-01/course-03-sync-policy-drift-and-health.md
-    - sections/section-020/module-02/course-02-applicationsets-and-generators.md
-    - sections/section-020/module-02/course-03-appprojects-for-a-second-tenant.md
-    - sections/section-020/module-03/course-02-sync-failures-waves-and-hooks.md
-    - sections/section-020/module-03/course-04-health-failures.md
-    - sections/section-020/capstone/course-01-trace-gitops-ownership-and-tenant-scope.md
+    - sections/section-020/module-01/course-01-chart-layout-and-rendering.md
+    - sections/section-020/module-01/course-02-values-templates-and-versions.md
   sections/section-030/module-01/labs/lab-01:
     preparation:
-    - sections/section-030/module-01/course-01-fetch-git-with-a-flux-source.md
-    - sections/section-030/module-01/course-02-apply-paths-and-order-dependencies.md
-    - sections/section-030/module-01/course-03-reconcile-suspend-and-resume.md
+    - sections/section-030/module-01/course-01-gitops-and-argo-cd-components.md
+    - sections/section-030/module-01/course-02-the-application-resource.md
+    - sections/section-030/module-01/course-03-sync-policy-drift-and-health.md
   sections/section-030/module-02/labs/lab-01:
     preparation:
-    - sections/section-030/module-02/course-01-chart-sources-and-helmrelease.md
-    - sections/section-030/module-02/course-02-values-and-release-history.md
-    - sections/section-030/module-02/course-03-remediation-and-rollback.md
+    - sections/section-030/module-02/course-02-applicationsets-and-generators.md
+    - sections/section-030/module-02/course-03-appprojects-for-a-second-tenant.md
   sections/section-030/module-03/labs/lab-01:
     preparation:
-    - sections/section-030/module-03/course-01-select-a-tag.md
-    - sections/section-030/module-03/course-02-commit-the-tag-to-git.md
-    - sections/section-030/module-03/course-03-release-a-new-tag.md
-  sections/section-030/capstone/labs/lab-01:
-    preparation:
-    - sections/section-030/module-01/course-01-fetch-git-with-a-flux-source.md
-    - sections/section-030/module-01/course-02-apply-paths-and-order-dependencies.md
-    - sections/section-030/module-01/course-03-reconcile-suspend-and-resume.md
-    - sections/section-030/module-02/course-01-chart-sources-and-helmrelease.md
-    - sections/section-030/module-02/course-02-values-and-release-history.md
-    - sections/section-030/module-02/course-03-remediation-and-rollback.md
-    - sections/section-030/capstone/course-01-separate-flux-source-apply-and-release-failures.md
+    - sections/section-030/module-03/course-01-where-argo-cd-reports-a-problem.md
+    - sections/section-030/module-03/course-02-sync-failures-waves-and-hooks.md
+    - sections/section-030/module-03/course-04-health-failures.md
   sections/section-040/module-01/labs/lab-01:
     preparation:
-    - sections/section-040/module-01/course-01-tasks-taskruns-and-pods.md
-    - sections/section-040/module-01/course-02-workspaces-and-pipelines.md
-    - sections/section-040/module-01/course-03-reading-a-failed-taskrun.md
-  sections/section-040/module-01/labs/lab-02:
-    preparation:
-    - sections/section-040/module-01/course-01-tasks-taskruns-and-pods.md
-    - sections/section-040/module-01/course-02-workspaces-and-pipelines.md
-    - sections/section-040/module-01/course-05-parallel-tasks-tkn-runs-and-cluster-access.md
+    - sections/section-040/module-01/course-01-fetch-git-with-a-flux-source.md
+    - sections/section-040/module-01/course-02-apply-paths-and-order-dependencies.md
+    - sections/section-040/module-01/course-03-reconcile-suspend-and-resume.md
   sections/section-040/module-02/labs/lab-01:
     preparation:
-    - sections/section-040/module-02/course-01-publish-an-image-to-the-registry.md
-    - sections/section-040/module-02/course-02-commit-the-new-tag-with-git-credentials.md
-    - sections/section-040/module-02/course-03-one-pipeline-from-source-to-commit.md
-  sections/section-040/module-02/labs/lab-02:
-    preparation:
-    - sections/section-040/module-02/course-01-publish-an-image-to-the-registry.md
-    - sections/section-040/module-02/course-02-commit-the-new-tag-with-git-credentials.md
-    - sections/section-040/module-02/course-03-one-pipeline-from-source-to-commit.md
-    - sections/section-040/module-02/course-04-listen-for-a-push-with-tekton-triggers.md
-    - sections/section-040/module-02/course-05-start-the-pipeline-from-a-git-push.md
+    - sections/section-040/module-02/course-01-chart-sources-and-helmrelease.md
+    - sections/section-040/module-02/course-02-values-and-release-history.md
+    - sections/section-040/module-02/course-03-remediation-and-rollback.md
   sections/section-040/module-03/labs/lab-01:
     preparation:
-    - sections/section-040/module-03/course-01-a-workflow-with-a-dag.md
-    - sections/section-040/module-03/course-02-reuse-a-workflow-with-a-workflowtemplate.md
-    - sections/section-040/module-03/course-03-read-a-failed-workflow.md
-    - sections/section-040/module-03/course-04-start-a-workflow-from-a-git-push.md
-  sections/section-040/module-03/labs/lab-02:
-    preparation:
-    - sections/section-040/module-03/course-01-a-workflow-with-a-dag.md
-    - sections/section-040/module-03/course-02-reuse-a-workflow-with-a-workflowtemplate.md
-    - sections/section-040/module-03/course-05-run-workflows-with-the-argo-command-line-tool.md
-  sections/section-040/module-03/labs/lab-03:
-    preparation:
-    - sections/section-040/module-03/course-02-reuse-a-workflow-with-a-workflowtemplate.md
-    - sections/section-040/module-03/course-05-run-workflows-with-the-argo-command-line-tool.md
-    - sections/section-040/module-03/course-06-pass-a-step-output-through-a-checksum-check.md
-  sections/section-040/capstone/labs/lab-01:
-    preparation:
-    - sections/section-040/module-01/course-01-tasks-taskruns-and-pods.md
-    - sections/section-040/module-01/course-02-workspaces-and-pipelines.md
-    - sections/section-040/module-01/course-03-reading-a-failed-taskrun.md
-    - sections/section-040/module-02/course-01-publish-an-image-to-the-registry.md
-    - sections/section-040/module-02/course-02-commit-the-new-tag-with-git-credentials.md
-    - sections/section-040/module-02/course-03-one-pipeline-from-source-to-commit.md
-    - sections/section-040/capstone/course-01-follow-a-release-from-tested-source-to-gitops-delivery.md
-  sections/section-040/capstone/labs/lab-02:
-    preparation:
-    - sections/section-040/module-03/course-01-a-workflow-with-a-dag.md
-    - sections/section-040/module-03/course-02-reuse-a-workflow-with-a-workflowtemplate.md
-    - sections/section-040/module-03/course-03-read-a-failed-workflow.md
-    - sections/section-040/module-03/course-04-start-a-workflow-from-a-git-push.md
-    - sections/section-040/capstone/course-02-trace-a-git-push-into-a-workflow-run.md
+    - sections/section-040/module-03/course-01-select-a-tag.md
+    - sections/section-040/module-03/course-02-commit-the-tag-to-git.md
+    - sections/section-040/module-03/course-03-release-a-new-tag.md
   sections/section-050/module-01/labs/lab-01:
     preparation:
-    - sections/section-050/module-01/course-01-convert-a-deployment.md
-    - sections/section-050/module-01/course-02-canary-steps-and-weights.md
-    - sections/section-050/module-01/course-03-promote-and-pause.md
-    - sections/section-050/module-01/course-04-abort-and-retry.md
+    - sections/section-050/module-01/course-01-tasks-taskruns-and-pods.md
+    - sections/section-050/module-01/course-02-workspaces-and-pipelines.md
+    - sections/section-050/module-01/course-03-reading-a-failed-taskrun.md
   sections/section-050/module-01/labs/lab-02:
     preparation:
-    - sections/section-050/module-01/course-02-canary-steps-and-weights.md
-    - sections/section-050/module-01/course-03-promote-and-pause.md
-    - sections/section-050/module-01/course-05-web-analysis-step.md
+    - sections/section-050/module-01/course-01-tasks-taskruns-and-pods.md
+    - sections/section-050/module-01/course-02-workspaces-and-pipelines.md
+    - sections/section-050/module-01/course-05-parallel-tasks-tkn-runs-and-cluster-access.md
   sections/section-050/module-02/labs/lab-01:
     preparation:
-    - sections/section-050/module-02/course-01-active-and-preview-services.md
-    - sections/section-050/module-02/course-02-promote-and-measure-the-candidate.md
-    - sections/section-050/module-02/course-03-pre-promotion-analysis.md
-    - sections/section-050/module-02/course-04-abort-on-failed-analysis.md
-  sections/section-050/module-03/labs/lab-01:
+    - sections/section-050/module-02/course-01-publish-an-image-to-the-registry.md
+    - sections/section-050/module-02/course-02-commit-the-new-tag-with-git-credentials.md
+    - sections/section-050/module-02/course-03-one-pipeline-from-source-to-commit.md
+  sections/section-050/module-02/labs/lab-02:
     preparation:
-    - sections/section-050/module-03/course-01-what-flagger-creates.md
-    - sections/section-050/module-03/course-02-analysis-and-a-promoted-canary.md
-    - sections/section-050/module-03/course-03-roll-back-a-failing-canary.md
-  sections/section-050/module-03/labs/lab-02:
-    preparation:
-    - sections/section-050/module-03/course-01-what-flagger-creates.md
-    - sections/section-050/module-03/course-04-blue-green-without-a-mesh.md
-  sections/section-050/module-03/labs/lab-03:
-    preparation:
-    - sections/section-050/module-03/course-01-what-flagger-creates.md
-    - sections/section-050/module-03/course-02-analysis-and-a-promoted-canary.md
-    - sections/section-050/module-03/course-05-wait-for-approval-before-a-rollout.md
-  sections/section-050/module-04/labs/lab-01:
-    preparation:
-    - sections/section-050/module-04/course-01-split-traffic-with-the-gateway-api-plugin.md
-    - sections/section-050/module-04/course-02-route-test-traffic-by-header.md
-    - sections/section-050/module-04/course-03-stop-a-bad-canary-with-background-analysis.md
-  sections/section-050/capstone/labs/lab-01:
-    preparation:
-    - sections/section-050/module-01/course-01-convert-a-deployment.md
-    - sections/section-050/module-01/course-02-canary-steps-and-weights.md
-    - sections/section-050/module-01/course-03-promote-and-pause.md
-    - sections/section-050/module-01/course-04-abort-and-retry.md
-    - sections/section-050/module-02/course-02-promote-and-measure-the-candidate.md
-    - sections/section-050/module-02/course-03-pre-promotion-analysis.md
-    - sections/section-050/module-02/course-04-abort-on-failed-analysis.md
-    - sections/section-050/capstone/course-01-prove-a-canary-gate-with-a-failing-and-a-passing-candidate.md
-  sections/section-050/capstone/labs/lab-02:
-    preparation:
-    - sections/section-050/module-04/course-01-split-traffic-with-the-gateway-api-plugin.md
-    - sections/section-050/module-04/course-02-route-test-traffic-by-header.md
-    - sections/section-050/module-04/course-03-stop-a-bad-canary-with-background-analysis.md
-    - sections/section-050/capstone/course-02-connect-header-routing-traffic-weights-and-analysis.md
+    - sections/section-050/module-02/course-01-publish-an-image-to-the-registry.md
+    - sections/section-050/module-02/course-02-commit-the-new-tag-with-git-credentials.md
+    - sections/section-050/module-02/course-03-one-pipeline-from-source-to-commit.md
+    - sections/section-050/module-02/course-04-listen-for-a-push-with-tekton-triggers.md
+    - sections/section-050/module-02/course-05-start-the-pipeline-from-a-git-push.md
   sections/section-060/module-01/labs/lab-01:
     preparation:
-    - sections/section-060/module-01/course-01-providers-and-functions.md
-    - sections/section-060/module-01/course-02-define-an-api-with-an-xrd-and-a-composition.md
-    - sections/section-060/module-01/course-03-deliver-the-platform-with-argo-cd.md
-    - sections/section-060/module-01/course-04-diagnose-a-composite-resource-that-is-not-ready.md
-  sections/section-060/module-02/labs/lab-01:
-    preparation:
-    - sections/section-060/module-02/course-01-read-a-working-directory-and-state.md
-    - sections/section-060/module-02/course-02-review-and-apply-an-attribute-change.md
-    - sections/section-060/module-02/course-03-add-a-service-and-understand-reconciliation.md
-  sections/section-060/capstone/labs/lab-01:
-    preparation:
-    - sections/section-060/module-01/course-01-providers-and-functions.md
-    - sections/section-060/module-01/course-02-define-an-api-with-an-xrd-and-a-composition.md
-    - sections/section-060/module-01/course-03-deliver-the-platform-with-argo-cd.md
-    - sections/section-060/module-01/course-04-diagnose-a-composite-resource-that-is-not-ready.md
-    - sections/section-060/capstone/course-01-follow-gitops-delivery-through-crossplane-reconciliation.md
-  sections/section-060/capstone/labs/lab-02:
-    preparation:
-    - sections/section-060/module-02/course-01-read-a-working-directory-and-state.md
-    - sections/section-060/module-02/course-02-review-and-apply-an-attribute-change.md
-    - sections/section-060/module-02/course-03-add-a-service-and-understand-reconciliation.md
-    - sections/section-060/capstone/course-02-distinguish-pending-changes-new-resources-and-live-drift.md
-  sections/section-010/module-02/labs/lab-02:
-    preparation:
-    - sections/section-010/module-02/course-03-history-and-rollback.md
-  sections/section-020/module-03/labs/lab-02:
-    preparation:
-    - sections/section-020/module-03/course-03-permanent-drift-and-ignore-differences.md
-  sections/section-020/module-01/labs/lab-02:
-    preparation:
-    - sections/section-020/module-01/course-04-helm-charts-as-a-source.md
-  sections/section-020/module-02/labs/lab-02:
-    preparation:
-    - sections/section-020/module-02/course-01-app-of-apps.md
-  sections/section-040/module-03/labs/lab-04:
-    preparation:
-    - sections/section-040/module-03/course-02-reuse-a-workflow-with-a-workflowtemplate.md
-    - sections/section-040/module-03/course-05-run-workflows-with-the-argo-command-line-tool.md
-    - sections/section-040/module-03/course-07-create-a-deployment-from-workflow-inputs.md
-  sections/section-040/module-01/labs/lab-03:
-    preparation:
-    - sections/section-040/module-01/course-02-workspaces-and-pipelines.md
-    - sections/section-040/module-01/course-04-shared-tasks-with-resolvers.md
+    - sections/section-060/module-01/course-01-a-workflow-with-a-dag.md
+    - sections/section-060/module-01/course-02-reuse-a-workflow-with-a-workflowtemplate.md
+    - sections/section-060/module-01/course-03-read-a-failed-workflow.md
+    - sections/section-060/module-01/course-04-start-a-workflow-from-a-git-push.md
   sections/section-060/module-01/labs/lab-02:
     preparation:
-    - sections/section-060/module-01/course-02-define-an-api-with-an-xrd-and-a-composition.md
-    - sections/section-060/module-01/course-04-diagnose-a-composite-resource-that-is-not-ready.md
-    - sections/section-060/module-01/course-05-deliver-the-platform-with-flux.md
-  sections/section-050/module-03/labs/lab-04:
+    - sections/section-060/module-01/course-01-a-workflow-with-a-dag.md
+    - sections/section-060/module-01/course-02-reuse-a-workflow-with-a-workflowtemplate.md
+    - sections/section-060/module-01/course-05-run-workflows-with-the-argo-command-line-tool.md
+  sections/section-060/module-01/labs/lab-03:
     preparation:
-    - sections/section-050/module-03/course-01-what-flagger-creates.md
-    - sections/section-050/module-03/course-02-analysis-and-a-promoted-canary.md
-    - sections/section-050/module-03/course-06-wait-for-approval-before-promotion.md
-  sections/section-020/module-02/labs/lab-03:
+    - sections/section-060/module-01/course-02-reuse-a-workflow-with-a-workflowtemplate.md
+    - sections/section-060/module-01/course-05-run-workflows-with-the-argo-command-line-tool.md
+    - sections/section-060/module-01/course-06-pass-a-step-output-through-a-checksum-check.md
+  sections/section-070/module-01/labs/lab-01:
     preparation:
-    - sections/section-020/module-02/course-02-applicationsets-and-generators.md
-  sections/section-020/module-03/labs/lab-03:
+    - sections/section-070/module-01/course-01-convert-a-deployment.md
+    - sections/section-070/module-01/course-02-canary-steps-and-weights.md
+    - sections/section-070/module-01/course-03-promote-and-pause.md
+    - sections/section-070/module-01/course-04-abort-and-retry.md
+  sections/section-070/module-01/labs/lab-02:
     preparation:
-    - sections/section-020/module-03/course-02-sync-failures-waves-and-hooks.md
+    - sections/section-070/module-01/course-02-canary-steps-and-weights.md
+    - sections/section-070/module-01/course-03-promote-and-pause.md
+    - sections/section-070/module-01/course-05-web-analysis-step.md
+  sections/section-070/module-02/labs/lab-01:
+    preparation:
+    - sections/section-070/module-02/course-01-active-and-preview-services.md
+    - sections/section-070/module-02/course-02-promote-and-measure-the-candidate.md
+    - sections/section-070/module-02/course-03-pre-promotion-analysis.md
+    - sections/section-070/module-02/course-04-abort-on-failed-analysis.md
+  sections/section-080/module-01/labs/lab-01:
+    preparation:
+    - sections/section-080/module-01/course-01-what-flagger-creates.md
+    - sections/section-080/module-01/course-02-analysis-and-a-promoted-canary.md
+    - sections/section-080/module-01/course-03-roll-back-a-failing-canary.md
+  sections/section-080/module-01/labs/lab-02:
+    preparation:
+    - sections/section-080/module-01/course-01-what-flagger-creates.md
+    - sections/section-080/module-01/course-04-blue-green-without-a-mesh.md
+  sections/section-080/module-01/labs/lab-03:
+    preparation:
+    - sections/section-080/module-01/course-01-what-flagger-creates.md
+    - sections/section-080/module-01/course-02-analysis-and-a-promoted-canary.md
+    - sections/section-080/module-01/course-05-wait-for-approval-before-a-rollout.md
+  sections/section-070/module-03/labs/lab-01:
+    preparation:
+    - sections/section-070/module-03/course-01-split-traffic-with-the-gateway-api-plugin.md
+    - sections/section-070/module-03/course-02-route-test-traffic-by-header.md
+    - sections/section-070/module-03/course-03-stop-a-bad-canary-with-background-analysis.md
+  sections/section-090/module-01/labs/lab-01:
+    preparation:
+    - sections/section-090/module-01/course-01-providers-and-functions.md
+    - sections/section-090/module-01/course-02-define-an-api-with-an-xrd-and-a-composition.md
+    - sections/section-090/module-01/course-03-deliver-the-platform-with-argo-cd.md
+    - sections/section-090/module-01/course-04-diagnose-a-composite-resource-that-is-not-ready.md
+  sections/section-100/module-01/labs/lab-01:
+    preparation:
+    - sections/section-100/module-01/course-01-read-a-working-directory-and-state.md
+    - sections/section-100/module-01/course-02-review-and-apply-an-attribute-change.md
+    - sections/section-100/module-01/course-03-add-a-service-and-understand-reconciliation.md
+  sections/section-020/module-01/labs/lab-02:
+    preparation:
+    - sections/section-020/module-01/course-03-history-and-rollback.md
+  sections/section-030/module-03/labs/lab-02:
+    preparation:
+    - sections/section-030/module-03/course-03-permanent-drift-and-ignore-differences.md
+  sections/section-030/module-01/labs/lab-02:
+    preparation:
+    - sections/section-030/module-01/course-04-helm-charts-as-a-source.md
+  sections/section-030/module-02/labs/lab-02:
+    preparation:
+    - sections/section-030/module-02/course-01-app-of-apps.md
+  sections/section-060/module-01/labs/lab-04:
+    preparation:
+    - sections/section-060/module-01/course-02-reuse-a-workflow-with-a-workflowtemplate.md
+    - sections/section-060/module-01/course-05-run-workflows-with-the-argo-command-line-tool.md
+    - sections/section-060/module-01/course-07-create-a-deployment-from-workflow-inputs.md
+  sections/section-050/module-01/labs/lab-03:
+    preparation:
+    - sections/section-050/module-01/course-02-workspaces-and-pipelines.md
+    - sections/section-050/module-01/course-04-shared-tasks-with-resolvers.md
+  sections/section-090/module-01/labs/lab-02:
+    preparation:
+    - sections/section-090/module-01/course-02-define-an-api-with-an-xrd-and-a-composition.md
+    - sections/section-090/module-01/course-04-diagnose-a-composite-resource-that-is-not-ready.md
+    - sections/section-090/module-01/course-05-deliver-the-platform-with-flux.md
+  sections/section-080/module-01/labs/lab-04:
+    preparation:
+    - sections/section-080/module-01/course-01-what-flagger-creates.md
+    - sections/section-080/module-01/course-02-analysis-and-a-promoted-canary.md
+    - sections/section-080/module-01/course-06-wait-for-approval-before-promotion.md
+  sections/section-030/module-02/labs/lab-03:
+    preparation:
+    - sections/section-030/module-02/course-02-applicationsets-and-generators.md
+  sections/section-030/module-03/labs/lab-03:
+    preparation:
+    - sections/section-030/module-03/course-02-sync-failures-waves-and-hooks.md
+  sections/section-010/module-01/labs/lab-02:
+    preparation:
+    - sections/section-010/module-01/course-01-base-and-kustomization.md
+    - sections/section-010/module-01/course-02-overlays-and-patches.md
+    - sections/section-010/module-01/course-03-generators-diff-and-apply.md
+  sections/section-060/module-01/labs/lab-05:
+    preparation:
+    - sections/section-060/module-01/course-02-reuse-a-workflow-with-a-workflowtemplate.md
+    - sections/section-060/module-01/course-03-read-a-failed-workflow.md
+    - sections/section-060/module-01/course-04-start-a-workflow-from-a-git-push.md
+    - sections/section-060/module-01/course-08-trace-a-git-push-into-a-workflow-run.md
+  sections/section-100/module-01/labs/lab-02:
+    preparation:
+    - sections/section-100/module-01/course-01-read-a-working-directory-and-state.md
+    - sections/section-100/module-01/course-02-review-and-apply-an-attribute-change.md
+    - sections/section-100/module-01/course-03-add-a-service-and-understand-reconciliation.md
+    - sections/section-100/module-01/course-04-tell-three-kinds-of-plan-changes-apart.md
 additional_readings: []

@@ -4,15 +4,21 @@ Solve this question on: `terminal`
 
 ## Scenario
 
-The `scout` Rollout in `starfleet` has 5 replicas. Its stable version is podinfo `6.14.0`. A release of `6.15.0` is stopped at the first pause, at 20 percent. The `outpost` team trusts this release, but wants the next release to pass an automatic HTTP (Hypertext Transfer Protocol) check instead of waiting for a person at that pause.
+The `drifter` team prepares a namespace for each new site with the Tekton Pipeline `outpost-onboard` in the namespace `starfleet`. The Pipeline runs the Tasks `plan-namespace`, `create-namespace` and `report-namespace`. The Task `plan-namespace` has a result `namespace`, which holds the name `outpost-<site>`.
 
-The Argo Rollouts controller is installed. The Rollout already names the Service `scout-canary` as its `canaryService`. The AnalysisTemplate `scout-canary-message` exists but is unfinished.
+The first run, `outpost-onboard-first-try`, failed. The team also wants each new namespace to carry a label for its tier. The Task `label-namespace` already exists in `starfleet` and does this work, but the Pipeline does not use it yet.
+
+The ServiceAccount `outpost-provisioner` in `starfleet` is bound to the ClusterRole `namespace-provisioner`.
+
+Use the `tkn` command-line tool to start and read the runs. If your shell does not find it, run `export PATH="$HOME/.astrona/bin:$PATH"`.
 
 ## Tasks
 
-1. **Finish the paused release in two moves.** Use `kubectl argo rollouts promote` once, so that the release stops at the second pause (step `3/4`). Then finish it with `kubectl argo rollouts promote --full`. Wait until the Rollout is `Healthy` on `6.15.0`.
-2. **Complete the AnalysisTemplate.** Change `scout-canary-message` in `starfleet`. Keep its `web` provider, its metric name `message` and its timing. The metric must request `http://scout-canary.starfleet/`, read the `message` field of the JSON (JavaScript Object Notation) response with `jsonPath`, and succeed only when that value equals `canary-ready`.
-3. **Replace the first pause.** Change the Rollout so that its steps are, in this order: `setWeight: 20`, an inline `analysis` step that uses the template `scout-canary-message`, `setWeight: 60`, and `pause: {}`. Do this after the `6.15.0` release is `Healthy`.
-4. **Trigger a release with an environment variable.** Set `PODINFO_UI_MESSAGE=canary-ready` on the `scout` container in the Rollout. Keep the image `ghcr.io/stefanprodan/podinfo:6.15.0`. Wait until the analysis step passes and the Rollout stops at the last pause. Do not promote during the analysis step.
-5. **Read the AnalysisRun.** Find the `Successful` AnalysisRun that the analysis step created for this release. Save its name, its phase and the `value` of its first measurement to `/tmp/scout-analysisrun.txt`. Put them on one line, separated by single spaces, with the value exactly as the AnalysisRun shows it.
-6. **Finish the release.** Use a normal `promote`, not `--full`. The Rollout must be `Healthy` with 5 available replicas and the new pod template as its stable version. A request from the `shuttle` pod to `http://scout.starfleet/` must return version `6.15.0` and message `canary-ready`.
+1. **Find the cause of the failure.** Use `tkn` in `starfleet` to find out why `outpost-onboard-first-try` failed, and which account its pods used.
+2. **Add the Task.** Change the Pipeline `outpost-onboard`. Add a string param `tier` to the Pipeline. Add a Pipeline task named `label-namespace` that references the Task `label-namespace`. It must start at the same time as `report-namespace`, after `create-namespace` ends, and `report-namespace` must keep its current order. Set the Task param `namespace` from the result of `plan-namespace`, and the Task param `tier` from the Pipeline param `tier`.
+3. **Fix the rights.** Change the ClusterRole `namespace-provisioner` so that all four Tasks can do their work on namespaces. Add only what they need, and allow nothing except namespaces. Give the ServiceAccount `default` no new rights.
+4. **Run the Pipeline for two sites.** Use `tkn pipeline start` with `-p` to start two runs as `outpost-provisioner`. Use `site=vega` with `tier=gold`, and `site=rigel` with `tier=silver`. Both runs must end as `Succeeded`, and they must create and label `outpost-vega` and `outpost-rigel`.
+5. **Save a log.** When the `rigel` run has ended, save the output of `tkn pipelinerun logs` for that run to `/tmp/outpost-rigel-run.log`.
+6. **Clean up.** Use `tkn` to delete every failed PipelineRun of `outpost-onboard`. Keep the runs for both sites.
+
+Check your progress with `astrona submit --watch`. A plain `astrona submit` finishes the attempt and deletes the lab, so run it once, at the end.

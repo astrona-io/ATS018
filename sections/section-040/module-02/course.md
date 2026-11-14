@@ -1,41 +1,27 @@
-# Hand Off From A Tekton Pipeline To GitOps
+# Deliver Helm Releases With Flux
 
-A CI pipeline produces a new version, and a GitOps controller delivers it. The two meet in one place: a commit to the GitOps repository that changes the image tag. The pipeline never runs `kubectl apply` against the application. It publishes the image, writes the new tag into Git, and stops. Argo CD sees the commit and rolls out the new version.
+The `scout` chart installed successfully, but its latest upgrade cannot become ready. Flux reports the failure, and the cluster still holds the last successful release. You need to read which operation failed, repair the values, and decide what the controller should do when another upgrade fails.
 
-This split is the hand-off. It keeps one source of truth for what runs in the cluster, it keeps cluster credentials out of the pipeline, and it gives every release a commit that you can read, review and revert.
+A Helm chart is a package of Kubernetes templates and default values. A release is one installed copy of that package, and a revision is one numbered install, upgrade or rollback. Flux uses a HelmRelease object to manage the release through its helm controller. You use Flux and Kubernetes commands to configure and inspect it.
 
-Keep one sentence in mind for this module: **the pipeline writes to the registry and to Git, and only Argo CD writes to the cluster.** Every step you build either publishes an image, commits a tag, or starts the pipeline.
-
-The module has five parts. **Publish An Image To The Registry** explains the hand-off and writes a Task that publishes a new image tag. **Commit The New Tag With Git Credentials** writes the Task that changes the tag in the GitOps repository, and gives it credentials through a Secret and a service account. **One Pipeline From Source To Commit** chains the clone, the publish and the commit into one Pipeline and follows its commit until Argo CD serves it. **Listen For A Push With Tekton Triggers** builds the `EventListener`, `TriggerBinding` and `TriggerTemplate`, explains the order in which the listener applies them to a request, and gives it the permissions to create runs. **Start The Pipeline From A Git Push** tests the filter by hand, connects the webhook, follows one push to the new version answering requests, and shows where to look when a push creates no run.
-
-The 20-minute lab **Create PipelineRuns From JSON Requests With Tekton Triggers** practises field extraction, template substitution and listener permissions with an existing Pipeline. You send a request from inside the cluster and check that its values reach a successful run.
+The module has three parts. **Chart Sources And HelmRelease** reads the starting failure, selects a chart source and repairs the release with inline values. **Values And Release History** loads values from a ConfigMap and reads the installed revisions. **Remediation And Rollback** sets recovery rules, observes a failed upgrade roll back and compares the Flux objects with Argo CD.
 
 ## Learning objectives
 
 After this module you can:
 
-- Push a newly tagged image to the in-cluster registry from a pipeline Task.
-- Update the image tag in a GitOps repository from a pipeline with a Git commit.
-- Give a Task Git credentials through a Secret and a service account.
-- Start a PipelineRun from a Git push with an `EventListener`, a `TriggerBinding` and a `TriggerTemplate`, and say in which order the listener applies interceptors, bindings and the template.
-- Prove the full flow from a push to a PipelineRun, a commit and an Argo CD sync of the new version.
+- Create a chart source and a HelmRelease with inline values.
+- Read release conditions, history and failure messages.
+- Configure install and upgrade remediation, including rollback.
+- Load values from a ConfigMap through `valuesFrom`.
+- Match Flux source and release objects to Argo CD source and delivery settings.
 
 ## Before you start
 
-You need Kubernetes basics (namespaces, pods, Secrets, ServiceAccounts, Role and ClusterRole bindings) and the commands `kubectl apply`, `kubectl create` and `kubectl exec`. You need to know what a Tekton Task, Pipeline, TaskRun, PipelineRun, param, result and workspace are, and what an Argo CD `Application` with automated sync does. On your machine you need `git`, `tkn` 0.46 and the `argocd` command-line tool 3.5.
+You need Kubernetes namespaces, Deployments, Services and ConfigMaps, and the commands `kubectl apply`, `kubectl get` and `kubectl exec`. A ConfigMap holds configuration values that are not secret. A Deployment keeps application pods running, and a Service gives ready pods a stable address.
 
-Your playground is a single-node `kind` cluster running Kubernetes 1.35 with these parts:
+The playground runs Kubernetes 1.35.8 and Flux 2.9.6. In `starfleet`, the `podinfo` OCIRepository fetches chart 6.15.0 from an Open Container Initiative (OCI) registry. The HelmRelease `scout` has a successful revision and a deliberate failed upgrade: its values set `faults.unready: true`. No remediation is configured.
 
-| Part | What it is |
-| --- | --- |
-| Tekton Pipelines 1.17.0 and Triggers 0.36.4 | The pipeline controller and the Triggers controller, webhook and core interceptors, in `tekton-pipelines` |
-| A container registry | `registry.registry.svc:5000` inside the cluster, over plain HTTP. It holds the podinfo base images `starfleet/podinfo:6.14.0`, `6.14.1` and `6.15.0`, and `starfleet/scout:6.14.0` |
-| Two private Git repositories | `starfleet/scout-app` (the source, with a `VERSION` file that says `6.14.0`) and `starfleet/scout-deploy` (the GitOps repository: a Deployment, a Service and a `kustomization.yaml` that sets the image tag) at `http://gitea-http.gitea.svc:3000`, user `platform`, password `starfleet-gitops` |
-| Argo CD 3.5.4 | The `Application` `scout` syncs `scout-deploy` into `starfleet` with automated sync, prune and self-heal |
-| `starfleet` | `scout` (version `6.14.0`), `shuttle` (a client pod with `curl`) and the Task `fetch-source`, which clones a repository and reports its commit ID and `VERSION` |
-
-The Git repositories are served by Gitea, a small Git server in the cluster. Deliberately absent: the pipeline has no Git credentials, there is no `EventListener`, and the source repository has no webhook. Two ports on your machine reach into the cluster: `https://127.0.0.1:8080` is the Argo CD API server, and `http://127.0.0.1:3000` is the Git server. `kubectl` already points at the cluster.
-
-Launch your playground now, and keep it running next to you while you read the parts:
+`shuttle` runs in `starfleet` as a client. Podinfo images are preloaded. Use the Flux 2.9.6 command-line tool on your machine; every command runs against the playground. The source fetch needs outbound access to the chart registry.
 
 <!-- astrona:playground -->

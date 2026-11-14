@@ -2,7 +2,7 @@
 # schemas/question-bank.schema.json. Keep question ids stable once published.
 schema_version: 1
 kind: question_bank
-id: ats018-030-02
+id: ats018-020-02
 course_id: ATS018
 exam_code: CNPE
 status: alpha
@@ -10,188 +10,234 @@ provenance: Original practice material written for this course; not official exa
 scope:
   type: module
   id: section-030/module-02
-  title: Deliver Helm Releases With Flux
+  title: Manage Many Applications With ApplicationSets
 questions:
-  - id: ats018-030-02-q01
+  - id: ats018-020-02-q01
     type: single_choice
     difficulty: beginner
-    learning_objective: "Separate a Ready source from a failed release."
+    learning_objective: "Say why the parent of an app of apps does not show a failing child."
     source_readings:
-      - sections/section-030/module-02/course-01-chart-sources-and-helmrelease.md
-    prompt: "The `OCIRepository` `podinfo` is `Ready`, and the `HelmRelease` `scout` shows `Ready=False UpgradeFailed ... timeout waiting for: [Deployment/starfleet/scout-podinfo status: 'InProgress']`. Where is the problem?"
+      - sections/section-030/module-02/course-01-app-of-apps.md
+    prompt: "In an app of apps setup, the parent `Application` `platform-apps` is `Synced` and `Healthy`, but the pods of the child `scout` crash. What explains this, and what should you watch?"
     options:
       - id: a
-        text: "The chart download failed, so fix the `OCIRepository` url"
-        explanation: "The source is `Ready`, so the chart was fetched."
+        text: "The parent copies the health of the last child only, so watch the last child"
+        explanation: "Argo CD does not copy health from one child."
       - id: b
-        text: "The registry is down, so wait for it"
-        explanation: "A registry problem would stop the source from being `Ready`."
+        text: "The parent checks health once an hour, so wait and look again"
+        explanation: "The parent does not wait on a timer. It does not judge its children."
       - id: c
-        text: "The upgrade of the release failed because the new pods did not become ready. Look at the release values and the pods"
-        explanation: "Correct. A Ready source separates a fetch problem from a release problem."
+        text: "Argo CD does not judge the health of an `Application` object by default, so watch each child `Application`"
+        explanation: "Correct. The parent is `Healthy` even when a child is `Degraded`."
       - id: d
-        text: "The notification controller dropped the release"
-        explanation: "The notification controller sends notifications. It does not run releases."
+        text: "The repo server hides child errors, so read its logs"
+        explanation: "The repo server renders manifests. It does not decide health."
     correct_option: c
-    explanation: "The source fetched the chart. The helm controller upgraded the release, and the Deployment never became ready."
+    explanation: "The parent only delivers `Application` objects. Their health is not part of the parent health by default, so check the children."
 
-  - id: ats018-030-02-q02
+  - id: ats018-020-02-q02
     type: single_choice
     difficulty: intermediate
-    learning_objective: "Say what deleting a HelmRelease does."
+    learning_objective: "Predict what a delete of the parent Application removes."
     source_readings:
-      - sections/section-030/module-02/course-01-chart-sources-and-helmrelease.md
-    prompt: "A `HelmRelease` is `Ready=False`. A colleague proposes `kubectl delete helmrelease scout` to clear the failure. What does the deletion normally do?"
+      - sections/section-030/module-02/course-01-app-of-apps.md
+    prompt: "You delete the parent `Application` `platform-apps` with `kubectl delete -f application-platform-apps.yaml`. It has no `finalizers` field. What happens to the three child applications and their workloads?"
     options:
       - id: a
-        text: "It uninstalls the release and removes its workloads"
-        explanation: "Correct. Change the values to repair the release. Do not delete the object to clear a status."
+        text: "They stay, because the parent has no `resources-finalizer.argocd.argoproj.io` finalizer"
+        explanation: "Correct. Without the finalizer, a delete removes only that object and leaves what it created."
       - id: b
-        text: "It resets the failure counters and keeps the pods"
-        explanation: "`flux reconcile helmrelease --reset` resets counters. A delete does not."
+        text: "They are deleted, because a parent always deletes its children"
+        explanation: "A delete cascades only when the finalizer is on the `Application`."
       - id: c
-        text: "It only removes the status from the object"
-        explanation: "A delete removes the object, not just its status."
+        text: "The children are deleted but the workloads stay"
+        explanation: "Without the finalizer, nothing the parent delivered is deleted."
       - id: d
-        text: "It deletes the `OCIRepository` and keeps the release"
-        explanation: "The source is a separate object and is not deleted."
+        text: "The delete is refused until the children are deleted"
+        explanation: "Kubernetes does not block the delete. There is no such rule."
     correct_option: a
-    explanation: "Deleting a `HelmRelease` normally uninstalls the release. Repair the release through its values instead."
+    explanation: "Add `resources-finalizer.argocd.argoproj.io` to `metadata.finalizers` for a cascading delete. Leave it out to stop managing something without removing it."
 
-  - id: ats018-030-02-q03
+  - id: ats018-020-02-q03
     type: single_choice
-    difficulty: intermediate
-    learning_objective: "Explain the watch label on a values ConfigMap."
+    difficulty: beginner
+    learning_objective: "Choose the destination namespace of a parent Application."
     source_readings:
-      - sections/section-030/module-02/course-02-values-and-release-history.md
-    prompt: "A `HelmRelease` reads its values from a ConfigMap with `valuesFrom`. The ConfigMap does not have the label `reconcile.fluxcd.io/watch: Enabled`. What changes?"
+      - sections/section-030/module-02/course-01-app-of-apps.md
+    prompt: "The parent `Application` delivers a folder of `Application` manifests. The children deploy into the namespace `starfleet`. Which `destination.namespace` does the parent need?"
     options:
       - id: a
-        text: "The release never reads the ConfigMap"
-        explanation: "The release still reads it. The label only affects when a change is noticed."
+        text: "`starfleet`, because that is where the workloads run"
+        explanation: "The parent delivers `Application` objects, not workloads."
       - id: b
-        text: "A change to the ConfigMap normally waits for the next scheduled reconciliation instead of being applied at once"
-        explanation: "Correct. The label asks Flux to react to changes. The `interval` still gives regular reconciliation."
+        text: "`default`, because it is the default namespace"
+        explanation: "`Application` objects must be created in the `argocd` namespace."
       - id: c
-        text: "The ConfigMap is deleted at the next upgrade"
-        explanation: "Flux does not delete the ConfigMap."
+        text: "`kube-system`, because controllers run there"
+        explanation: "Argo CD does not run in that namespace in this setup, and `Application` objects belong in `argocd`."
       - id: d
-        text: "The release reads the ConfigMap from another namespace"
-        explanation: "Values references are read from the namespace of the `HelmRelease`."
-    correct_option: b
-    explanation: "The watch label makes Flux react to changes in the referenced object. Without it, the change waits for the interval."
-
-  - id: ats018-030-02-q04
-    type: single_choice
-    difficulty: intermediate
-    learning_objective: "Read HelmRelease values order."
-    source_readings:
-      - sections/section-030/module-02/course-02-values-and-release-history.md
-    prompt: "A HelmRelease has `valuesFrom` with a ConfigMap and also inline `values` for the same key. Which value wins?"
-    options:
-      - id: a
-        text: "The ConfigMap value"
-        explanation: "The ConfigMap supplies shared defaults, and inline values override them."
-      - id: b
-        text: "The chart default only"
-        explanation: "Chart defaults are the lowest level."
-      - id: c
-        text: "Neither; Flux reports a conflict"
-        explanation: "Flux merges the sources in a fixed order."
-      - id: d
-        text: "The inline value"
-        explanation: "Correct. Inline values override values loaded through `valuesFrom`."
+        text: "`argocd`, because `Application` objects live there"
+        explanation: "Correct. The parent delivers `Application` objects, and they must be created in `argocd`."
     correct_option: d
-    explanation: "Inline values override `valuesFrom`. The helm controller renders the merged values and changes the workload."
+    explanation: "The parent path is the folder with the `Application` manifests, and its destination namespace is `argocd`."
 
-  - id: ats018-030-02-q05
+  - id: ats018-020-02-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain the `missingkey=error` template option."
+    source_readings:
+      - sections/section-030/module-02/course-02-applicationsets-and-generators.md
+    prompt: "An `ApplicationSet` uses `goTemplate: true` and the placeholder `{{.evn}}` by mistake, while the parameter is named `env`. What does `goTemplateOptions: [\"missingkey=error\"]` change?"
+    options:
+      - id: a
+        text: "It creates the missing parameter `evn` with the value `staging`"
+        explanation: "The option does not invent parameters."
+      - id: b
+        text: "The template fails with an error and the `ApplicationSet` reports it, instead of rendering an empty string"
+        explanation: "Correct. Without the option, the placeholder renders as nothing and produces a name such as `scout-`."
+      - id: c
+        text: "It makes Argo CD ignore the generator and use the default project"
+        explanation: "The option affects only template rendering."
+      - id: d
+        text: "It deletes the `ApplicationSet`"
+        explanation: "The option does not delete anything."
+    correct_option: b
+    explanation: "`missingkey=error` turns a misspelled parameter into a visible error. The `ApplicationSet` conditions show it as `ErrorOccurred`."
+
+  - id: ats018-020-02-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Say who owns a generated Application."
+    source_readings:
+      - sections/section-030/module-02/course-02-applicationsets-and-generators.md
+    prompt: "You edit the generated `Application` `scout-production` by hand and change its `targetRevision`. What does the ApplicationSet controller do?"
+    options:
+      - id: a
+        text: "It keeps your change, because the object is an ordinary `Application`"
+        explanation: "The generated `Application` has an owner reference to the `ApplicationSet`."
+      - id: b
+        text: "It deletes the `Application` and the workloads"
+        explanation: "A hand edit does not delete the object."
+      - id: c
+        text: "It copies your change into the template"
+        explanation: "The template is not changed by edits to generated objects."
+      - id: d
+        text: "It sets the `Application` back to what the template says"
+        explanation: "Correct. The owner reference shows that the `ApplicationSet` is in charge. Change the template or the generator instead."
+    correct_option: d
+    explanation: "The `ApplicationSet` owns the applications it generates. Hand edits are reverted, so change the template."
+
+  - id: ats018-020-02-q06
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Pick the placeholder that gives a folder name."
+    source_readings:
+      - sections/section-030/module-02/course-02-applicationsets-and-generators.md
+    prompt: "A Git directory generator uses `directories` with `path: apps/*`. For the folder `apps/scout`, which placeholder gives the value `scout` for the `Application` name?"
+    options:
+      - id: a
+        text: "`{{.path.path}}`"
+        explanation: "That gives the full folder path, `apps/scout`."
+      - id: b
+        text: "`{{.env}}`"
+        explanation: "`env` exists only in the list generator example, not in a Git directory generator."
+      - id: c
+        text: "`{{.path.basename}}`"
+        explanation: "Correct. It gives the last part of the folder path."
+      - id: d
+        text: "`{{.name}}`"
+        explanation: "The Git directory generator does not provide a `name` parameter."
+    correct_option: c
+    explanation: "The Git directory generator provides `path.path`, the full folder path, and `path.basename`, the last part."
+
+  - id: ats018-020-02-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain deletion in an `ApplicationSet`."
+    source_readings:
+      - sections/section-030/module-02/course-02-applicationsets-and-generators.md
+    prompt: "A Git directory generator makes one `Application` per folder. A team deletes the folder `outpost-scout` from the repository. What happens by default?"
+    options:
+      - id: a
+        text: "Argo CD deletes the generated `Application` and its workloads"
+        explanation: "Correct. Removing a folder removes the generated application unless `preserveResourcesOnDeletion` is set."
+      - id: b
+        text: "Nothing; generated applications stay until deleted by hand"
+        explanation: "An `ApplicationSet` owns what it generates and removes it."
+      - id: c
+        text: "Only the `Application` is deleted; the workloads stay"
+        explanation: "The workloads stay only when `preserveResourcesOnDeletion` is set."
+      - id: d
+        text: "The `ApplicationSet` fails and stops generating"
+        explanation: "The other folders keep generating applications."
+    correct_option: a
+    explanation: "An `ApplicationSet` owns the applications it generates. Removing an element or a folder deletes the application and its workloads unless `preserveResourcesOnDeletion` is set."
+
+  - id: ats018-020-02-q08
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Skip the polling wait of the Git generator."
+    source_readings:
+      - sections/section-030/module-02/course-02-applicationsets-and-generators.md
+    prompt: "You push a new folder `apps/beacon` to the repository of a Git directory generator, and no `beacon` `Application` appears for a minute. What is the cause, and what skips the wait?"
+    options:
+      - id: a
+        text: "The folder name is too long, so rename it"
+        explanation: "Folder name length is not the cause."
+      - id: b
+        text: "The `Application` was created in the wrong namespace, so list all namespaces"
+        explanation: "Generated applications are created in `argocd`."
+      - id: c
+        text: "The repo server cache is full, so restart Redis"
+        explanation: "Nothing needs a restart. The generator checks Git on a timer."
+      - id: d
+        text: "The Git generator polls every three minutes by default, so add the annotation `argocd.argoproj.io/application-set-refresh=true` to the `ApplicationSet`"
+        explanation: "Correct. The controller removes the annotation again after it refreshed."
+    correct_option: d
+    explanation: "The Git generator polls on a timer. The refresh annotation makes the controller check the repository now."
+
+  - id: ats018-020-02-q09
     type: single_choice
     difficulty: advanced
-    learning_objective: "Read the release history after a failed upgrade."
+    learning_objective: "Read the two kinds of AppProject errors."
     source_readings:
-      - sections/section-030/module-02/course-02-values-and-release-history.md
-    prompt: "The history of a `HelmRelease` reads `2 failed 6.15.0+ff3d3e14728f` and `1 deployed 6.15.0+ff3d3e14728f`. What does this show?"
+      - sections/section-030/module-02/course-03-appprojects-for-a-second-tenant.md
+    prompt: "An `Application` in a project has a valid repository and destination, but it contains a `ClusterRole`. The project does not whitelist it. What does Argo CD report?"
     options:
       - id: a
-        text: "Revision 2 is deployed, because it has the higher number"
-        explanation: "Read the status of each revision. Revision 2 has the status `failed`."
+        text: "The whole application is invalid with an `InvalidSpecError` condition"
+        explanation: "That happens when the repository or destination is outside the project rules."
       - id: b
-        text: "Revision 1 was deleted, because revision 2 replaced it"
-        explanation: "A failed revision did not erase the previous successful record."
+        text: "Only that object is blocked, with `resource rbac.authorization.k8s.io:ClusterRole is not permitted in project`"
+        explanation: "Correct. A kind that is not whitelisted blocks only that object."
       - id: c
-        text: "The failed upgrade left the previous successful revision 1 as `deployed`"
-        explanation: "Correct. History shows what each operation did. The Ready condition shows whether the current desired state succeeded."
+        text: "Argo CD syncs the object because the `default` project allows it"
+        explanation: "The application is in a project that does not whitelist it."
       - id: d
-        text: "The chart version changed between the two revisions"
-        explanation: "Both rows show the same chart version. Values changes create revisions too."
-    correct_option: c
-    explanation: "Revision numbers and statuses are read together. A failed upgrade can leave the earlier successful revision as `deployed`."
-
-  - id: ats018-030-02-q06
-    type: single_choice
-    difficulty: intermediate
-    learning_objective: "Count attempts from the retries field."
-    source_readings:
-      - sections/section-030/module-02/course-03-remediation-and-rollback.md
-    prompt: "A `HelmRelease` has `upgrade.remediation.retries: 1` and a values fault that keeps failing. How many upgrade attempts does the helm controller make, and what does the status say?"
-    options:
-      - id: a
-        text: "One attempt, and `Stalled` is never set"
-        explanation: "`retries` counts extra attempts after the first one."
-      - id: b
-        text: "Three attempts, and the release is deleted"
-        explanation: "One retry means two attempts, and the release is not deleted."
-      - id: c
-        text: "Unlimited attempts, until the values change"
-        explanation: "The controller stops when the retry budget is spent."
-      - id: d
-        text: "Two attempts, and `Stalled=True` with `RetriesExceeded: Failed to upgrade after 2 attempt(s)`"
-        explanation: "Correct. One retry means two failed upgrade attempts."
-    correct_option: d
-    explanation: "`retries` counts attempts after the first. When they are used, the release is `Stalled` with `RetriesExceeded`."
-
-  - id: ats018-030-02-q07
-    type: single_choice
-    difficulty: intermediate
-    learning_objective: "Describe upgrade remediation."
-    source_readings:
-      - sections/section-030/module-02/course-03-remediation-and-rollback.md
-    prompt: "What can upgrade remediation do for a failed `HelmRelease` upgrade?"
-    options:
-      - id: a
-        text: "Delete the HelmRepository"
-        explanation: "Remediation acts on the release, not on the source."
-      - id: b
-        text: "Roll back to the last successful configuration"
-        explanation: "Correct. Upgrade remediation can roll back, and the retries count extra attempts."
-      - id: c
-        text: "Edit the values in Git"
-        explanation: "Remediation rolls back a release. It does not change the values in Git."
-      - id: d
-        text: "Increase the chart version"
-        explanation: "Remediation does not choose a new chart version."
+        text: "A `ComparisonError` from the repo server"
+        explanation: "The repo server renders the object; the project check comes after."
     correct_option: b
-    explanation: "Install remediation removes a failed install before retrying. Upgrade remediation can roll back to the last successful configuration."
+    explanation: "A repository or destination outside the rules invalidates the whole application. A kind that is not whitelisted blocks only that object."
 
-  - id: ats018-030-02-q08
+  - id: ats018-020-02-q10
     type: single_choice
     difficulty: advanced
-    learning_objective: "Read a HelmRelease that remediated."
+    learning_objective: "Allow a core kind in an AppProject whitelist."
     source_readings:
-      - sections/section-030/module-02/course-03-remediation-and-rollback.md
-    prompt: "A HelmRelease shows `Remediated` as true and client requests succeed, but `Ready` is false. Why?"
+      - sections/section-030/module-02/course-03-appprojects-for-a-second-tenant.md
+    prompt: "The `outpost` project lists only a Deployment and a Service in `namespaceResourceWhitelist`. A ConfigMap in the repository stays `Missing` with `resource :ConfigMap is not permitted in project outpost`. Which entry allows it?"
     options:
       - id: a
-        text: "The current desired values still fail, and the rollback keeps the older successful release running"
-        explanation: "Correct. `Ready` stays false while the desired values fail, even after a rollback."
+        text: "`group: ''` with `kind: ConfigMap`"
+        explanation: "Correct. ConfigMaps are in the core API group, which is the empty string."
       - id: b
-        text: "Flux has a bug; `Ready` ignores remediation"
-        explanation: "The behaviour is by design: `Ready` describes the desired state."
+        text: "`group: 'apps'` with `kind: ConfigMap`"
+        explanation: "`apps` is the group of Deployments. A ConfigMap is not in it."
       - id: c
-        text: "The source is not fetched"
-        explanation: "Source readiness is a separate condition."
+        text: "`group: 'core'` with `kind: ConfigMap`"
+        explanation: "The core group is written as an empty string, not `core`."
       - id: d
-        text: "The chart version is too old"
-        explanation: "A chart version does not explain a failed upgrade with a working rollback."
+        text: "A `clusterResourceWhitelist` entry with `kind: ConfigMap`"
+        explanation: "A ConfigMap is a namespaced object, so the namespaced whitelist applies."
     correct_option: a
-    explanation: "Fix the desired values first. A reset clears failure counters; it does not repair the configuration."
+    explanation: "`namespaceResourceWhitelist` lists namespaced kinds. The core API group, where ConfigMaps, Services and Secrets live, has the empty group `''`."

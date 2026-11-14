@@ -1,41 +1,55 @@
 # yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
 #
-# Roll Out A Canary With Argo Rollouts (PLAYGROUND) — playground environment.
-# The Argo Rollouts 1.10.0 controller, and `scout` in `starfleet` as a plain
-# Deployment (podinfo 6.14.0, 5 replicas) with a Service, plus `shuttle`.
-# Deliberately absent: no Rollout, no traffic router, no metrics provider.
-# No task, no grading.
+# Build Tekton Tasks And Pipelines (PLAYGROUND) — playground environment.
+# Tekton Pipelines 1.17.0, a public Git repository `starfleet/scout-app`
+# (in-cluster Gitea, plumbing only) and the `run-tests` Task, which fails on
+# purpose because of a wrong working directory. No Pipeline, no Triggers, no
+# registry. No task, no grading.
 apiVersion: astrona.io/v1
 metadata:
   name: ats-018-playground-050-01
   docs:
     guide: docs/overview.md
-
 runtime:
   type: kind
   kind:
     image: kindest/node:v1.35.8
     preloadImages:
       - curlimages/curl:8.22.0
+      - alpine:3.23
+      - alpine/git:2.52.0
+      - alpine/kubectl:1.35.4
       - ghcr.io/stefanprodan/podinfo:6.14.0
       - ghcr.io/stefanprodan/podinfo:6.15.0
-      - quay.io/argoproj/argo-rollouts:v1.10.0
-
+      - gitea/gitea:28.1.0-rootless
+  portForwards:
+    - name: git
+      description: "The Git server (git over HTTP)"
+      namespace: gitea
+      resource: svc/gitea-http
+      targetPort: 3000
+      hostPort: 3000
+      scheme: http
 bootstrap:
   manifests:
     - name: lab-start
       type: file
       source: manifests/lab-start.yaml
   init:
-    - name: install-argo-rollouts
-      description: "Installs the Argo Rollouts 1.10.0 controller"
+    - name: install-gitea
+      description: "Starts the in-cluster Git server"
       type: file
-      source: bootstrap/01-install-argo-rollouts.sh
+      source: bootstrap/01-install-gitea.sh
+    - name: install-tekton
+      description: "Installs Tekton Pipelines 1.17.0"
+      type: file
+      source: bootstrap/02-install-tekton.sh
+    - name: seed
+      description: "Pushes scout-app into Git and installs the run-tests Task"
+      type: file
+      source: bootstrap/03-seed.sh
   waitFor:
     - resource: deploy/shuttle
       namespace: starfleet
-    - resource: deploy/scout
-      namespace: starfleet
-
 teardown:
   keepCluster: false

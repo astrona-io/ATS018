@@ -1,20 +1,17 @@
 #!/usr/bin/env bash
-# Plumbing: push the public source repository into Gitea, add a push webhook
-# that points at the (not yet existing) EventSource Service, and install the
-# `run-tests` WorkflowTemplate, which fails on purpose.
+# Plumbing: push starfleet/scout-deploy into Gitea, create the read-write Git
+# credential Secret, and start the Flux delivery of scout 6.14.0. Deliberately
+# absent: no ImageRepository, ImagePolicy or ImageUpdateAutomation.
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-bash "$SCRIPT_DIR/seed-repo.sh" scout-app "$SCRIPT_DIR/../repos/scout-app" public
-
-LOCAL_PORT=$(( 30000 + RANDOM % 20000 ))
-kubectl -n gitea port-forward svc/gitea-http "$LOCAL_PORT:3000" >/dev/null 2>&1 &
-PF=$!
-trap 'kill $PF 2>/dev/null || true' EXIT
-API="http://127.0.0.1:$LOCAL_PORT/api/v1"
-for i in $(seq 1 30); do curl -fs "$API/version" >/dev/null 2>&1 && break; sleep 1; done
-curl -fs -u platform:starfleet-gitops -X POST -H 'Content-Type: application/json' \
-  "$API/repos/starfleet/scout-app/hooks" \
-  -d '{"type":"gitea","active":true,"events":["push"],"config":{"url":"http://push-webhook-eventsource-svc.argo-events.svc:12000/push","content_type":"json"}}' >/dev/null
-echo "[lab] Added the push webhook to starfleet/scout-app"
-
-kubectl apply -f "$SCRIPT_DIR/../manifests/workflowtemplate-run-tests.yaml"
+# Init scripts run before bootstrap.manifests, so create the namespaces here.
+kubectl apply -f "$SCRIPT_DIR/../manifests/lab-start.yaml"
+bash "$SCRIPT_DIR/seed-repo.sh" scout-deploy "$SCRIPT_DIR/../repos/scout-deploy"
+kubectl -n flux-system create secret generic scout-git \
+  --from-literal=username=platform --from-literal=password=starfleet-gitops
+kubectl apply -f "$SCRIPT_DIR/../manifests/flux-delivery.yaml"
+for attempt in $(seq 1 60); do
+  if kubectl -n starfleet get deploy scout >/dev/null 2>&1; then break; fi
+  sleep 3
+done
+kubectl -n starfleet rollout status deploy/scout --timeout=300s

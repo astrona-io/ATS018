@@ -12,16 +12,18 @@ runtime:
     image: kindest/node:v1.35.8
     preloadImages:
       - curlimages/curl:8.22.0
-      - alpine:3.23
-      - gcr.io/go-containerregistry/crane/debug:v0.22.1
-      - registry:3.1.2
+      - ghcr.io/stefanprodan/podinfo:6.15.0
       - gitea/gitea:28.1.0-rootless
-      - ghcr.io/fluxcd/source-controller:v1.9.6
-      - ghcr.io/fluxcd/kustomize-controller:v1.9.6
-      - ghcr.io/fluxcd/notification-controller:v1.9.4
-      - ghcr.io/fluxcd/image-reflector-controller:v1.2.5
-      - ghcr.io/fluxcd/image-automation-controller:v1.2.5
+      - quay.io/argoproj/argocd:v3.5.4
+      - public.ecr.aws/docker/library/redis:8.2.3-alpine
   portForwards:
+    - name: argocd
+      description: "Argo CD API server and web page"
+      namespace: argocd
+      resource: svc/argocd-server
+      targetPort: 443
+      hostPort: 8080
+      scheme: https
     - name: gitea
       description: "The Git server (git over HTTP)"
       namespace: gitea
@@ -40,22 +42,16 @@ bootstrap:
       description: "Starts the in-cluster Git server"
       type: file
       source: bootstrap/01-install-gitea.sh
-    - name: install-registry
-      description: "Starts the in-cluster registry and copies scout 6.14.0 and 6.15.0 into it"
+    - name: install-argocd
+      description: "Installs Argo CD 3.5.4 (non-HA, without Dex and notifications)"
       type: file
-      source: bootstrap/02-install-registry.sh
-    - name: install-flux
-      description: "Installs Flux 2.9.6 with the image reflector and image automation controllers"
-      type: file
-      source: bootstrap/03-install-flux.sh
+      source: bootstrap/02-install-argocd.sh
     - name: seed
-      description: "Pushes scout-deploy into Git, creates the Git credential Secret and starts the delivery of scout 6.14.0"
+      description: "Pushes scout-faults into Git and creates the three broken Applications"
       type: file
-      source: bootstrap/04-seed.sh
+      source: bootstrap/03-seed.sh
   waitFor:
     - resource: deploy/shuttle
-      namespace: starfleet
-    - resource: deploy/scout
       namespace: starfleet
 
 testing:
@@ -66,20 +62,24 @@ testing:
       source: testing/verify-start.sh
       timeout: 10m
     - name: solution
-      description: "Reference solution applied by `astrona test`"
+      description: Reference solution applied by `astrona test`
       type: file
       source: solution/apply.sh
 
 validation:
   scripts:
-    - name: image-automation-objects
-      description: "The ImageRepository, ImagePolicy and ImageUpdateAutomation exist, are Ready and select 6.15.0"
+    - name: scout-path-fixed
+      description: scout-path syncs the right folder and is Synced and Healthy
       type: file
-      source: validation/validate-image-objects.sh
-    - name: tag-delivered-through-git
-      description: "The automation committed the tag to Git, Flux applied that commit and shuttle receives 6.15.0"
+      source: validation/validate-path.sh
+    - name: scout-reject-fixed
+      description: The rejected manifest is fixed in Git and scout-reject is Synced and Healthy
       type: file
-      source: validation/validate-delivered-from-git.sh
+      source: validation/validate-reject.sh
+    - name: scout-image-fixed
+      description: The image tag is fixed in Git and scout-image is Synced and Healthy
+      type: file
+      source: validation/validate-image.sh
 
 teardown:
   keepCluster: false

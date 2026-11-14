@@ -15,7 +15,7 @@ questions:
     difficulty: beginner
     learning_objective: "Define drift and the right fix in a GitOps setup."
     source_readings:
-      - sections/section-020/module-01/course-03-sync-policy-drift-and-health.md
+      - sections/section-030/module-01/course-03-sync-policy-drift-and-health.md
     prompt: "Someone changes the replica count of a delivered Deployment with `kubectl scale`. Argo CD has `selfHeal` on. What happens, and where does a lasting change belong?"
     options:
       - id: a
@@ -59,8 +59,8 @@ questions:
     difficulty: intermediate
     learning_objective: "Choose Argo CD or Flux feature for Helm charts."
     source_readings:
-      - sections/section-020/module-01/course-04-helm-charts-as-a-source.md
-      - sections/section-030/module-02/course-02-values-and-release-history.md
+      - sections/section-030/module-01/course-04-helm-charts-as-a-source.md
+      - sections/section-040/module-02/course-02-values-and-release-history.md
     prompt: "An administrator says: \"I want a numbered release history I can read.\" Which tool installs a Helm release and keeps that history?"
     options:
       - id: a
@@ -82,7 +82,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Pick the Argo CD object for many similar applications."
     source_readings:
-      - sections/section-020/module-02/course-02-applicationsets-and-generators.md
+      - sections/section-030/module-02/course-02-applicationsets-and-generators.md
     prompt: "A platform team has one folder per application in `platform-apps` and wants one Argo CD application per folder without writing each by hand. What do they use?"
     options:
       - id: a
@@ -104,7 +104,7 @@ questions:
     difficulty: advanced
     learning_objective: "Find the stage of an Argo CD failure."
     source_readings:
-      - sections/section-020/module-03/course-01-where-argo-cd-reports-a-problem.md
+      - sections/section-030/module-03/course-01-where-argo-cd-reports-a-problem.md
     prompt: "An Application shows sync status `Unknown` and a condition that says `app path does not exist`. Which stage failed, and which field is wrong?"
     options:
       - id: a
@@ -126,7 +126,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Read what Flux status proves."
     source_readings:
-      - sections/section-030/module-01/course-04-summary.md
+      - sections/section-040/module-01/course-04-summary.md
     prompt: "A Flux Kustomization is `Ready`, with `wait: true`. What must you still do before you call the release done?"
     options:
       - id: a
@@ -148,8 +148,8 @@ questions:
     difficulty: advanced
     learning_objective: "Trace an automatic image release."
     source_readings:
-      - sections/section-030/module-03/course-02-commit-the-tag-to-git.md
-      - sections/section-030/module-03/course-03-release-a-new-tag.md
+      - sections/section-040/module-03/course-02-commit-the-tag-to-git.md
+      - sections/section-040/module-03/course-03-release-a-new-tag.md
     prompt: "A new tag appears in the registry. In which order do Flux objects act until the pods run the new tag?"
     options:
       - id: a
@@ -171,7 +171,7 @@ questions:
     difficulty: advanced
     learning_objective: "Order a Crossplane platform in GitOps."
     source_readings:
-      - sections/section-060/module-01/course-06-summary.md
+      - sections/section-090/module-01/course-06-summary.md
     prompt: "A Git repository holds an XRD and an XR of that kind. A first sync fails because the kind does not exist yet. Which fix works in Argo CD?"
     options:
       - id: a
@@ -193,7 +193,7 @@ questions:
     difficulty: beginner
     learning_objective: "Name the unit of a Tekton run."
     source_readings:
-      - sections/section-040/module-01/course-01-tasks-taskruns-and-pods.md
+      - sections/section-050/module-01/course-01-tasks-taskruns-and-pods.md
     prompt: "You apply a Tekton `Task` and nothing runs. Why?"
     options:
       - id: a
@@ -215,7 +215,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Start a run with a generated name."
     source_readings:
-      - sections/section-040/module-01/course-02-workspaces-and-pipelines.md
+      - sections/section-050/module-01/course-02-workspaces-and-pipelines.md
     prompt: "A PipelineRun manifest uses `generateName`. Which command creates it?"
     options:
       - id: a
@@ -237,7 +237,7 @@ questions:
     difficulty: advanced
     learning_objective: "Find a pipeline fault from the status."
     source_readings:
-      - sections/section-040/module-01/course-03-reading-a-failed-taskrun.md
+      - sections/section-050/module-01/course-03-reading-a-failed-taskrun.md
     prompt: "A TaskRun has the reason `StepFailed` and an exit code of `1`. Where is the error text?"
     options:
       - id: a
@@ -259,7 +259,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Describe the hand-off from CI to GitOps."
     source_readings:
-      - sections/section-040/module-02/course-06-summary.md
+      - sections/section-050/module-02/course-06-summary.md
     prompt: "Which two results prove a pipeline release end to end?"
     options:
       - id: a
@@ -281,7 +281,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Name the Argo Events chain."
     source_readings:
-      - sections/section-040/module-03/course-04-start-a-workflow-from-a-git-push.md
+      - sections/section-060/module-01/course-04-start-a-workflow-from-a-git-push.md
     prompt: "Which chain starts an Argo Workflow from a Git push?"
     options:
       - id: a
@@ -303,7 +303,7 @@ questions:
     difficulty: advanced
     learning_objective: "Reuse a Workflow graph."
     source_readings:
-      - sections/section-040/module-03/course-02-reuse-a-workflow-with-a-workflowtemplate.md
+      - sections/section-060/module-01/course-02-reuse-a-workflow-with-a-workflowtemplate.md
     prompt: "How does a Workflow use a graph that a `WorkflowTemplate` holds?"
     options:
       - id: a
@@ -325,7 +325,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Decide what an abort leaves."
     source_readings:
-      - sections/section-050/module-01/course-04-abort-and-retry.md
+      - sections/section-070/module-01/course-04-abort-and-retry.md
     prompt: "A canary Rollout was aborted and reports `Degraded`. The bad image is still in the Rollout template. What do users get?"
     options:
       - id: a
@@ -347,7 +347,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Choose blue/green behaviour."
     source_readings:
-      - sections/section-050/module-02/course-01-active-and-preview-services.md
+      - sections/section-070/module-02/course-01-active-and-preview-services.md
     prompt: "In a blue/green Rollout, what makes the active Service send users to the new version?"
     options:
       - id: a
@@ -369,7 +369,7 @@ questions:
     difficulty: advanced
     learning_objective: "Handle a post-promotion failure."
     source_readings:
-      - sections/section-050/module-02/course-04-abort-on-failed-analysis.md
+      - sections/section-070/module-02/course-04-abort-on-failed-analysis.md
     prompt: "A post-promotion analysis fails. What happens to the active selector?"
     options:
       - id: a
@@ -391,7 +391,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Choose between Flagger and Rollouts."
     source_readings:
-      - sections/section-050/module-03/course-07-summary.md
+      - sections/section-080/module-01/course-07-summary.md
     prompt: "A team wants to keep its Deployment and let a controller create a primary copy and move Istio weights. Which tool fits?"
     options:
       - id: a
@@ -413,7 +413,7 @@ questions:
     difficulty: advanced
     learning_objective: "Read a Flagger rollback."
     source_readings:
-      - sections/section-050/module-03/course-03-roll-back-a-failing-canary.md
+      - sections/section-080/module-01/course-03-roll-back-a-failing-canary.md
     prompt: "A `Canary` shows `Failed`. Which pods served users during the release?"
     options:
       - id: a
@@ -435,7 +435,7 @@ questions:
     difficulty: advanced
     learning_objective: "Prove a header route."
     source_readings:
-      - sections/section-050/module-04/course-02-route-test-traffic-by-header.md
+      - sections/section-070/module-03/course-02-route-test-traffic-by-header.md
     prompt: "A Rollout sends requests that carry a chosen header to the canary only. Which fields make that work?"
     options:
       - id: a
@@ -457,7 +457,7 @@ questions:
     difficulty: intermediate
     learning_objective: Choose a template change when a values key is not consumed.
     source_readings:
-    - sections/section-010/module-02/course-02-values-templates-and-versions.md
+    - sections/section-020/module-01/course-02-values-templates-and-versions.md
     prompt: 'The outpost team sets replicaCount: 2 in its Helm values file. Rendering still shows one replica because
       the Deployment template contains the literal replicas: 1. Which change makes the value control the workload?'
     options:
@@ -481,7 +481,7 @@ questions:
     difficulty: intermediate
     learning_objective: Keep desired source values after a Helm rollback.
     source_readings:
-    - sections/section-010/module-02/course-03-history-and-rollback.md
+    - sections/section-020/module-01/course-03-history-and-rollback.md
     prompt: 'An operator rolls scout back to a known release revision. The response is correct again, but trial-values.yaml
       still sets message: temporary. What should the operator use for the next repeatable upgrade?'
     options:
@@ -506,7 +506,7 @@ questions:
     difficulty: intermediate
     learning_objective: Save a readable review.
     source_readings:
-    - sections/section-060/module-02/course-02-review-and-apply-an-attribute-change.md
+    - sections/section-100/module-01/course-02-review-and-apply-an-attribute-change.md
     prompt: A binary plan is saved as change.plan. Which command creates a readable review without terminal
       colors?
     options:
@@ -529,7 +529,7 @@ questions:
     difficulty: intermediate
     learning_objective: Compare drift repair models.
     source_readings:
-    - sections/section-060/module-02/course-03-add-a-service-and-understand-reconciliation.md
+    - sections/section-100/module-01/course-03-add-a-service-and-understand-reconciliation.md
     prompt: A person changes a managed replica count after apply. When does OpenTofu restore the configured
       count?
     options:

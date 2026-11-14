@@ -1,3 +1,5 @@
+# Starting state: the client pod that sends test requests. The application
+# namespaces starfleet-staging and starfleet-production do not exist yet.
 apiVersion: v1
 kind: Namespace
 metadata:

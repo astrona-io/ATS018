@@ -1,10 +1,10 @@
 ---
-estimated_duration: 20m
+estimated_duration: 30m
 ---
 
-# Repair A Failing HelmRelease And Add Remediation
+# Generate Applications And Restrict A Team With An AppProject
 
-Graded lab for the HelmRelease module. The learner gets a `scout` `HelmRelease` whose last upgrade failed because the pods never become ready. They repair the values of the existing release and configure rollback remediation for future failed upgrades.
+Graded lab for the ApplicationSet module. Argo CD and two private repositories exist, but no `Application`, `ApplicationSet` or extra `AppProject`. The learner creates an `AppProject` for the `outpost` team, an `ApplicationSet` that generates one `Application` per environment, and an `Application` for the `outpost` team that runs inside its project.
 
 ```sh
 astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-030/module-02/labs/lab-01

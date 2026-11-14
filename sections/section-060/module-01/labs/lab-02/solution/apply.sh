@@ -1,30 +1,61 @@
 #!/usr/bin/env bash
+# Reference solution. Keep it in step with solution.md.
 set -euo pipefail
-dir=$(cd "$(dirname "$0")" && pwd)
-kubectl apply -f "$dir/flux.yaml"
-kubectl -n flux-system wait kustomization/platform --for=condition=Ready --timeout=300s
-kubectl -n starfleet-production wait scoutenvironments.platform.starfleet.dev/scout --for=create --timeout=180s
-work=$(mktemp -d)
-port=$((30000 + RANDOM % 20000))
-kubectl -n gitea port-forward svc/gitea-http "$port:3000" >"$work/forward.log" 2>&1 &
-forward_pid=$!
-trap 'kill "$forward_pid" 2>/dev/null || true; rm -rf "$work"' EXIT
-for attempt in $(seq 1 30); do
-  if curl -fsS "http://127.0.0.1:$port/api/v1/version" >/dev/null 2>&1; then break; fi
-  sleep 1
-done
-git clone -q "http://platform:starfleet-gitops@127.0.0.1:$port/starfleet/platform-infra.git" "$work/source"
-sed -i.bak 's/version: 6.99.0/version: 6.15.0/' "$work/source/environments/production/scoutenvironment.yaml"
-rm "$work/source/environments/production/scoutenvironment.yaml.bak"
-git -C "$work/source" -c user.name=platform -c user.email=platform@starfleet.local commit -qam "Use the published production version"
-git -C "$work/source" push -q origin main
-for attempt in $(seq 1 120); do
-  revision=$(kubectl -n flux-system get gitrepository platform-infra -o jsonpath='{.status.artifact.revision}')
-  commit=$(git -C "$work/source" rev-parse HEAD)
-  [[ "$revision" == *"$commit" ]] && break
-  sleep 3
-done
-kubectl -n flux-system wait kustomization/platform --for=condition=Ready --timeout=300s
-kubectl -n flux-system wait kustomization/environments --for=condition=Ready --timeout=300s
+NS="starfleet"
+export PATH="$HOME/.astrona/bin:$PATH"
+unset ARGO_SERVER ARGO_TOKEN
+WORK_DIR="$(mktemp -d)"
+trap 'rm -rf "$WORK_DIR"' EXIT
 
-bash "$dir/../validation/validate.sh" --wait
+# Fix the file name and run a copy of the step in the same group.
+cat > "$WORK_DIR/scout-check.yaml" <<'YAML'
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: scout-check
+  namespace: starfleet
+spec:
+  entrypoint: main
+  serviceAccountName: workflow-runner
+  arguments:
+    parameters:
+      - name: expected-version
+        value: "6.15.0"
+  volumes:
+    - name: release
+      configMap:
+        name: scout-release
+  templates:
+    - name: main
+      steps:
+        - - name: prepare
+            template: prepare
+        - - name: check-version
+            template: check-version
+          - name: check-version-copy
+            template: check-version
+    - name: prepare
+      container:
+        image: alpine:3.23
+        command: [echo, preparing the release check]
+    - name: check-version
+      container:
+        image: alpine:3.23
+        command: [sh, -c]
+        args:
+          - grep -Fqx "{{workflow.parameters.expected-version}}" /release/VERSION && echo release check passed
+        volumeMounts:
+          - name: release
+            mountPath: /release
+YAML
+argo template update "$WORK_DIR/scout-check.yaml"
+
+SCOUT_RUN="$(argo submit -n "$NS" --from workflowtemplate/scout-check -o name)"
+kubectl -n "$NS" wait "workflow/$SCOUT_RUN" --for=jsonpath='{.status.phase}'=Succeeded --timeout=300s
+
+OUTPOST_RUN="$(argo submit -n "$NS" --from workflowtemplate/outpost-config -p target-namespace=outpost --serviceaccount outpost-provisioner -o name)"
+kubectl -n "$NS" wait "workflow/$OUTPOST_RUN" --for=jsonpath='{.status.phase}'=Succeeded --timeout=300s
+
+# The seeded run is the only other Workflow.
+argo delete -n "$NS" -l workflows.argoproj.io/workflow-template=scout-check --status Failed,Error
+argo list -n "$NS"

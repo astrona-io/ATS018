@@ -1,39 +1,41 @@
-# Roll Out A Canary With Argo Rollouts
+# Build Tekton Tasks And Pipelines
 
-A Kubernetes Deployment replaces old pods as new pods become ready. That proves the containers can start, but it gives you no planned stop to test a small release before replacing the rest. A canary release sends some traffic to a new version while a stable version still serves the remaining traffic.
+A GitOps controller delivers what is in Git, but something has to test the code and produce the new version first. That job is continuous integration (CI): every change runs the same checks in the same way, and the result is a version that is ready to deliver. On Kubernetes, the CI system the exam teaches is Tekton.
 
-Argo Rollouts adds those stops. Its `Rollout` resource replaces a Deployment and tells the Argo Rollouts controller how to change the replica counts. A replica is one copy of a pod. A ReplicaSet is the Kubernetes resource that keeps those copies running from one pod template.
+Tekton is a set of controllers and custom resources that run CI work inside the cluster. A Tekton Task is a list of steps, and each step is a container. When you run a Task, the Tekton controller creates one pod for it, and the steps run one after the other as containers in that pod. A Tekton Pipeline puts several Tasks in order and lets them share files and values.
 
-Keep one sentence in mind for this module: **without a traffic router, Argo Rollouts approximates canary weight by changing replica counts.** A traffic router is a component that controls the share of requests sent to each version. This playground has one Service and no traffic router, so the replica split matters more than any short request sample.
+Keep one sentence in mind for this module: **every run is a Kubernetes object with a status, and every step is a container with a log.** When something fails, you read the status of the run, then the status of the step, then the log of that container.
 
-The module has five parts. **Convert A Deployment Into A Rollout** replaces the starting Deployment and establishes a stable version. **Canary Steps And Replica Weights** changes the image, watches a pause and checks both versions through one Service. **Promote And Pause A Canary** advances the steps and tests an explicit pause. **Abort And Retry A Release** stops an invalid image, proves the stable version still serves requests, and retries a corrected release. **Gate A Canary With A Web Analysis Step** compares `promote` with `promote --full`, replaces a pause with an automatic HTTP (Hypertext Transfer Protocol) check through a second Service, and reads the result of that check. That check needs no metrics provider.
+The module has five parts. **Tasks, TaskRuns And Pods** writes a Task with a parameter and a result, runs it, and finds the pod and the containers it created. **Workspaces, Pipelines And Results** clones a Git repository into a shared volume and chains two Tasks in a Pipeline that passes a result from one to the next. **Reading A Failed TaskRun** adds a broken test Task to the Pipeline and follows the failure from the PipelineRun down to the container log. **Shared Tasks With Resolvers** loads Tasks from another namespace and from a Git repository instead of copying them. **Parallel Tasks, tkn Runs And Cluster Access** adds a Task that runs at the same time as another, starts one Pipeline with different values, gives a Pipeline that changes the cluster the account and the rights it needs, saves a log to a file, and deletes a failed run.
 
 ## Learning objectives
 
 After this module you can:
 
-- Convert a Deployment into a Rollout with `setWeight` and `pause` steps.
-- Follow a release with `kubectl argo rollouts get rollout --watch`.
-- Promote, pause and abort a release, and identify the ReplicaSet serving traffic.
-- Explain why replica counts approximate a weight without a traffic router.
-- Correct an image and retry an aborted release.
-- Explain the difference between `promote` and `promote --full`.
-- Replace a `pause` step with an inline `analysis` step that uses the `web` provider against a canary Service.
-- Start a release with an environment variable and read its AnalysisRun.
+- Write a Task with params, steps, results and a workspace.
+- Chain Tasks in a Pipeline with `runAfter` and pass a result from one Task to the next.
+- Start a PipelineRun with a PersistentVolumeClaim workspace and read its logs with `tkn`.
+- Reference a shared Task through the cluster or git resolver instead of copying it.
+- Diagnose a failed TaskRun from its step status and the pod logs.
+- Run a Task in parallel with another and pass it a result and a param.
+- Start a Pipeline several times with tkn and different param values, save a run log to a file and delete a failed run.
+- Give a Pipeline that changes the cluster the right ServiceAccount and RBAC rights.
 
 ## Before you start
 
-You need Kubernetes basics: namespaces, Deployments, Services, labels, selectors and readiness probes. A readiness probe is a check that tells Kubernetes whether a pod can receive Service traffic. You also need `kubectl get`, `kubectl apply` and `kubectl exec`.
+You need Kubernetes basics: namespaces, pods, containers, PersistentVolumeClaims, and the commands `kubectl get`, `kubectl apply`, `kubectl create` and `kubectl logs`. You also need the `tkn` command-line tool version 0.46 on your machine. `tkn` is the Tekton command-line tool; it reads the same objects as `kubectl` and shows them in a shorter form.
 
-The playground runs Kubernetes 1.35.8 with the Argo Rollouts 1.10.0 controller in `argo-rollouts`. Use `kubectl` 1.35.8 and the `kubectl-argo-rollouts` plugin version 1.10.0 on your machine. A plugin is an executable that `kubectl` finds on your shell's `PATH`; this one provides the `kubectl argo rollouts` commands. The controller runs the releases in the cluster even when the plugin is closed.
+Your playground is a single-node `kind` cluster running Kubernetes 1.35 with these parts:
 
-| Namespace | What is in it |
+| Part | What it is |
 | --- | --- |
-| `argo-rollouts` | The Argo Rollouts controller and its custom resource definitions |
-| `starfleet` | `scout`, a Deployment with five podinfo 6.14.0 replicas; the `scout` Service; and the `shuttle` request client |
+| Tekton Pipelines 1.17.0 | The controller, the admission webhook and the remote resolvers, in `tekton-pipelines` and `tekton-pipelines-resolvers` |
+| The Task `run-tests` in `starfleet` | A Task that runs the test script of `scout`. It fails on purpose |
+| A public Git repository | `http://gitea-http.gitea.svc:3000/starfleet/scout-app.git` inside the cluster. It holds the files `VERSION` and `test.sh`, and a shared Task in `tekton/run-tests.yaml` |
+| `shuttle` in `starfleet` | A client pod with `curl` |
 
-podinfo is a small web application that returns a JavaScript Object Notation (JSON) response with its version. The node already holds images 6.14.0 and 6.15.0. No Rollout, traffic router or metrics provider exists. No GitOps controller manages these objects, so you change them directly with `kubectl`. A GitOps controller reads desired state from Git and applies it to the cluster; in that environment, also record workload changes in Git.
+The repository is served by Gitea, a small Git server that runs in the cluster; from your machine it answers on `http://127.0.0.1:3000`. There is no Pipeline, no Tekton Triggers and no container registry. The node already holds the step images `alpine:3.23`, `alpine/git:2.52.0` and `alpine/kubectl:1.35.4`. `kubectl` already points at the cluster.
 
-Write the manifest in a folder on your machine and keep the playground running while you read the parts. Every command uses the playground's Kubernetes context.
+Launch your playground now, and keep it running next to you while you read the parts:
 
 <!-- astrona:playground -->

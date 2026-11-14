@@ -235,25 +235,33 @@ section is only true for this one.
   inside `kubectl`, the core APIs). Two exceptions get one compact module
   each, because the CNPE simulator tests them (user decision, 2026-11-04):
   Helm (edit a chart and deploy it with the `helm` command-line tool, section
-  010) and OpenTofu (plan, apply and add a resource, section 060). Anything
+  020) and OpenTofu (plan, apply and add a resource, section 100). Anything
   else is a waste of the student's time and is never a lesson subject. Gitea,
   the in-cluster registry and `crane` are
   plumbing: playground bootstraps install and seed them, and a lesson names
   them in one sentence at most and never teaches their web UI or CLI.
-- **The sections:** the order follows a change from Git to users: package
-  it, deliver it, produce a new version, release it safely.
+- **The sections:** each section teaches exactly one tool, so the student
+  focuses on one tool at a time (user decision, 2026-11-13). The order
+  follows a change from Git to users: package it, deliver it, produce a new
+  version, release it safely, then deliver infrastructure.
 
   | Section | Title | Curriculum item |
   | --- | --- | --- |
-  | 010 | Packaging Applications For GitOps (Kustomize and Helm) | Implementing GitOps Workflows |
-  | 020 | Continuous Delivery With Argo CD | Implementing GitOps Workflows |
-  | 030 | Continuous Delivery With Flux | Implementing GitOps Workflows |
-  | 040 | Continuous Integration Pipelines (Tekton, Argo Workflows and Events) | Building and Configuring CI/CD Pipelines |
-  | 050 | Progressive Delivery | Deploying Applications Using Progressive Delivery Strategies |
-  | 060 | Infrastructure Deployment Through GitOps (Crossplane and OpenTofu) | Implementing GitOps Workflows |
+  | 010 | Build Manifests With Kustomize | Implementing GitOps Workflows |
+  | 020 | Package Applications With Helm | Implementing GitOps Workflows |
+  | 030 | Continuous Delivery With Argo CD | Implementing GitOps Workflows |
+  | 040 | Continuous Delivery With Flux | Implementing GitOps Workflows |
+  | 050 | Continuous Integration Pipelines With Tekton | Building and Configuring CI/CD Pipelines |
+  | 060 | Continuous Integration With Argo Workflows And Argo Events | Building and Configuring CI/CD Pipelines |
+  | 070 | Progressive Delivery With Argo Rollouts | Deploying Applications Using Progressive Delivery Strategies |
+  | 080 | Progressive Delivery With Flagger | Deploying Applications Using Progressive Delivery Strategies |
+  | 090 | Infrastructure Delivery With Crossplane | Implementing GitOps Workflows |
+  | 100 | Plan And Apply Infrastructure With OpenTofu | Implementing GitOps Workflows |
 
-  The full design (modules, objectives, playground environments, capstones)
-  is in `.astrona/blueprint.yaml`.
+  The full design (modules, objectives, playground environments) is in
+  `.astrona/blueprint.yaml`. The course has no section capstones (user
+  decision, 2026-11-14): every graded lab belongs to a module and follows
+  the reading it practises.
 
 - **The versions:** everything is built and checked on a `kind` v0.33.0
   cluster with node image `kindest/node:v1.35.8` (Kubernetes 1.35, the exam
@@ -433,7 +441,7 @@ content: `starfleet/scout-deploy` (Kustomize base and overlays, Helm values),
     `--full` sets `status.promoteFull` until completion. Editing steps on a
     stable template starts no release; editing them mid-release restarts
     from step 0. The plugin `set` command has only `image`.
-  - The `tkn` 0.46.1 behaviour used by `section-040/module-01` (read from
+  - The `tkn` 0.46.1 behaviour used by `section-050/module-01` (read from
     the source 2026-11-04, not run). `pipeline start` asks for every param
     not set with `-p` unless `--use-param-defaults` is set; `-o` cannot join
     `--showlog`; `--showlog` follows the status of the run only with `-E`.
@@ -460,7 +468,6 @@ content: `starfleet/scout-deploy` (Kustomize base and overlays, Helm values),
 | Module reading: landing page, deep-dive parts, closing page | `sections/section-0N0/module-0M/course.md`, `course-0N-*.md` |
 | Graded lab: task, walkthrough, setup, grader | `.../labs/lab-01/` (`question.md`, `solution.md`, `prerequisites.md`, `bootstrap/`, `manifests/`, `solution/`, `testing/`, `validation/`) |
 | Ungraded sandbox for a module | `.../playground/` (`config.yaml`, `bootstrap/prepare.sh`, `manifests/`, `docs/overview.md`, which is the only learner page) |
-| One graded integration lab per section | `sections/section-0N0/capstone/labs/lab-01/` |
 
 A lab folder holds:
 
@@ -485,20 +492,20 @@ under `modules:` (`module-intro`, then `module-010`, `module-020` and so on).
 Each section's `content` lists, in order: the section `README.md`, then for
 each module its landing page, its parts, and right after the part a lab
 tests, a `Question` reading (`labs/lab-01/question.md`) followed by the
-`type: lab` entry; the module's closing page comes last. The section
-capstone closes the section. Playgrounds are not listed: the landing page's
+`type: lab` entry; the module's closing page comes last. Playgrounds are
+not listed: the landing page's
 `<!-- astrona:playground -->` marker shows them.
 
-Every `type: lab` entry (module labs and capstones) carries these fields, in
+Every `type: lab` entry carries these fields, in
 this order:
 
 ```yaml
       - type: reading
         title: Question
-        path: sections/section-020/module-01/labs/lab-01/question.md
+        path: sections/section-030/module-01/labs/lab-01/question.md
       - type: lab
         title: "Deliver An Application From Git With Argo CD Lab"
-        path: sections/section-020/module-01/labs/lab-01
+        path: sections/section-030/module-01/labs/lab-01
         difficulty: beginner
         estimated_duration: 20m
         topic: argocd
@@ -555,22 +562,20 @@ this order:
 astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-010/module-01/playground
 astrona destroy ats-018-playground-010-01   # takes metadata.name from config.yaml, not the path
 
-# Lab or capstone (graded against the live cluster)
-astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-020/module-01/labs/lab-01
-astrona submit -c sections/section-020/module-01/labs/lab-01
-astrona destroy ats-018-lab-020-01
+# Lab (graded against the live cluster)
+astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-030/module-01/labs/lab-01
+astrona submit -c sections/section-030/module-01/labs/lab-01
+astrona destroy ats-018-lab-030-01
 
 # Authors: run a local, uncommitted copy, and prove a lab passes with its reference solution
 astrona run -c sections/section-010/module-01/playground
-astrona test -c sections/section-020/module-01/labs/lab-01
+astrona test -c sections/section-030/module-01/labs/lab-01
 ```
 
-Names: a playground is `ats-018-playground-<section>-<module>`, a module lab
-is `ats-018-lab-<section>-<module>` and a capstone is
-`ats-018-capstone-<section>`; keep those names. A second section capstone takes `ats-018-capstone-<section>-<lab>`, for
-example `ats-018-capstone-060-02`. A second lab in a module
+Names: a playground is `ats-018-playground-<section>-<module>` and a module
+lab is `ats-018-lab-<section>-<module>`; keep those names. A second lab in a module
 takes `ats-018-lab-<section>-<module>-<lab>`, for example
-`ats-018-lab-020-02-02`, so two labs never share a name. Lab bootstrap
+`ats-018-lab-030-02-02`, so two labs never share a name. Lab bootstrap
 scripts do not pin a kube context: astrona sets `KUBECONFIG` for the lab, and
 `astrona test` runs on a cluster with a different name. Every lab must pass
 `astrona validate` and `astrona test`.

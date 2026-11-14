@@ -4,7 +4,7 @@
 #    {"kind":"playground","path":"sections/.../playground"}, ...]
 #
 #   list-environments.sh                        # every section
-#   list-environments.sh sections/section-030   # only these paths
+#   list-environments.sh sections/section-040   # only these paths
 #   list-environments.sh --changed-since <ref>  # sections changed since <ref>
 #
 # With --changed-since, a change to scripts/ or the labs workflow selects

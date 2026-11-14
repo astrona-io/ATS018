@@ -2,9 +2,9 @@
 estimated_duration: 30m
 ---
 
-# Deliver The Platform With Argo CD And Repair Production
+# Start A Workflow From A Git Push With Argo Events
 
-Graded lab for the Crossplane GitOps module. The learner delivers the `platform-infra` repository with an automated Argo CD `Application`, adds a health check for the `ScoutEnvironment` kind, finds why production is not Ready and fixes it in Git.
+Graded lab for the Argo Workflows module. The learner gets a WorkflowTemplate that starts in a folder that does not exist, a Gitea webhook that nothing answers and a ready EventBus. They fix the template, create the EventSource and the Sensor, push a commit and prove that the push started a Succeeded Workflow.
 
 ```sh
 astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-060/module-01/labs/lab-01

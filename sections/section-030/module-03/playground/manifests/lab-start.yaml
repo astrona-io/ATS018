@@ -1,3 +1,5 @@
+# Starting state: the client pod that sends test requests. Argo CD creates the
+# namespaces of the four Applications.
 apiVersion: v1
 kind: Namespace
 metadata:

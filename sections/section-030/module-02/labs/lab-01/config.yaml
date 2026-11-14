@@ -12,12 +12,18 @@ runtime:
     image: kindest/node:v1.35.8
     preloadImages:
       - curlimages/curl:8.22.0
-      - ghcr.io/stefanprodan/podinfo:6.14.0
       - ghcr.io/stefanprodan/podinfo:6.15.0
-      - ghcr.io/fluxcd/source-controller:v1.9.6
-      - ghcr.io/fluxcd/kustomize-controller:v1.9.6
-      - ghcr.io/fluxcd/helm-controller:v1.6.5
-      - ghcr.io/fluxcd/notification-controller:v1.9.4
+      - gitea/gitea:28.1.0-rootless
+      - quay.io/argoproj/argocd:v3.5.4
+      - public.ecr.aws/docker/library/redis:8.2.3-alpine
+  portForwards:
+    - name: argocd
+      description: "Argo CD API server and web page"
+      namespace: argocd
+      resource: svc/argocd-server
+      targetPort: 443
+      hostPort: 8080
+      scheme: https
 
 bootstrap:
   manifests:
@@ -25,14 +31,18 @@ bootstrap:
       type: file
       source: manifests/lab-start.yaml
   init:
-    - name: install-flux
-      description: Installs the Flux 2.9.6 controllers
+    - name: install-gitea
+      description: "Starts the in-cluster Git server"
       type: file
-      source: bootstrap/01-install-flux.sh
-    - name: seed-release
-      description: Installs the scout release and makes its upgrade fail
+      source: bootstrap/01-install-gitea.sh
+    - name: install-argocd
+      description: "Installs Argo CD 3.5.4 (non-HA, without Dex and notifications)"
       type: file
-      source: bootstrap/02-seed-release.sh
+      source: bootstrap/02-install-argocd.sh
+    - name: seed
+      description: "Pushes platform-apps and outpost-apps into Git and adds a credential template"
+      type: file
+      source: bootstrap/03-seed.sh
   waitFor:
     - resource: deploy/shuttle
       namespace: starfleet
@@ -51,14 +61,18 @@ testing:
 
 validation:
   scripts:
-    - name: release-repaired
-      description: The same HelmRelease is Ready, the pods are ready and shuttle gets a response from the chart
+    - name: outpost-project
+      description: The AppProject outpost allows one repository, one namespace and no cluster-scoped resources
       type: file
-      source: validation/validate-release-repaired.sh
-    - name: remediation-configured
-      description: Upgrade remediation rolls back, retries and remediates the last failure
+      source: validation/validate-project.sh
+    - name: environment-applications
+      description: One ApplicationSet generated scout-staging and scout-production and both are Synced and Healthy
       type: file
-      source: validation/validate-remediation.sh
+      source: validation/validate-applicationset.sh
+    - name: outpost-application
+      description: The outpost-scout Application runs in the outpost project and the project rejects another repository
+      type: file
+      source: validation/validate-outpost.sh
 
 teardown:
   keepCluster: false

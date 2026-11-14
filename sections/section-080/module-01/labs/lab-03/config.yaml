@@ -1,0 +1,56 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-018-lab-080-01-03
+  docs:
+    question: question.md
+    solution: solution.md
+    prerequisites: prerequisites.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - curlimages/curl:8.22.0
+      - ghcr.io/stefanprodan/podinfo:6.14.0
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - ghcr.io/fluxcd/flagger:1.45.0
+      - ghcr.io/fluxcd/flagger-loadtester:0.39.0
+bootstrap:
+  init:
+    - name: install-flagger
+      description: Installs Flagger, the load tester and an initialized ungated Canary
+      type: file
+      source: bootstrap/01-install-flagger.sh
+  waitFor:
+    - resource: deploy/scout
+      namespace: starfleet
+    - resource: deploy/shuttle
+      namespace: starfleet
+testing:
+  init:
+    - name: verify-unfinished-state
+      description: Require a ready API and an explicit grader rejection before solving
+      type: file
+      source: testing/verify-start.sh
+      timeout: 10m
+    - name: solution
+      description: Applies the reference solution
+      type: file
+      source: solution/apply.sh
+validation:
+  scripts:
+    - name: approval-definition
+      description: The existing Canary requires confirm-rollout approval from the load tester
+      type: file
+      source: validation/validate-approval-definition.sh
+    - name: waiting-events
+      description: Events saved before approval match live events for the same Canary
+      type: file
+      source: validation/validate-waiting-events.sh
+    - name: approved-release
+      description: Approval passed and the new image succeeded on the primary and serves requests
+      type: file
+      source: validation/validate-approved-release.sh
+teardown:
+  keepCluster: false

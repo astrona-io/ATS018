@@ -1,0 +1,43 @@
+# Starting state: the namespace and the client pod shuttle. shuttle sends one
+# request per second to the active and the preview Service, so Prometheus
+# always has fresh request metrics for both versions.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: starfleet
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shuttle
+  namespace: starfleet
+  labels:
+    app: shuttle
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shuttle
+  template:
+    metadata:
+      labels:
+        app: shuttle
+    spec:
+      containers:
+        - name: shuttle
+          image: curlimages/curl:8.22.0
+          command:
+            - sh
+            - -c
+            - |
+              while true; do
+                curl -s -o /dev/null http://scout.starfleet
+                curl -s -o /dev/null http://scout-preview.starfleet
+                sleep 1
+              done
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 32Mi

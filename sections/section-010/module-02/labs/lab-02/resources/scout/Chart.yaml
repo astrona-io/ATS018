@@ -1,6 +1,0 @@
-apiVersion: v2
-name: scout
-description: A small podinfo workload for release practice
-type: application
-version: 0.1.0
-appVersion: "6.14.0"

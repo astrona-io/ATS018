@@ -12,12 +12,16 @@ runtime:
     image: kindest/node:v1.35.8
     preloadImages:
       - curlimages/curl:8.22.0
-      - alpine:3.23
-      - alpine/git:2.52.0
+      - ghcr.io/stefanprodan/podinfo:6.14.0
+      - ghcr.io/stefanprodan/podinfo:6.15.0
       - gitea/gitea:28.1.0-rootless
+      - ghcr.io/fluxcd/source-controller:v1.9.6
+      - ghcr.io/fluxcd/kustomize-controller:v1.9.6
+      - ghcr.io/fluxcd/helm-controller:v1.6.5
+      - ghcr.io/fluxcd/notification-controller:v1.9.4
   portForwards:
     - name: git
-      description: The Git server (Gitea)
+      description: The deployment repository (Gitea)
       namespace: gitea
       resource: svc/gitea-http
       targetPort: 3000
@@ -31,17 +35,21 @@ bootstrap:
       source: manifests/lab-start.yaml
   init:
     - name: install-gitea
-      description: Starts the in-cluster Git server
+      description: Starts Gitea and creates the user platform
       type: file
       source: bootstrap/01-install-gitea.sh
-    - name: install-tekton
-      description: Installs Tekton Pipelines 1.17.0
+    - name: install-flux
+      description: Installs the Flux 2.9.6 controllers
       type: file
-      source: bootstrap/02-install-tekton.sh
+      source: bootstrap/02-install-flux.sh
     - name: seed
-      description: Pushes scout-app into Git and installs the Tasks and the Pipeline
+      description: Seeds the scout-deploy repository and the read-only Secret
       type: file
       source: bootstrap/03-seed.sh
+    - name: flux-start
+      description: Creates the broken GitRepository and Kustomization and the rest of the starting Flux objects
+      type: file
+      source: bootstrap/04-seed-flux-objects.sh
   waitFor:
     - resource: deploy/shuttle
       namespace: starfleet
@@ -60,14 +68,18 @@ testing:
 
 validation:
   scripts:
-    - name: task-fixed
-      description: The run-tests Task still runs test.sh and now starts in the workspace
+    - name: flux-objects
+      description: The source follows main, platform is applied first, scout depends on it and both are Ready and not suspended
       type: file
-      source: validation/validate-task-fixed.sh
-    - name: pipeline-run-succeeded
-      description: A PipelineRun of scout-ci Succeeded with the fixed Task and reports version 6.15.0
+      source: validation/validate-flux-objects.sh
+    - name: change-delivered-from-git
+      description: The staging message changed in Git, Flux applied that exact commit and shuttle receives the new message
       type: file
-      source: validation/validate-pipelinerun.sh
+      source: validation/validate-change-from-git.sh
+    - name: resumed-kustomization
+      description: No Kustomization in flux-system is suspended, all are Ready, and the drifted workload matches Git again
+      type: file
+      source: validation/validate-resumed-kustomization.sh
 
 teardown:
   keepCluster: false

@@ -1,10 +1,3 @@
-# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
-#
-# Build Tekton Tasks And Pipelines (PLAYGROUND) — playground environment.
-# Tekton Pipelines 1.17.0, a public Git repository `starfleet/scout-app`
-# (in-cluster Gitea, plumbing only) and the `run-tests` Task, which fails on
-# purpose because of a wrong working directory. No Pipeline, no Triggers, no
-# registry. No task, no grading.
 apiVersion: astrona.io/v1
 metadata:
   name: ats-018-playground-040-01
@@ -16,15 +9,16 @@ runtime:
     image: kindest/node:v1.35.8
     preloadImages:
       - curlimages/curl:8.22.0
-      - alpine:3.23
-      - alpine/git:2.52.0
-      - alpine/kubectl:1.35.4
       - ghcr.io/stefanprodan/podinfo:6.14.0
       - ghcr.io/stefanprodan/podinfo:6.15.0
       - gitea/gitea:28.1.0-rootless
+      - ghcr.io/fluxcd/source-controller:v1.9.6
+      - ghcr.io/fluxcd/kustomize-controller:v1.9.6
+      - ghcr.io/fluxcd/helm-controller:v1.6.5
+      - ghcr.io/fluxcd/notification-controller:v1.9.4
   portForwards:
     - name: git
-      description: "The Git server (git over HTTP)"
+      description: The deployment repository
       namespace: gitea
       resource: svc/gitea-http
       targetPort: 3000
@@ -37,15 +31,12 @@ bootstrap:
       source: manifests/lab-start.yaml
   init:
     - name: install-gitea
-      description: "Starts the in-cluster Git server"
       type: file
       source: bootstrap/01-install-gitea.sh
-    - name: install-tekton
-      description: "Installs Tekton Pipelines 1.17.0"
+    - name: install-flux
       type: file
-      source: bootstrap/02-install-tekton.sh
+      source: bootstrap/02-install-flux.sh
     - name: seed
-      description: "Pushes scout-app into Git and installs the run-tests Task"
       type: file
       source: bootstrap/03-seed.sh
   waitFor:

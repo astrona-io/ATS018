@@ -1,244 +1,197 @@
-# Knowledge check for section 040, module 01. Listed in astrona.yaml as a
-# `type: quiz` entry right after the module summary. Contract:
+# Knowledge check for section 040, module 01. Contract:
 # schemas/question-bank.schema.json. Keep question ids stable once published.
 schema_version: 1
 kind: question_bank
-id: ats018-040-01
+id: ats018-030-01
 course_id: ATS018
 exam_code: CNPE
 status: alpha
-provenance: "Original practice material written for this course; not official exam questions."
+provenance: Original practice material written for this course; not official exam questions.
 scope:
   type: module
   id: section-040/module-01
-  title: "Build Tekton Tasks And Pipelines"
+  title: Reconcile Git Sources With Flux Kustomizations
 questions:
-  - id: ats018-040-01-q01
+  - id: ats018-030-01-q01
     type: single_choice
     difficulty: beginner
-    learning_objective: "Name the containers of a TaskRun pod."
+    learning_objective: "Name the Flux controller that fetches Git."
     source_readings:
-      - sections/section-040/module-01/course-01-tasks-taskruns-and-pods.md
-    prompt: "A Task has two steps, `fetch` and `test`. How does Tekton run one TaskRun of it?"
+      - sections/section-040/module-01/course-01-fetch-git-with-a-flux-source.md
+    prompt: "Flux fetches the private repository `scout-deploy` and stores the files as an artifact. Which controller does this, and which controller later renders and applies the manifests?"
     options:
       - id: a
-        text: "One pod with one container per step, named `step-fetch` and `step-test`, run one after the other"
-        explanation: "Correct. The entrypoint program of Tekton makes the step containers run in order."
+        text: "The helm controller fetches, and the notification controller applies"
+        explanation: "The helm controller installs chart releases. The notification controller sends notifications."
       - id: b
-        text: "Two pods, one for each step"
-        explanation: "One TaskRun creates one pod. The steps are containers in it."
+        text: "The source controller fetches, and the kustomize controller renders and applies"
+        explanation: "Correct. The source controller fetches Git and publishes artifacts. The kustomize controller renders and applies the manifests."
       - id: c
-        text: "One container that runs both steps as shell commands"
-        explanation: "Each step becomes its own container."
+        text: "The kustomize controller fetches, and the source controller applies"
+        explanation: "The two jobs are the other way round."
       - id: d
-        text: "No pod, because the Tekton controller runs the steps itself"
-        explanation: "The controller only creates the pod. The steps run as containers in it."
-    correct_option: a
-    explanation: "A Task is a list of steps and each step is a container. A TaskRun creates one pod with containers named `step-<step name>`."
+        text: "The kubelet fetches, and the API server applies"
+        explanation: "Flux does its own work in its controllers. The kubelet runs containers."
+    correct_option: b
+    explanation: "Flux splits the work. The source controller fetches Git. The kustomize controller renders the path and applies the objects."
 
-  - id: ats018-040-01-q02
+  - id: ats018-030-01-q02
     type: single_choice
     difficulty: beginner
-    learning_objective: "Create a TaskRun that uses generateName."
+    learning_objective: "State what a GitRepository `Ready` condition proves."
     source_readings:
-      - sections/section-040/module-01/course-01-tasks-taskruns-and-pods.md
-    prompt: "The file `taskrun-report-version.yaml` sets `metadata.generateName: report-version-`. Which command starts the run?"
+      - sections/section-040/module-01/course-01-fetch-git-with-a-flux-source.md
+    prompt: "A `GitRepository` is `Ready`, but requests from the client return the old version. What does `Ready` prove?"
     options:
       - id: a
-        text: "`kubectl apply -f taskrun-report-version.yaml`"
-        explanation: "`kubectl apply` needs a fixed `metadata.name`, so it fails on `generateName`."
+        text: "Only that the source controller fetched the repository and published an artifact"
+        explanation: "Correct. The fetch worked. The Kustomization and the application are separate questions."
       - id: b
-        text: "`kubectl apply -f task-report-version.yaml`"
-        explanation: "That file holds the Task, a definition. Applying it only stores the Task and starts nothing."
+        text: "That the application runs the new commit"
+        explanation: "The Kustomization applies the files, and only a request proves the behaviour."
       - id: c
-        text: "`kubectl create -f taskrun-report-version.yaml`"
-        explanation: "Correct. The API server adds a random suffix to the name when you create the object."
+        text: "That the Kustomization applied every object"
+        explanation: "The Kustomization has its own Ready condition."
       - id: d
-        text: "`kubectl run report-version`"
-        explanation: "`kubectl run` creates a pod from an image, not a TaskRun."
-    correct_option: c
-    explanation: "An object with `generateName` has no fixed name, so you create it. Applying a Task never starts a run; only a TaskRun or a PipelineRun does."
-
-  - id: ats018-040-01-q03
-    type: single_choice
-    difficulty: intermediate
-    learning_objective: "Write a Task result."
-    source_readings:
-      - sections/section-040/module-01/course-01-tasks-taskruns-and-pods.md
-    prompt: "A step must store the text `scout 6.14.0` in the result `summary` without a trailing newline. What does the step do?"
-    options:
-      - id: a
-        text: "Run `echo` and write the text to `$(results.summary.path)`"
-        explanation: "`echo` adds a newline, and the newline becomes part of the value."
-      - id: b
-        text: "Print the text to the standard output of the step"
-        explanation: "Standard output goes to the log, not to the result."
-      - id: c
-        text: "Set the environment variable `SUMMARY` in the step"
-        explanation: "Tekton does not read environment variables as results."
-      - id: d
-        text: "Run `printf` and write the text to the file `$(results.summary.path)`"
-        explanation: "Correct. `printf` adds no newline, and Tekton stores the file content in the status of the run."
-    correct_option: d
-    explanation: "A step writes a result by writing to the file `$(results.<name>.path)`. Use `printf` because `echo` adds a newline to the value."
-
-  - id: ats018-040-01-q04
-    type: single_choice
-    difficulty: intermediate
-    learning_objective: "Share files between Tasks of a Pipeline."
-    source_readings:
-      - sections/section-040/module-01/course-02-workspaces-and-pipelines.md
-    prompt: "Task `fetch-source` writes files and Task `run-tests` must read them. How can the files pass between the two Tasks?"
-    options:
-      - id: a
-        text: "Through a workspace backed by a PersistentVolumeClaim"
-        explanation: "Correct. Each Task in a Pipeline runs in its own pod, so a shared volume is the way."
-      - id: b
-        text: "Through the same pod, because a Pipeline uses one pod"
-        explanation: "Each Task in a Pipeline runs in its own pod."
-      - id: c
-        text: "Through `$(results.<name>.path)`, which holds files of any size"
-        explanation: "Results are small named outputs, not file storage."
-      - id: d
-        text: "Through `runAfter`, which copies the files"
-        explanation: "`runAfter` only orders the Tasks."
+        text: "That the Deployment is healthy"
+        explanation: "Health belongs to the Kustomization with `wait: true` and to the application itself."
     correct_option: a
-    explanation: "Each Task runs in its own pod, so an `emptyDir` workspace is empty for the second Task. A PersistentVolumeClaim workspace carries the files. A `volumeClaimTemplate` creates a fresh claim for each run."
+    explanation: "Source readiness proves the fetch. A request from the client proves the behaviour."
 
-  - id: ats018-040-01-q05
+  - id: ats018-030-01-q03
     type: single_choice
     difficulty: intermediate
-    learning_objective: "Order the Tasks of a Pipeline."
+    learning_objective: "Place the credential Secret of a GitRepository."
     source_readings:
-      - sections/section-040/module-01/course-02-workspaces-and-pipelines.md
-    prompt: "A Pipeline lists `fetch-source` and `run-tests`. Neither has `runAfter`, and neither uses a result of the other. When do they start?"
+      - sections/section-040/module-01/course-01-fetch-git-with-a-flux-source.md
+    prompt: "A `GitRepository` in `flux-system` has `secretRef.name: scout-readonly`, and it reports an authentication error. The Secret exists in the namespace `starfleet-staging`. What is wrong?"
     options:
       - id: a
-        text: "In the order of the list, one after the other"
-        explanation: "The order of the list does not matter. Only `runAfter` and result references order Tasks."
+        text: "The Secret needs the label `argocd.argoproj.io/secret-type: repository`"
+        explanation: "That label belongs to Argo CD. Flux does not use it."
       - id: b
-        text: "At the same time"
-        explanation: "Correct. Without `runAfter` or a result reference, Tekton starts all Tasks together."
+        text: "The Secret name is too long"
+        explanation: "The length of the name is not the cause."
       - id: c
-        text: "`run-tests` first, because it has no workspace"
-        explanation: "The workspace does not decide the order."
+        text: "The password is stored as plain text in the `GitRepository`"
+        explanation: "The `secretRef` only names the Secret. It does not hold the password."
       - id: d
-        text: "The Pipeline is rejected until you add `runAfter`"
-        explanation: "Tekton accepts it. The Tasks just run at the same time."
-    correct_option: b
-    explanation: "Two things create an order: `runAfter` and a reference to the result of another Task. With neither, the second Task may read the workspace before the clone is done."
-
-  - id: ats018-040-01-q06
-    type: single_choice
-    difficulty: intermediate
-    learning_objective: "Read a failed run from the top down."
-    source_readings:
-      - sections/section-040/module-01/course-03-reading-a-failed-taskrun.md
-    prompt: "A PipelineRun failed. In which order do you read the status to find the error itself?"
-    options:
-      - id: a
-        text: "The container log first, then the PipelineRun message"
-        explanation: "Start from the top so you know which step to open."
-      - id: b
-        text: "The EventListener log, then the Task definition"
-        explanation: "The EventListener only starts runs."
-      - id: c
-        text: "The registry, then the TaskRun"
-        explanation: "The registry does not hold the run status."
-      - id: d
-        text: "The PipelineRun message, then the failed TaskRun with its step and exit code, then the container log of that step"
-        explanation: "Correct. The log of the failing step holds the error."
+        text: "The source reads its Secret from its own namespace, so the Secret must be in `flux-system`"
+        explanation: "Correct. A Secret in the application namespace is not found by the source."
     correct_option: d
-    explanation: "Read from the top down: PipelineRun message, failed TaskRun and step, container log."
+    explanation: "A `secretRef` names a Secret in the same namespace as the `GitRepository`, here `flux-system`."
 
-  - id: ats018-040-01-q07
+  - id: ats018-030-01-q04
     type: single_choice
-    difficulty: advanced
-    learning_objective: "Read a failed step with kubectl only."
+    difficulty: intermediate
+    learning_objective: "Order Kustomizations with `dependsOn`."
     source_readings:
-      - sections/section-040/module-01/course-03-reading-a-failed-taskrun.md
-    prompt: "`tkn` is not installed. The TaskRun `scout-ci-2mk48-run-tests` failed. Which command reads the log of the failed step `test`?"
+      - sections/section-040/module-01/course-02-apply-paths-and-order-dependencies.md
+    prompt: "A Kustomization sets `targetNamespace: starfleet`, but the Namespace does not exist and apply fails. What is the right fix?"
     options:
       - id: a
-        text: "`kubectl -n starfleet logs scout-ci-2mk48-run-tests -c test`"
-        explanation: "The pod name ends in `-pod`, and the container name starts with `step-`."
+        text: "Add `createNamespace: true` to `targetNamespace`"
+        explanation: "`targetNamespace` changes the destination of namespaced objects and does not create it."
       - id: b
-        text: "`kubectl -n starfleet logs taskrun/scout-ci-2mk48-run-tests`"
-        explanation: "`kubectl logs` reads pods, not TaskRun objects."
+        text: "Let a dependency Kustomization create the Namespace and add `dependsOn` for it"
+        explanation: "Correct. `targetNamespace` does not create a Namespace, and `dependsOn` waits for the dependency's Ready condition."
       - id: c
-        text: "`kubectl -n starfleet logs scout-ci-2mk48-run-tests-pod -c step-test`"
-        explanation: "Correct. The pod is named after the TaskRun with `-pod`, and the container is named `step-<step name>`."
+        text: "Suspend the Kustomization"
+        explanation: "Suspending pauses reconciliation and creates nothing."
       - id: d
-        text: "`kubectl -n starfleet describe task run-tests`"
-        explanation: "That shows the Task definition, not the log of one run."
+        text: "Set `prune: true`"
+        explanation: "Pruning deletes objects; it does not create a Namespace."
+    correct_option: b
+    explanation: "`dependsOn` waits for the Ready condition of another Kustomization, so the Namespace can exist first."
+
+  - id: ats018-030-01-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Tell the Flux Kustomization from the local kustomization.yaml file."
+    source_readings:
+      - sections/section-040/module-01/course-02-apply-paths-and-order-dependencies.md
+    prompt: "What is the difference between a Flux `Kustomization` and a `kustomization.yaml` file?"
+    options:
+      - id: a
+        text: "They are the same file, and Flux only renames it"
+        explanation: "They are two different things."
+      - id: b
+        text: "The Flux `Kustomization` is a file in Git, and `kustomization.yaml` is an object in the cluster"
+        explanation: "The roles are the other way round."
+      - id: c
+        text: "The Flux `Kustomization` is an object in the cluster that names a path to render and apply. The `kustomization.yaml` file lives in Git and tells Kustomize how to render"
+        explanation: "Correct. The Flux object names the directory, and the local file lists the resources and changes."
+      - id: d
+        text: "The `kustomization.yaml` file applies the objects to the cluster"
+        explanation: "Kustomize only renders. In Flux, the kustomize controller applies."
     correct_option: c
-    explanation: "The TaskRun is a record. The log is in the pod, in the container `step-<step name>`. The exit code is in `status.steps` of the TaskRun."
+    explanation: "The Flux `Kustomization` custom resource names a path and a source. The local file in that path tells Kustomize what to render."
 
-  - id: ats018-040-01-q08
+  - id: ats018-030-01-q06
     type: single_choice
-    difficulty: advanced
-    learning_objective: "Tell a broken definition from a failing step."
+    difficulty: intermediate
+    learning_objective: "Read a DependencyNotReady condition."
     source_readings:
-      - sections/section-040/module-01/course-03-reading-a-failed-taskrun.md
-    prompt: "A PipelineRun fails with the reason `InvalidWorkspaceBindings` and no pod exists. What does that tell you?"
+      - sections/section-040/module-01/course-02-apply-paths-and-order-dependencies.md
+    prompt: "The `scout` Kustomization shows `Ready=False DependencyNotReady: dependency 'flux-system/platform' not found`. The `GitRepository` is `Ready`. What does this tell you?"
     options:
       - id: a
-        text: "A step exited with a non-zero code"
-        explanation: "That gives a `StepFailed` reason on a TaskRun, and a pod exists."
+        text: "The applier stopped at the dependency check and has not tried to create the Deployment. Create the `platform` Kustomization"
+        explanation: "Correct. The source is fine. The `dependsOn` entry names a Kustomization that does not exist yet."
       - id: b
-        text: "The registry refused an image"
-        explanation: "That needs a pod that tries to pull the image."
+        text: "The repository credentials are wrong, so fix the Secret"
+        explanation: "The source is `Ready`, so the files were fetched."
       - id: c
-        text: "The resolver is turned off"
-        explanation: "A resolver problem shows as `CouldntGetTask`."
+        text: "The Deployment was rejected by the API server"
+        explanation: "The controller did not try to apply anything."
       - id: d
-        text: "The definition is broken, so the run failed before any pod was created"
-        explanation: "Correct. The run did not bind the workspace `shared` that the Pipeline requires."
-    correct_option: d
-    explanation: "Reasons such as `InvalidWorkspaceBindings` and `CouldntGetTask` mean a broken definition, and no pod is created. A finished run never changes: fix the definition and start a new run."
-
-  - id: ats018-040-01-q09
-    type: single_choice
-    difficulty: advanced
-    learning_objective: "Read a resolver error."
-    source_readings:
-      - sections/section-040/module-01/course-04-shared-tasks-with-resolvers.md
-    prompt: "A PipelineRun fails with `Failed(CouldntGetTask)` after you mistype `pathInRepo` for the git resolver. Which statement is true?"
-    options:
-      - id: a
-        text: "No TaskRun ran at all, because the controller resolves every Task before it starts the first one"
-        explanation: "Correct. Not even `fetch-source` ran."
-      - id: b
-        text: "`fetch-source` ran and only `run-tests` failed"
-        explanation: "The controller resolves all Tasks first, so no TaskRun started."
-      - id: c
-        text: "A pod exists, and its log holds the error"
-        explanation: "No Task started, so no pod exists. Read the PipelineRun message."
-      - id: d
-        text: "The git resolver is turned off"
-        explanation: "The message says the file does not exist, so the resolver worked and cloned the repository."
+        text: "The image tag does not exist, so fix it in Git"
+        explanation: "No pod was created, so no image was pulled."
     correct_option: a
-    explanation: "A wrong path fails the whole run before any Task starts. The end of the PipelineRun message comes from the git resolver and names the missing file."
+    explanation: "`dependsOn` blocks the apply until the named Kustomization is `Ready`. A missing dependency stops the applier before any object is created."
 
-  - id: ats018-040-01-q10
+  - id: ats018-030-01-q07
     type: single_choice
-    difficulty: advanced
-    learning_objective: "Pick the right revision for a shared Task."
+    difficulty: intermediate
+    learning_objective: "Read SUSPENDED and READY together."
     source_readings:
-      - sections/section-040/module-01/course-04-shared-tasks-with-resolvers.md
-    prompt: "The git resolver loads a Task with `revision: main`. The Task must not change between runs. What do you do?"
+      - sections/section-040/module-01/course-03-reconcile-suspend-and-resume.md
+    prompt: "After `flux suspend kustomization scout`, `flux get kustomizations` shows `SUSPENDED True` and `READY True`. Someone scales the Deployment by hand. What do these columns tell you?"
     options:
       - id: a
-        text: "Keep `main`, because a branch is fixed"
-        explanation: "A branch follows new commits, so the next run may get a different Task."
+        text: "The Deployment matches Git, because `READY` is `True`"
+        explanation: "`READY` records the last completed reconciliation. It is not a live check."
       - id: b
-        text: "Set `revision` to a tag or a commit ID"
-        explanation: "Correct. A tag or a commit ID names one fixed version of the Task."
+        text: "The Deployment and its pods were deleted"
+        explanation: "Suspension keeps the objects it applied."
       - id: c
-        text: "Set `gitToken` to a Secret"
-        explanation: "`gitToken` gives access to a private repository. It does not fix the version."
+        text: "The Kustomization is broken, because a suspended applier cannot be `Ready`"
+        explanation: "A suspended applier can keep an older `Ready` condition."
       - id: d
-        text: "Move the params of the Task under `taskRef.params`"
-        explanation: "Those params belong to the resolver, not to the Task."
-    correct_option: b
-    explanation: "The `provenance` field of the TaskRun records the commit ID that the Task came from. Pin a tag or a commit ID when the Task must stay the same."
+        text: "No new reconciliation runs, so the manual change stays until you resume"
+        explanation: "Correct. `READY` describes the last reconciliation. After `flux resume`, the controller restores the value in Git."
+    correct_option: d
+    explanation: "`SUSPENDED=True` means the controller does not reconcile. A `Ready` condition from before is not proof that the cluster matches Git."
+
+  - id: ats018-030-01-q08
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Request a reconciliation with a fresh source fetch."
+    source_readings:
+      - sections/section-040/module-01/course-03-reconcile-suspend-and-resume.md
+    prompt: "The repository has a new commit. You run `flux reconcile kustomization scout` and want the source fetched again before the apply. Which flag does that?"
+    options:
+      - id: a
+        text: "`--prune`"
+        explanation: "Pruning deletes objects that left the rendered files. It does not request a fresh fetch."
+      - id: b
+        text: "`--wait`"
+        explanation: "`wait` adds health checks to readiness. It does not request a fresh fetch."
+      - id: c
+        text: "`--with-source`"
+        explanation: "Correct. `flux reconcile kustomization --with-source` first requests a source fetch, so the applier uses the new artifact."
+      - id: d
+        text: "`--force`"
+        explanation: "Forcing an apply does not request a fresh fetch."
+    correct_option: c
+    explanation: "`flux resume` clears the suspension and waits for reconciliation. `flux reconcile kustomization ... --with-source` also fetches the source again."

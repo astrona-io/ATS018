@@ -2,9 +2,9 @@
 estimated_duration: 30m
 ---
 
-# Start A Workflow From A Git Push With Argo Events
+# Automate Image Updates With Flux
 
-Graded lab for the Argo Workflows module. The learner gets a WorkflowTemplate that starts in a folder that does not exist, a Gitea webhook that nothing answers and a ready EventBus. They fix the template, create the EventSource and the Sensor, push a commit and prove that the push started a Succeeded Workflow.
+Graded lab for the Flux image automation module. Flux delivers `scout` 6.14.0 from Git and the in-cluster registry also holds 6.15.0. The learner creates an `ImageRepository`, an `ImagePolicy` and an `ImageUpdateAutomation` so that Flux itself commits the newest tag to Git and delivers it.
 
 ```sh
 astrona run --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-040/module-03/labs/lab-01

@@ -1,75 +1,43 @@
-# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
 apiVersion: astrona.io/v1
 metadata:
   name: ats-018-lab-020-01
   docs:
     question: question.md
     solution: solution.md
-
 runtime:
   type: kind
   kind:
     image: kindest/node:v1.35.8
     preloadImages:
-      - curlimages/curl:8.22.0
-      - ghcr.io/stefanprodan/podinfo:6.15.0
-      - ghcr.io/stefanprodan/podinfo:6.14.0
-      - gitea/gitea:28.1.0-rootless
-      - quay.io/argoproj/argocd:v3.5.4
-      - public.ecr.aws/docker/library/redis:8.2.3-alpine
-  portForwards:
-    - name: argocd
-      description: "Argo CD API server and web page"
-      namespace: argocd
-      resource: svc/argocd-server
-      targetPort: 443
-      hostPort: 8080
-      scheme: https
-
+    - curlimages/curl:8.22.0
+    - ghcr.io/stefanprodan/podinfo:6.14.0
+    - ghcr.io/stefanprodan/podinfo:6.15.0
 bootstrap:
-  manifests:
-    - name: lab-start
-      type: file
-      source: manifests/lab-start.yaml
   init:
-    - name: install-gitea
-      description: "Starts the in-cluster Git server"
-      type: file
-      source: bootstrap/01-install-gitea.sh
-    - name: install-argocd
-      description: "Installs Argo CD 3.5.4 (non-HA, without Dex and notifications)"
-      type: file
-      source: bootstrap/02-install-argocd.sh
-    - name: seed
-      description: "Pushes the private scout-deploy repository into Git"
-      type: file
-      source: bootstrap/03-seed.sh
-  waitFor:
-    - resource: deploy/shuttle
-      namespace: starfleet
-
+  - name: helm-cli
+    description: Installs Helm 4.3.0 in the terminal
+    type: file
+    source: bootstrap/00-install-helm.sh
+  - name: lab-start
+    description: Creates namespaces and the shuttle client
+    type: file
+    source: bootstrap/01-seed-cluster.sh
 testing:
   init:
-    - name: verify-unfinished-state
-      description: Require a ready API and an explicit grader rejection before solving
-      type: file
-      source: testing/verify-start.sh
-      timeout: 10m
-    - name: solution
-      description: Reference solution applied by `astrona test`
-      type: file
-      source: solution/apply.sh
-
+  - name: verify-unfinished-state
+    description: Require a ready API and an explicit grader rejection before solving
+    type: file
+    source: testing/verify-start.sh
+    timeout: 10m
+  - name: solution
+    description: Reference solution for this task
+    type: file
+    source: solution/apply.sh
 validation:
   scripts:
-    - name: application-definition
-      description: The repository Secret and the Application exist with automated sync, prune and self-heal
-      type: file
-      source: validation/validate-application.sh
-    - name: delivered-and-self-healing
-      description: Argo CD delivered scout 6.15.0 to starfleet-staging and reverts a manual scale
-      type: file
-      source: validation/validate-delivery.sh
-
+  - name: chart-release
+    description: Chart files match the deployed release and the required workload
+    type: file
+    source: validation/validate-chart-release.sh
 teardown:
   keepCluster: false

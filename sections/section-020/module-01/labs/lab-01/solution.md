@@ -1,117 +1,137 @@
-# Solution
+# Solution Walkthrough
 
-Argo CD can only deliver what it can read, so the work has three parts: give Argo CD access to the repository, tell it what to deliver in an `Application`, and check the result.
+Install the starter chart, add the required template field and values, then verify the upgraded release. A release is an installed copy of a Helm chart. A revision records one release operation.
+
+| Goal | Where it lives | Command or file |
+| --- | --- | --- |
+| Resource structure | Chart templates | `scout/templates/deployment.yaml` |
+| Environment settings | Values override | `production-values.yaml` |
+| Package identity | Chart metadata | `scout/Chart.yaml` |
+
+## The feedback loop
 
 Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
 
 ```sh
-astrona submit --watch -c sections/section-020/module-01/labs/lab-01
+astrona submit --watch --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-020/module-01/labs/lab-01
 ```
 
 Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
 
-## Step 1: save the repository Secret
+The `chart-release` check needs work at startup. These are expected conditions, not a captured grading transcript.
 
-Argo CD reads repository credentials from Secrets in its own namespace that carry the label `argocd.argoproj.io/secret-type: repository`. The `url` in the Secret must match the `repoURL` of the `Application`.
+## Step 1: Install the baseline
 
-Save this as `secret-repo-scout-deploy.yaml`:
+Use the terminal where `kubectl` points at the lab. Read the starter metadata and values before changing them:
+
+```sh
+export PATH="$HOME/.astrona/bin:$PATH"
+cd ~/resources
+cat scout/Chart.yaml
+cat scout/values.yaml
+helm lint ./scout
+helm template scout ./scout --namespace starfleet-production
+helm install scout ./scout --namespace starfleet-production --wait=watcher --timeout 180s
+helm history scout --namespace starfleet-production
+```
+
+Look for the initial revision with image `6.14.0`. No full check is ready yet: the chart requirements need the later upgrade.
+
+## Step 2: Complete and deploy the chart
+
+Save this as `~/resources/scout/templates/deployment.yaml`:
 
 ```yaml
-apiVersion: v1
-kind: Secret
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: repo-scout-deploy
-  namespace: argocd
+  name: {{ .Release.Name }}
   labels:
-    argocd.argoproj.io/secret-type: repository
-stringData:
-  type: git
-  url: http://gitea-http.gitea.svc:3000/starfleet/scout-deploy.git
-  username: platform
-  password: starfleet-gitops
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: scout
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - name: http
+              containerPort: 9898
+          env:
+            - name: PODINFO_UI_MESSAGE
+              value: {{ .Values.message | quote }}
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
 ```
 
-Apply it:
+`metadata.name` and the labels use the release name. The selector matches the pod labels. `replicas` reads the requested count, and `image` combines the repository and tag. The new `env` entry reads `.Values.message`; `quote` makes it a string. The probe checks `/readyz` on the named port. Resource requests and the memory limit keep the small workload bounded.
 
-```sh
-kubectl apply -f secret-repo-scout-deploy.yaml
-```
-
-Without this Secret, the `repo-server` cannot clone the private repository, and the `Application` shows a `ComparisonError` condition.
-
-## Step 2: save the Application
-
-The `Application` says which Git path to render and which cluster and namespace to sync it to. `CreateNamespace=true` lets Argo CD create `starfleet-staging`. `automated` with `prune` and `selfHeal` makes Argo CD follow Git, delete what leaves Git and revert manual changes.
-
-Save this as `application-scout-staging.yaml`:
+Save this as `~/resources/scout/Chart.yaml`:
 
 ```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: scout-staging
-  namespace: argocd
-spec:
-  project: default
-  source:
-    repoURL: http://gitea-http.gitea.svc:3000/starfleet/scout-deploy.git
-    targetRevision: main
-    path: overlays/staging
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: starfleet-staging
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
+apiVersion: v2
+name: scout
+description: A small podinfo workload for release practice
+type: application
+version: 0.2.0
+appVersion: "6.15.0"
 ```
+
+`apiVersion` selects the chart format, and `name` identifies the chart. `type: application` describes an installable workload chart. `version` identifies the chart package; `appVersion` describes the application without changing the image.
+
+Save this as `~/resources/production-values.yaml`:
+
+```yaml
+replicaCount: 2
+image:
+  tag: "6.15.0"
+message: release-ready
+```
+
+`replicaCount` sets two pods. `image.tag` selects the new application image while retaining the default repository. `message` supplies the environment variable's value.
+
+Check the chart and rendered Deployment:
+
+```sh
+cd ~/resources
+helm lint ./scout -f production-values.yaml
+helm template scout ./scout --namespace starfleet-production -f production-values.yaml
+```
+
+Look for two replicas, image `6.15.0` and the required message.
 
 Apply it:
 
 ```sh
-kubectl apply -f application-scout-staging.yaml
+helm upgrade --install scout ./scout --namespace starfleet-production --create-namespace -f production-values.yaml --wait=watcher --timeout 180s
 ```
 
-## Step 3: check the result
-
-Read the sync status and the health status of the `Application`. Both can take up to a minute to settle while the pod starts:
+Then check the result:
 
 ```sh
-kubectl -n argocd get application scout-staging
+helm list --namespace starfleet-production
+kubectl -n starfleet exec deploy/shuttle -- curl -fsS http://scout.starfleet-production/
 ```
 
-The columns `SYNC STATUS` and `HEALTH STATUS` must read `Synced` and `Healthy`. If the sync status is `Unknown`, read the conditions with `kubectl -n argocd get application scout-staging -o jsonpath='{.status.conditions}'`; a repository error there means Step 1 is wrong.
+Look for chart `scout-0.2.0`, application version `6.15.0` and message `release-ready`.
 
-Send a request from `shuttle`:
+The watch terminal shows the `chart-release` check passing. If pods are still settling, wait for the Deployment with `kubectl -n starfleet-production rollout status deploy/scout --timeout=180s`.
 
-```sh
-kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.starfleet-staging/
-```
+## Finish
 
-The JSON response must contain `"version": "6.15.0"` and `"message": "staging"`.
-
-## Step 4: check self-heal
-
-Scale the Deployment by hand, then read the replica count again after a few seconds:
-
-```sh
-kubectl -n starfleet-staging scale deploy/scout --replicas=3
-kubectl -n starfleet-staging get deploy scout
-```
-
-The application controller sees the drift and syncs again, so the Deployment returns to 1 replica. If it stays at 3, check that `selfHeal: true` is in the `Application` under `spec.syncPolicy.automated`.
-
-Stop the watch with Ctrl-C, then run the plain command once:
-
-```sh
-astrona submit -c sections/section-020/module-01/labs/lab-01
-```
-
-## Common mistakes
-
-- Applying the overlay with `kubectl apply -k`. The objects then have no Argo CD tracking annotation, and the grader rejects them.
-- Writing the repository URL without `.git` in the Secret but with it in the `Application` (or the other way round). Argo CD then finds no credentials.
-- Putting `selfHeal` or `prune` directly under `syncPolicy` instead of under `syncPolicy.automated`.
-- Creating the namespace by hand instead of using `CreateNamespace=true`.
+The chart-release check compares the saved chart and values to the deployed manifest, then checks the live application response. Stop the watch and submit the final attempt when it passes. Practice history-based recovery in the next independent lab.

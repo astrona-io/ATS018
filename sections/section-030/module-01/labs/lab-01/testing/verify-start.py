@@ -44,7 +44,7 @@ def verify(lab, graders):
     raise RuntimeError('all graders passed before the reference solution')
 
 
-GRADERS = ['validation/validate-flux-objects.sh', 'validation/validate-change-from-git.sh', 'validation/validate-resumed-kustomization.sh']
+GRADERS = ['validation/validate-application.sh', 'validation/validate-delivery.sh']
 
 if __name__ == '__main__':
     try:

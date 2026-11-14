@@ -1,36 +1,35 @@
-# Roll Out A Canary With Argo Rollouts — Playground
+# Build Tekton Tasks And Pipelines — Playground
 
 - **ID:** PLAYGROUND
 - **Slug:** ats-018-playground-050-01
 - **Author:** Paris Nakita Kejser
-- **Type:** Astrona playground — clean environment, no grading
+- **Type:** Astrona playground — clean environment, no task, no grading
 
-A single-node kind cluster (`kindest/node:v1.35.8`) with the Argo Rollouts
-1.10.0 controller in `argo-rollouts`. Namespace `starfleet` starts with a
-five-replica `scout` Deployment on podinfo 6.14.0, its Service and the
-`shuttle` client. Images 6.14.0 and 6.15.0 are preloaded. No Rollout, traffic
-router or metrics provider exists. Nothing to submit.
-
-Use `kubectl` 1.35.8 and `kubectl-argo-rollouts` 1.10.0 on the host, with the
-plugin executable on `PATH`. Bootstrap needs outbound internet to fetch the
-pinned controller install manifest. Scripts use macOS-compatible bash.
+A single-node kind cluster (Kubernetes 1.35, `kindest/node:v1.35.8`) with
+Tekton Pipelines 1.17.0 and its remote resolvers, the public Gitea repository
+`starfleet/scout-app` (`VERSION`, `test.sh`, `tekton/run-tests.yaml`) and the
+`run-tests` Task in `starfleet`, which fails on purpose because its
+`workingDir` is `/workspace/wrong`. Nothing to submit.
 
 ## Run it
 
 ```sh
-astrona run -c sections/section-050/module-01/playground --trust
+astrona run -c .
 astrona destroy ats-018-playground-050-01
 ```
 
-Run these commands from the course root. Destroy takes `metadata.name`, not
-the configuration path. The learner writes the Rollout manifest locally;
-bootstrap deliberately leaves the application as a Deployment.
+The Tekton images are pulled at start, not preloaded: they are pinned by
+digest in the release manifest, and preloading digest-pinned images makes the
+pods fail with `CreateContainerError`.
 
 ## Layout
 
 | Path | Purpose |
 | --- | --- |
-| `config.yaml` | Runtime, preloaded images, bootstrap and readiness checks |
-| `bootstrap/01-install-argo-rollouts.sh` | Installs the pinned controller and waits for it |
-| `manifests/lab-start.yaml` | Namespace, starting application, Service and client |
-| `docs/overview.md` | Environment contents, readable helpers and practice tasks |
+| `config.yaml` | Environment definition (runtime, preloaded images, bootstrap order) |
+| `bootstrap/01-install-gitea.sh` | Starts Gitea and creates the user `platform` |
+| `bootstrap/02-install-tekton.sh` | Installs Tekton Pipelines 1.17.0 and waits for its webhook |
+| `bootstrap/03-seed.sh`, `seed-repo.sh` | Pushes `repos/scout-app` as a public repository and installs the broken Task |
+| `manifests/` | Namespace, `shuttle`, Gitea and the `run-tests` Task |
+| `repos/scout-app/` | Source files pushed into Gitea |
+| `docs/overview.md` | What the environment contains and ideas to try |

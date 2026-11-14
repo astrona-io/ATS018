@@ -2,18 +2,17 @@
 
 Solve this question on: `terminal`
 
-The `scout` application in the namespace `starfleet` runs as a plain Deployment with 5 replicas of podinfo `6.14.0`. The `outpost` team wants every new version to reach 20 percent and 60 percent of the pods first, with a person approving each step. The Argo Rollouts controller is already installed.
+The `drifter` team keeps its continuous integration pipeline in the namespace `starfleet`. The Pipeline `scout-ci` clones the Git repository `scout-app` with the Task `fetch-source`, then tests it with the Task `run-tests`. Nobody has run the pipeline since the last change to `run-tests`, and the team expects it to fail.
 
-Replace the Deployment with an Argo Rollouts `Rollout` named `scout`, then release podinfo `6.15.0` through its steps.
+Start the Pipeline, find out why it fails, and fix the cause. Do not delete the Task `run-tests`, do not remove the call to `test.sh` from it, and do not remove a Task from the Pipeline.
 
 When you finish, these must be true:
 
-- The Deployment `scout` no longer exists in `starfleet`. The Rollout `scout` has 5 replicas, selects the pods with the label `app=scout` and keeps the existing Service `scout` working.
-- The Rollout uses the `canary` strategy. Its first step is `setWeight: 20`, and the step after it is a `pause` with no duration (it waits until a person promotes it). `maxUnavailable` is `0`.
-- The Rollout started on `6.14.0` and was then updated to the image `ghcr.io/stefanprodan/podinfo:6.15.0`, so the release moved through its canary steps.
-- The Rollout is `Healthy`, its stable ReplicaSet is the `6.15.0` one, and 5 pods are ready.
-- A request from the `shuttle` pod to `http://scout.starfleet/` returns version `6.15.0`.
+- The Task `run-tests` in `starfleet` still runs `test.sh`, and its step starts in the `source` workspace.
+- The Pipeline `scout-ci` still runs `fetch-source` and then `run-tests`.
+- A new `PipelineRun` of `scout-ci` has the status `Succeeded`. Give its workspace `shared` a `volumeClaimTemplate`.
+- The Pipeline result `version` of that run is `6.15.0`.
 
-Do not delete the Service. Do not skip the release by creating the Rollout directly on `6.15.0`, and do not use `promote --full`.
+The `tkn` command-line tool and `kubectl` are installed. Tekton uses the Gitea repository `http://gitea-http.gitea.svc:3000/starfleet/scout-app.git`, which is public.
 
 Check your work with `astrona submit`.

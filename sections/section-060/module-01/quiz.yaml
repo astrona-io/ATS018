@@ -3,7 +3,7 @@
 # schemas/question-bank.schema.json. Keep question ids stable once published.
 schema_version: 1
 kind: question_bank
-id: ats018-060-01
+id: ats018-040-03
 course_id: ATS018
 exam_code: CNPE
 status: alpha
@@ -11,234 +11,280 @@ provenance: "Original practice material written for this course; not official ex
 scope:
   type: module
   id: section-060/module-01
-  title: "Deliver Infrastructure Objects With Crossplane And GitOps"
+  title: "Run CI Workflows With Argo Workflows"
 questions:
-  - id: ats018-060-01-q01
+  - id: ats018-040-03-q01
     type: single_choice
     difficulty: beginner
-    learning_objective: "Tell a Provider from a Function."
+    learning_objective: "Name the containers of a Workflow task pod."
     source_readings:
-      - sections/section-060/module-01/course-01-providers-and-functions.md
-    prompt: "What is the job of a Crossplane `Provider` and of a `Function`?"
+      - sections/section-060/module-01/course-01-a-workflow-with-a-dag.md
+    prompt: "A task of an Argo Workflow finished. `kubectl get pods` shows its pod as `0/2` ready with the status `Completed`. What are the two containers?"
     options:
       - id: a
-        text: "A `Provider` runs a controller and adds kinds for one kind of external system. A `Function` is a small service that a `Composition` calls to decide which objects a composite resource needs"
-        explanation: "Correct. In this module `provider-kubernetes` creates the objects and `function-patch-and-transform` copies fields."
+        text: "`main`, which runs your image, and `wait`, the Argo executor that collects the outputs"
+        explanation: "Correct. Both have ended, so the pod shows `0/2` ready."
       - id: b
-        text: "A `Provider` defines the new API kind, and a `Function` applies it to Git"
-        explanation: "The `CompositeResourceDefinition` defines a new kind, and neither package talks to Git."
+        text: "`init` and `main`, because every pod has an init container"
+        explanation: "Init containers are not counted in the regular-container ready column. Their presence does not explain the two regular containers shown here."
       - id: c
-        text: "Both are Helm charts that start the `crossplane` core pod"
-        explanation: "The chart starts the core pods. Providers and functions are packages that Crossplane installs."
+        text: "`step-main` and `step-wait`, named after the steps"
+        explanation: "Those names belong to Tekton, not to Argo Workflows."
       - id: d
-        text: "A `Provider` stores credentials, and a `Function` stores the pod template"
-        explanation: "Credentials go in a `ClusterProviderConfig`."
+        text: "`argo-server` and `main`"
+        explanation: "The Argo server is not part of a task pod."
     correct_option: a
-    explanation: "Core Crossplane stores and compares objects. The packages add the ability to create things."
+    explanation: "The `main` container holds the output of your command. The `wait` container holds the executor log lines. `0/2` is normal for a finished task."
 
-  - id: ats018-060-01-q02
+  - id: ats018-040-03-q02
     type: single_choice
     difficulty: intermediate
-    learning_objective: "Check a package is working."
+    learning_objective: "Read how a DAG orders tasks."
     source_readings:
-      - sections/section-060/module-01/course-01-providers-and-functions.md
-    prompt: "`kubectl get providers.pkg.crossplane.io` shows `INSTALLED True` and `HEALTHY False`. What does this mean?"
+      - sections/section-060/module-01/course-01-a-workflow-with-a-dag.md
+    prompt: "In a DAG template, `read-version` and `test` both have `depends: clone`. When do they start?"
     options:
       - id: a
-        text: "The package works and you can create objects"
-        explanation: "`HEALTHY False` means it does not answer yet."
+        text: "One after the other, in the order of the list"
+        explanation: "The list order does not decide the start."
       - id: b
-        text: "The core controller downloaded the package, but the package pod is still starting or cannot pull its image"
-        explanation: "Correct. Check `HEALTHY True` before you create anything that depends on the package."
+        text: "At the same time, as soon as `clone` is done"
+        explanation: "Correct. Tasks without a dependency between them run at the same time."
       - id: c
-        text: "The package version is not pinned"
-        explanation: "The version has no link to these columns."
+        text: "Before `clone`, because a DAG template starts all tasks together"
+        explanation: "A task starts when its dependencies are done."
       - id: d
-        text: "The `ClusterProviderConfig` is missing"
-        explanation: "A missing configuration is a different problem."
+        text: "Never, because a DAG template does not run anything"
+        explanation: "The DAG template itself runs nothing, but its tasks run as pods."
     correct_option: b
-    explanation: "`INSTALLED` and `HEALTHY` are two different checks."
+    explanation: "The controller starts a task as soon as its dependencies are done. The ages of the pods show `read-version` and `test` starting together."
 
-  - id: ats018-060-01-q03
+  - id: ats018-040-03-q03
     type: single_choice
     difficulty: intermediate
-    learning_objective: "Give the provider permissions."
+    learning_objective: "Pass an output parameter between tasks."
     source_readings:
-      - sections/section-060/module-01/course-01-providers-and-functions.md
-    prompt: "`provider-kubernetes` uses `credentials.source: InjectedIdentity`. It cannot create Deployments. What is missing?"
+      - sections/section-060/module-01/course-01-a-workflow-with-a-dag.md
+    prompt: "Task `read-version` writes the version to the file `/tmp/version` and declares it as an output parameter `version`. How does task `report` receive it?"
     options:
       - id: a
-        text: "A `Function` for Deployments"
-        explanation: "Functions do not grant permissions."
+        text: "As an argument with the value `{{tasks.read-version.outputs.parameters.version}}`"
+        explanation: "Correct. The `wait` container reads the file and reports the value to the controller."
       - id: b
-        text: "A larger `package` version"
-        explanation: "A version does not grant permissions."
+        text: "With `{{workflow.parameters.version}}`, which reads any output"
+        explanation: "That reads a Workflow parameter, not the output of a task."
       - id: c
-        text: "A `ClusterRole` and a `ClusterRoleBinding` for the provider service account"
-        explanation: "Correct. The provider acts as its own service account, and Kubernetes denies what no role allows."
+        text: "With `$(tasks.read-version.results.version)`, which is the Argo Workflows syntax"
+        explanation: "That is the Tekton syntax."
       - id: d
-        text: "A second `Provider`"
-        explanation: "One provider is enough."
+        text: "It cannot, because tasks only share data through a volume"
+        explanation: "A volume carries files. Parameters pass small values."
+    correct_option: a
+    explanation: "The Workflow shows three ways to move data: a Workflow parameter, an output parameter of a task, and a volume from `volumeClaimTemplates`."
+
+  - id: ats018-040-03-q04
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Start a run from a WorkflowTemplate."
+    source_readings:
+      - sections/section-060/module-01/course-02-reuse-a-workflow-with-a-workflowtemplate.md
+    prompt: "A `WorkflowTemplate` named `scout-ci` holds a DAG. Which field of a new Workflow starts a run from it?"
+    options:
+      - id: a
+        text: "`spec.templates[0].name: scout-ci`"
+        explanation: "That defines a template inside the Workflow instead of referring to the object."
+      - id: b
+        text: "`spec.serviceAccountName: scout-ci`"
+        explanation: "That selects a ServiceAccount."
+      - id: c
+        text: "`spec.workflowTemplateRef.name: scout-ci`"
+        explanation: "Correct. The Workflow holds the name and the arguments, and the controller reads the rest from the template."
+      - id: d
+        text: "`metadata.generateName: scout-ci-`"
+        explanation: "That only sets the name prefix of the Workflow."
     correct_option: c
-    explanation: "Add the API group and resource of every kind you wrap in an `Object` to the `ClusterRole`."
+    explanation: "A `WorkflowTemplate` never runs by itself. A Workflow names it, and its `arguments` replace the default arguments of the template."
 
-  - id: ats018-060-01-q04
+  - id: ats018-040-03-q05
     type: single_choice
     difficulty: intermediate
-    learning_objective: "Define a new kind."
+    learning_objective: "Tell Error from Failed for a missing template."
     source_readings:
-      - sections/section-060/module-01/course-02-define-an-api-with-an-xrd-and-a-composition.md
-    prompt: "Which object defines the new kind `ScoutEnvironment` and its fields, and which maps it to real objects?"
+      - sections/section-060/module-01/course-02-reuse-a-workflow-with-a-workflowtemplate.md
+    prompt: "A Workflow refers to the template `scout-ci` that does not exist. `kubectl get workflows` shows the phase `Error` and the message `workflowtemplates.argoproj.io \"scout-ci\" not found`. What does the phase mean?"
     options:
       - id: a
-        text: "A `Composition` defines the kind, and the XRD maps it"
-        explanation: "The roles are the other way around."
+        text: "The controller could not start the run, and no pod exists"
+        explanation: "Correct. `Error` means the run could not work as it should."
       - id: b
-        text: "A `CompositeResourceDefinition` defines the kind, and a `Composition` maps it to the objects Crossplane creates"
-        explanation: "Correct. The XRD name is the plural name plus the group."
+        text: "A container ended with a non-zero exit code"
+        explanation: "That gives `Failed`."
       - id: c
-        text: "A `ClusterProviderConfig` defines the kind, and a `Function` maps it"
-        explanation: "A `ClusterProviderConfig` holds connection and credential details."
+        text: "A task depended on a failed task"
+        explanation: "That task is `Omitted`."
       - id: d
-        text: "An `Object` defines the kind, and a `Provider` maps it"
-        explanation: "An `Object` wraps one Kubernetes manifest."
-    correct_option: b
-    explanation: "The XRD says what a team can ask for. The `Composition` says what Crossplane creates."
+        text: "The tests inside the pod failed"
+        explanation: "No pod ran, so no test ran."
+    correct_option: a
+    explanation: "`Failed` means a node ran and ended with a failure. `Error` means the controller could not run the Workflow, for example a missing template. After you create the template, start a new Workflow."
 
-  - id: ats018-060-01-q05
-    type: single_choice
-    difficulty: advanced
-    learning_objective: "Write a safe readiness rule."
-    source_readings:
-      - sections/section-060/module-01/course-02-define-an-api-with-an-xrd-and-a-composition.md
-    prompt: "By default an `Object` is Ready when the provider created it. Why does the `Composition` add a CEL readiness query on the Deployment?"
-    options:
-      - id: a
-        text: "So the Deployment starts faster"
-        explanation: "A query does not speed up pods."
-      - id: b
-        text: "So the XR is Ready only when all replicas are updated and available, not when pods cannot start"
-        explanation: "Correct. The query reads the observed Deployment."
-      - id: c
-        text: "So Argo CD can read the sync wave"
-        explanation: "Argo CD reads an annotation, not the query."
-      - id: d
-        text: "So the namespace is copied into the manifest"
-        explanation: "A patch does that."
-    correct_option: b
-    explanation: "Without a rule, an environment is Ready even when its pods fail."
-
-  - id: ats018-060-01-q06
-    type: single_choice
-    difficulty: advanced
-    learning_objective: "Order objects in Argo CD."
-    source_readings:
-      - sections/section-060/module-01/course-03-deliver-the-platform-with-argo-cd.md
-    prompt: "How does the `Application` apply the XRD before the XRs on an empty cluster?"
-    options:
-      - id: a
-        text: "It sorts files by name"
-        explanation: "Names do not decide the order."
-      - id: b
-        text: "It uses sync waves, and `SkipDryRunOnMissingResource=true` skips the dry run for kinds that do not exist yet"
-        explanation: "Correct. The lowest wave applies first, and Argo CD waits until its objects are healthy."
-      - id: c
-        text: "It uses `dependsOn`"
-        explanation: "`dependsOn` belongs to Flux."
-      - id: d
-        text: "It applies all objects at once and retries forever"
-        explanation: "A dry run of the XR fails while its kind is missing."
-    correct_option: b
-    explanation: "The repository uses wave -2 for the XRD, -1 for the Composition and 0 for the XRs."
-
-  - id: ats018-060-01-q07
-    type: single_choice
-    difficulty: advanced
-    learning_objective: "Close the health gap in Argo CD."
-    source_readings:
-      - sections/section-060/module-01/course-03-deliver-the-platform-with-argo-cd.md
-    prompt: "The Application is `Healthy`, but production is not Ready, and the `HEALTH` column of the XRs is blank. What is the fix?"
-    options:
-      - id: a
-        text: "Turn on self-heal"
-        explanation: "Self-heal does not add a health check."
-      - id: b
-        text: "Add a Lua health check for `ScoutEnvironment` in the key `resource.customizations.health.platform.starfleet.dev_ScoutEnvironment` of `argocd-cm`"
-        explanation: "Correct. The script reads the `Ready` condition of the XR."
-      - id: c
-        text: "Delete the production XR"
-        explanation: "That removes the problem from view only."
-      - id: d
-        text: "Restart the Crossplane pods"
-        explanation: "The blank column is an Argo CD gap."
-    correct_option: b
-    explanation: "Argo CD has no built-in check for a kind it has never seen. A wrong key is silently ignored."
-
-  - id: ats018-060-01-q08
-    type: single_choice
-    difficulty: advanced
-    learning_objective: "Trace a failing composite resource."
-    source_readings:
-      - sections/section-060/module-01/course-04-diagnose-a-composite-resource-that-is-not-ready.md
-    prompt: "An XR is `Ready=False`. The `Object` for the Deployment shows `Synced=True` and `Ready=False`. Where is the problem?"
-    options:
-      - id: a
-        text: "In the provider, because it could not create the Deployment"
-        explanation: "`Synced=True` means the provider created it without an error."
-      - id: b
-        text: "In Crossplane, because it could not compose"
-        explanation: "Crossplane composed the resources."
-      - id: c
-        text: "In the real Deployment or its pods, so read the pods and events next"
-        explanation: "Correct. The readiness rule is not met, so check the image or the pod."
-      - id: d
-        text: "In Argo CD, because it did not sync"
-        explanation: "Argo CD is not part of these layers."
-    correct_option: c
-    explanation: "Go down: XR, `Object`, real objects, pods. In the module the cause was an image tag that does not exist."
-
-  - id: ats018-060-01-q09
+  - id: ats018-040-03-q06
     type: single_choice
     difficulty: intermediate
-    learning_objective: "Place the fix."
+    learning_objective: "Read a failed DAG Workflow."
     source_readings:
-      - sections/section-060/module-01/course-04-diagnose-a-composite-resource-that-is-not-ready.md
-    prompt: "Production asks for the version `6.99.0`, which does not exist. Where do you change it?"
+      - sections/section-060/module-01/course-03-read-a-failed-workflow.md
+    prompt: "A DAG Workflow has the phase `Failed`. The nodes show `clone` as `Failed` and `read-version`, `test` and `report` as `Omitted`. Where is the cause?"
     options:
       - id: a
-        text: "In the Deployment with `kubectl edit`"
-        explanation: "Crossplane restores the value from the XR."
+        text: "In the log of the `report` pod, because it is the last task"
+        explanation: "`Omitted` tasks did not run, so they have no log."
       - id: b
-        text: "In the pod events"
-        explanation: "Events are output, not input."
+        text: "In all four nodes, because each one has its own error"
+        explanation: "Three of the nodes are only a result of the failure."
       - id: c
-        text: "In the `Object`"
-        explanation: "The `Object` is owned by Crossplane."
+        text: "In the `WorkflowTemplate`, which you must edit and wait for"
+        explanation: "Read the failed node first. The template may be fine."
       - id: d
-        text: "In `spec.version` of the XR in Git, so the delivery tool applies it"
-        explanation: "Correct. The XR is the single source of the value."
+        text: "In the log of the `main` container of the `clone` pod"
+        explanation: "Correct. Only the node with the phase `Failed` or `Error` holds the cause."
     correct_option: d
-    explanation: "With self-heal, the controller also reverts a live edit of the XR."
+    explanation: "Read the phase of the Workflow, then the nodes in `status.nodes`, then the log of the pod of the failed node. In the example, `git` said that the remote branch `nope` was not found."
 
-  - id: ats018-060-01-q10
+  - id: ats018-040-03-q07
     type: single_choice
-    difficulty: advanced
-    learning_objective: "Map Argo CD to Flux."
+    difficulty: intermediate
+    learning_objective: "Read the logs of all pods of a Workflow."
     source_readings:
-      - sections/section-060/module-01/course-05-deliver-the-platform-with-flux.md
-    prompt: "Which Flux feature replaces sync waves, and which replaces the Lua health script?"
+      - sections/section-060/module-01/course-03-read-a-failed-workflow.md
+    prompt: "A DAG Workflow has several pods. Which command reads the `main` logs of all of them, with the pod name in front of each line?"
     options:
       - id: a
-        text: "`dependsOn` between two Kustomizations replaces sync waves, and `wait: true` replaces the Lua script"
-        explanation: "Correct. `wait` reads the `Ready` condition that Crossplane sets."
+        text: "`kubectl -n starfleet logs <workflow name> -c main`"
+        explanation: "This only works when the Workflow has a single pod."
       - id: b
-        text: "`prune: true` replaces sync waves, and `interval` replaces the script"
-        explanation: "`prune` removes what left Git."
+        text: "`kubectl -n starfleet logs -l workflows.argoproj.io/workflow=<workflow name> -c main --prefix`"
+        explanation: "Correct. The label is on every pod of the Workflow."
       - id: c
-        text: "`GitRepository` replaces sync waves, and `timeout` replaces the script"
-        explanation: "A `GitRepository` fetches Git."
+        text: "`kubectl -n starfleet describe workflow <workflow name> -c main`"
+        explanation: "`describe` shows the object. It does not read container logs."
       - id: d
-        text: "Flux has no replacement"
-        explanation: "Flux has both."
+        text: "`kubectl -n argo-events logs -l sensor-name=push-ci`"
+        explanation: "That reads the log of a Sensor, not of a Workflow."
+    correct_option: b
+    explanation: "Use the label `workflows.argoproj.io/workflow=<name>` to select the pods. Filter out the `level=INFO` lines to read only your own output."
+
+  - id: ats018-040-03-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Read the phases of an Argo Workflow."
+    source_readings:
+      - sections/section-060/module-01/course-03-read-a-failed-workflow.md
+    prompt: "A Workflow ends in `Error`, and the command in its `main` container works when you run it by hand. The message names `workflowtaskresults` and the `default` ServiceAccount. What is the cause?"
+    options:
+      - id: a
+        text: "A container exited with a non-zero code"
+        explanation: "That gives `Failed`, not `Error`."
+      - id: b
+        text: "The EventBus has too many replicas"
+        explanation: "The EventBus does not affect a running Workflow."
+      - id: c
+        text: "The ServiceAccount may not create `workflowtaskresults`, so the executor cannot report the result"
+        explanation: "Correct. The executor in the `wait` container needs that right."
+      - id: d
+        text: "A task depended on a failed task"
+        explanation: "That task is `Omitted`."
+    correct_option: c
+    explanation: "`Failed` means a container exited with a non-zero code. `Error` means the controller or the executor could not do its work. Set `spec.serviceAccountName: workflow-runner`, which has a Role with that permission."
+
+  - id: ats018-040-03-q09
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Name the objects of Argo Events."
+    source_readings:
+      - sections/section-060/module-01/course-04-start-a-workflow-from-a-git-push.md
+    prompt: "A Git push must create a Workflow. Which object receives the webhook, which carries the event inside the cluster, and which filters it and creates the Workflow?"
+    options:
+      - id: a
+        text: "`Sensor`, `EventBus`, `EventSource`"
+        explanation: "The `Sensor` is the last one, not the first."
+      - id: b
+        text: "`EventBus`, `Sensor`, `EventSource`"
+        explanation: "The `EventBus` does not receive webhooks."
+      - id: c
+        text: "`EventSource`, `Sensor`, `EventBus`"
+        explanation: "The `Sensor` filters and triggers. The `EventBus` carries events."
+      - id: d
+        text: "`EventSource`, `EventBus`, `Sensor`"
+        explanation: "Correct. A `webhook` event source receives the push, the bus carries it, and the `Sensor` filters it with a data filter on `body.ref` and runs the trigger."
+    correct_option: d
+    explanation: "Argo Workflows cannot listen for a push. Argo Events does it, and a push to another branch reaches the event source but the Sensor drops it."
+
+  - id: ats018-040-03-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Find why a Sensor creates no Workflow."
+    source_readings:
+      - sections/section-060/module-01/course-04-start-a-workflow-from-a-git-push.md
+    prompt: "A push to `main` reaches the `EventSource`, but no Workflow appears. The Sensor uses the ServiceAccount `workflow-submitter`. Where do you look first?"
+    options:
+      - id: a
+        text: "In the Sensor pod log, with `kubectl -n argo-events logs -l sensor-name=push-ci`"
+        explanation: "Correct. A missing Role shows only there, for example a `forbidden` error on `workflowtemplates`."
+      - id: b
+        text: "In `kubectl -n starfleet get workflows`, which lists the error"
+        explanation: "No Workflow exists, so that list has no error to show."
+      - id: c
+        text: "In the log of the Gitea pod, because it creates the Workflow"
+        explanation: "Gitea only sends the webhook."
+      - id: d
+        text: "In the Argo CD `Application`, because it creates Workflows"
+        explanation: "Argo CD plays no part in this path."
     correct_option: a
-    explanation: "Keep the API and the instances in two Kustomizations so the kind exists first."
+    explanation: "The `submit` operation needs the right to create Workflows and to read `workflowtemplates`. Without the Role, the Sensor creates nothing, and the error is only in the Sensor pod log."
+  - id: ats018-040-03-q11
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: Pass a step output to a checksum operation without changing its bytes.
+    source_readings:
+    - sections/section-060/module-01/course-06-pass-a-step-output-through-a-checksum-check.md
+    prompt: An Argo step emits a payload. A later step must hash exactly those bytes, including spaces, before publishing.
+      Which approach preserves the checksum input?
+    options:
+    - id: a
+      text: Interpolate the payload directly into a shell command and use echo
+      explanation: Shell interpretation and an added newline can change the bytes.
+    - id: b
+      text: Pass the output parameter through an environment variable and use printf %s with a quoted expansion
+      explanation: Quoting avoids splitting and globbing; printf does not append a newline.
+    - id: c
+      text: Hash the output parameter name
+      explanation: The name identifies the value but is not the payload.
+    - id: d
+      text: Publish and compute the checksum in parallel
+      explanation: Publishing can finish before the checksum has been verified.
+    correct_option: b
+    explanation: Order prepare, checksum and publish steps. Pass the parameter as data and preserve its bytes when
+      computing the digest.
+  - id: ats018-040-03-q12
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: Pass workflow inputs into a Deployment resource template.
+    source_readings:
+      - sections/section-060/module-01/course-07-create-a-deployment-from-workflow-inputs.md
+    prompt: A Workflow in starfleet receives namespace=outpost and creates a Deployment through a resource template. Which statement is correct?
+    options:
+      - id: a
+        text: The namespace parameter moves the Workflow and its ServiceAccount to outpost.
+        explanation: The Workflow remains in the namespace selected when it was submitted.
+      - id: b
+        text: The step passes arguments into local inputs, and the executor needs Deployment permissions in outpost.
+        explanation: Parameter substitution selects the destination but does not grant permissions.
+      - id: c
+        text: Declaring an input automatically gives the executor permission to create its resource.
+        explanation: Roles and RoleBindings grant permissions; input declarations do not.
+      - id: d
+        text: The resource step must succeed as soon as the API accepts the manifest.
+        explanation: A successCondition can wait for an available Deployment replica.
+    correct_option: b
+    explanation: Pass the values through step arguments to the resource template inputs, and grant the workflow ServiceAccount the required rights in the target namespace.

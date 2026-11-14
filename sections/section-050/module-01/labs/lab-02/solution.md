@@ -1,14 +1,16 @@
 # Solution Walkthrough
 
-You will finish a paused release by hand, then make the next release pass an automatic check. A Rollout is the Argo Rollouts resource that manages a release. An AnalysisTemplate defines a check, and an AnalysisRun is the object that holds the result of one check.
+You will read a failed run with `tkn`, add a Task that runs in parallel with another, extend a ClusterRole, start the Pipeline twice with different values, save one log to a file, and delete the failed run.
 
-| Goal | Object or file | Field |
+| Goal | Object | Command or field |
 | --- | --- | --- |
-| Finish the paused release | Rollout `scout` | `promote`, then `promote --full` |
-| Check the canary | AnalysisTemplate `scout-canary-message` | `provider.web.url`, `provider.web.jsonPath`, `successCondition` |
-| Check the release automatically | Rollout `scout` | `spec.strategy.canary.steps[1].analysis` |
-| Start a release | Rollout `scout` | `PODINFO_UI_MESSAGE` in the pod template |
-| Keep the result | `/tmp/scout-analysisrun.txt` | AnalysisRun name, phase and first measurement value |
+| Find the cause | The failed PipelineRun | `tkn pipelinerun describe`, `tkn pipelinerun logs` |
+| Run two Tasks together | Pipeline `outpost-onboard` | The same `runAfter` on both Tasks |
+| Pass the values | Pipeline `outpost-onboard` | `$(tasks.plan-namespace.results.namespace)`, `$(params.tier)` |
+| Allow the label | ClusterRole `namespace-provisioner` | The verb `patch` on `namespaces` |
+| Start two runs | PipelineRuns | `tkn pipeline start`, `-p`, `-s` |
+| Save a log | `/tmp/outpost-rigel-run.log` | `tkn pipelinerun logs` with a redirect |
+| Remove the failure | PipelineRun `outpost-onboard-first-try` | `tkn pipelinerun delete` |
 
 ## The feedback loop
 
@@ -18,116 +20,165 @@ Keep this command running in a second host terminal. It grades the lab every few
 astrona submit --watch --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-050/module-01/labs/lab-02
 ```
 
-The four checks are `full-promotion`, `web-analysis-step`, `gated-release` and `saved-analysisrun`. None passes in the untouched environment. Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+The five checks are `pipeline-task`, `rbac`, `site-runs`, `saved-log` and `failed-run-deleted`. None passes in the untouched environment. Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
 
-## Finish the paused release
+## Find the cause
 
-Read the starting state, then promote once:
-
-```sh
-kubectl argo rollouts get rollout scout -n starfleet --no-color
-kubectl argo rollouts promote scout -n starfleet
-kubectl -n starfleet wait rollout/scout --for=jsonpath='{.status.currentStepIndex}'=3 --timeout=180s
-```
-
-Look for status `Paused` and step `1/4` before you promote. A normal promotion clears that pause. The controller then runs `setWeight: 60` and stops at the second pause, step `3/4`.
-
-Finish the release with a full promotion, which skips the remaining steps:
+Make sure your shell finds the tool, then read the failed run:
 
 ```sh
-kubectl argo rollouts promote scout -n starfleet --full
-kubectl argo rollouts status scout -n starfleet --timeout 180s
+export PATH="$HOME/.astrona/bin:$PATH"
+tkn -n starfleet pipelinerun list
+tkn -n starfleet pipelinerun describe outpost-onboard-first-try
+tkn -n starfleet pipelinerun logs outpost-onboard-first-try
 ```
 
-Look for `Healthy`. The `full-promotion` check should now pass.
+`tkn pipelinerun list` shows `outpost-onboard-first-try` with a failed status. `describe` shows the `Service Account` line with the value `default`, and the TaskRun table shows that `create-namespace` failed. The log lines of `[create-namespace : create]` hold a `Forbidden` error from the Kubernetes API server. The error names the account `default` and the verb it was not allowed to use.
 
-## Complete the AnalysisTemplate
+The pods ran as `default` because the run named no ServiceAccount. So the fix for this failure is to start the new runs with `outpost-provisioner`.
 
-Read the unfinished template first:
+## Add the Task
 
-```sh
-kubectl -n starfleet get analysistemplate scout-canary-message -o yaml
-```
+Two Tasks run in parallel when neither waits for the other. `report-namespace` waits only for `create-namespace`, so give `label-namespace` the same `runAfter`. A result reference to `plan-namespace` adds no other wait, because `create-namespace` already runs after it.
 
-It requests the `scout` Service, which selects the stable pods too. It also has no `jsonPath` or `successCondition`.
-
-Save this as `analysistemplate-scout-canary-message.yaml`:
+Save this as `pipeline-outpost-onboard.yaml`:
 
 ```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: AnalysisTemplate
+apiVersion: tekton.dev/v1
+kind: Pipeline
 metadata:
-  name: scout-canary-message
+  name: outpost-onboard
   namespace: starfleet
 spec:
-  metrics:
-    - name: message
-      initialDelay: 15s
-      count: 3
-      interval: 10s
-      successCondition: result == "canary-ready"
-      provider:
-        web:
-          url: http://scout-canary.starfleet/
-          timeoutSeconds: 5
-          jsonPath: "{$.message}"
+  params:
+    - name: site
+      type: string
+    - name: tier
+      type: string
+  tasks:
+    - name: plan-namespace
+      taskRef:
+        name: plan-namespace
+      params:
+        - name: site
+          value: $(params.site)
+    - name: create-namespace
+      runAfter:
+        - plan-namespace
+      taskRef:
+        name: create-namespace
+      params:
+        - name: namespace
+          value: $(tasks.plan-namespace.results.namespace)
+    - name: report-namespace
+      runAfter:
+        - create-namespace
+      taskRef:
+        name: report-namespace
+      params:
+        - name: namespace
+          value: $(tasks.plan-namespace.results.namespace)
+    - name: label-namespace
+      runAfter:
+        - create-namespace
+      taskRef:
+        name: label-namespace
+      params:
+        - name: namespace
+          value: $(tasks.plan-namespace.results.namespace)
+        - name: tier
+          value: $(params.tier)
 ```
-
-`url` requests the Service that selects only the canary pods. `jsonPath` sits under `web` and selects the `message` field of the response. Its value becomes `result` in `successCondition`, which sits on the metric.
 
 Apply it:
 
 ```sh
-kubectl apply -f analysistemplate-scout-canary-message.yaml
+kubectl apply -f pipeline-outpost-onboard.yaml
 ```
 
-## Replace the first pause
+The check `pipeline-task` turns green.
 
-Index 1 of the steps list is the first pause. Replace only that step:
+## Fix the rights
+
+Read what the account may do now:
 
 ```sh
-kubectl -n starfleet patch rollout scout --type=json -p='[{"op":"replace","path":"/spec/strategy/canary/steps/1","value":{"analysis":{"templates":[{"templateName":"scout-canary-message"}]}}}]'
-kubectl -n starfleet get rollout scout -o jsonpath='{.spec.strategy.canary.steps}{"\n"}'
+kubectl get clusterrole namespace-provisioner -o yaml
 ```
 
-Look for four steps with `analysis` in the second place. The Rollout stays `Healthy`, because a change to the steps alone starts no release on a stable template. The `web-analysis-step` check should now pass.
+The rule allows `get` and `create` on `namespaces`. The Task `label-namespace` runs `kubectl label`, which sends a `patch` request to the API server. So that verb is missing.
 
-## Trigger the release
+Save this as `clusterrole-namespace-provisioner.yaml`:
 
-An environment variable is part of the pod template, so changing it starts a release:
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: namespace-provisioner
+rules:
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "create", "patch"]
+```
+
+Apply it:
 
 ```sh
-kubectl -n starfleet patch rollout scout --type=json -p='[{"op":"add","path":"/spec/template/spec/containers/0/env","value":[{"name":"PODINFO_UI_MESSAGE","value":"canary-ready"}]}]'
-kubectl -n starfleet wait rollout/scout --for=jsonpath='{.status.currentStepIndex}'=3 --timeout=180s
-kubectl argo rollouts get rollout scout -n starfleet --no-color
+kubectl apply -f clusterrole-namespace-provisioner.yaml
 ```
 
-Wait without promoting. A promotion during the analysis step would cancel the check. Look for status `Paused` and step `3/4`, which show that the check passed.
-
-## Read the AnalysisRun
-
-Find the run by the pod hash of this release, then save its details:
+Then check the result. The command prints `yes` for an allowed request and `no` for a refused one:
 
 ```sh
-HASH=$(kubectl -n starfleet get rollout scout -o jsonpath='{.status.currentPodHash}')
-RUN_NAME=$(kubectl -n starfleet get analysisrun -l "rollout-type=Step,rollouts-pod-template-hash=$HASH" -o jsonpath='{.items[?(@.status.phase=="Successful")].metadata.name}')
-kubectl -n starfleet get analysisrun "$RUN_NAME" -o jsonpath='{.metadata.name} {.status.phase} {.status.metricResults[0].measurements[0].value}{"\n"}' > /tmp/scout-analysisrun.txt
-cat /tmp/scout-analysisrun.txt
+kubectl auth can-i patch namespaces --as=system:serviceaccount:starfleet:outpost-provisioner
+kubectl auth can-i delete namespaces --as=system:serviceaccount:starfleet:outpost-provisioner
 ```
 
-Look for phase `Successful` and the value `"canary-ready"`. The double quotes are part of the stored value. The `saved-analysisrun` check should now pass.
+The first command prints `yes` and the second prints `no`. The check `rbac` turns green.
 
-## Finish the release
+## Run the Pipeline for two sites
 
-Use a normal promotion, because only the last pause remains:
+Each `-p` sets one Pipeline param, and `-s` sets the ServiceAccount for all pods of the run. `--showlog` prints the log lines until the run ends:
 
 ```sh
-kubectl argo rollouts promote scout -n starfleet
-kubectl argo rollouts status scout -n starfleet --timeout 180s
-kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.starfleet/
+tkn -n starfleet pipeline start outpost-onboard -p site=vega -p tier=gold -s outpost-provisioner --showlog
+tkn -n starfleet pipeline start outpost-onboard -p site=rigel -p tier=silver -s outpost-provisioner --showlog
 ```
 
-Look for `Healthy`, version `6.15.0` and message `canary-ready`. Old pods can answer for a few seconds after `Healthy`, so repeat the request if needed. All four checks should now pass. Stop the watch with Ctrl-C and submit once:
+Now read the runs and the namespaces:
+
+```sh
+tkn -n starfleet pipelinerun list
+kubectl get namespaces outpost-vega outpost-rigel --show-labels
+```
+
+Both new runs show `Succeeded`. Each namespace has its `tier` label, and a label `onboarded-by` with the name of the TaskRun that wrote it. The check `site-runs` turns green.
+
+## Save the log
+
+Find the name of the `rigel` run. It is the newest run, so `--last` selects it. The redirect sends the output to the file:
+
+```sh
+tkn -n starfleet pipelinerun logs --last > /tmp/outpost-rigel-run.log
+grep 'namespace :' /tmp/outpost-rigel-run.log
+```
+
+Each line starts with `[<task> : <step>]`. Look for lines from `label-namespace` and from `report-namespace` that name `outpost-rigel`. The check `saved-log` turns green.
+
+## Delete the failed run
+
+`-f` skips the question that `tkn` otherwise asks before it deletes:
+
+```sh
+tkn -n starfleet pipelinerun delete outpost-onboard-first-try -f
+tkn -n starfleet pipelinerun list
+```
+
+Only the two `Succeeded` runs remain. The check `failed-run-deleted` turns green.
+
+## Submit
+
+When all five checks are green, stop the watch with Ctrl-C and record the attempt once:
 
 ```sh
 astrona submit --git ssh://git@github.com/astrona-io/ATS018.git -c sections/section-050/module-01/labs/lab-02
@@ -135,7 +186,8 @@ astrona submit --git ssh://git@github.com/astrona-io/ATS018.git -c sections/sect
 
 ## If a check stays red
 
-- **`full-promotion`:** The paused release must reach step `3/4` before `promote --full`. If you skipped that stop, the grader cannot record it for that release, so destroy the lab and start again.
-- **`web-analysis-step`:** Read the template and steps with `kubectl get -o yaml`. Keep `jsonPath` under `provider.web` and `successCondition` on the metric. Keep the other three steps unchanged.
-- **`gated-release`:** Read the AnalysisRun if the Rollout is `Degraded`. Fix the cause, then change the message value to start a new release. If you used `--full` on this release, change the pod template again and use a normal promotion.
-- **`saved-analysisrun`:** Save the line again after the last release. Keep the quotes in the value and use single spaces. A later release makes the saved run out of date.
+- **`pipeline-task`:** Read the Pipeline with `tkn -n starfleet pipeline describe outpost-onboard`. Both `label-namespace` and `report-namespace` must list only `create-namespace` in `runAfter`.
+- **`rbac`:** Add only the missing verb on `namespaces`. Do not bind the account to `cluster-admin`, and do not add `delete`.
+- **`site-runs`:** A run keeps the Pipeline it started with. If you changed the Pipeline after a run started, start a new run. If `label-namespace` failed, fix the ClusterRole first, then start a new run with the same values. The namespace must carry the label from a run that you keep.
+- **`saved-log`:** Save the log after the run has ended, and do not use `--prefix=false`. If you started the `rigel` run again, or if `vega` ran last, save the log by run name: `tkn -n starfleet pipelinerun logs <name> > /tmp/outpost-rigel-run.log`.
+- **`failed-run-deleted`:** A run that failed while you worked also counts. Delete each failed run by its name, and keep the `Succeeded` ones.

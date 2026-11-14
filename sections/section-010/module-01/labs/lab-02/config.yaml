@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-018-lab-010-01-02
+  docs:
+    question: question.md
+    solution: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - curlimages/curl:8.22.0
+      - ghcr.io/stefanprodan/podinfo:6.14.0
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+bootstrap:
+  init:
+    - name: lab-start
+      description: Creates namespaces and the shuttle client
+      type: file
+      source: bootstrap/01-seed-cluster.sh
+testing:
+  init:
+    - name: verify-unfinished-state
+      description: Require a ready API and an explicit grader rejection before solving
+      type: file
+      source: testing/verify-start.sh
+      timeout: 10m
+    - name: solution
+      description: Reference solution for this task
+      type: file
+      source: solution/apply.sh
+validation:
+  scripts:
+    - name: overlay
+      description: The Kustomize staging overlay matches the live workload
+      type: file
+      source: validation/validate-overlay.sh
+teardown:
+  keepCluster: false

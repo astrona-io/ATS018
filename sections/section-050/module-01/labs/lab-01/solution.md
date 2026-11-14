@@ -3,127 +3,130 @@
 Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
 
 ```sh
-astrona submit --watch -c sections/section-050/module-01/labs/lab-01
+astrona submit --watch
 ```
 
 Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
 
-## Step 1: write the Rollout for the current version
+## Step 1: start the Pipeline
 
-A Rollout has the same `selector` and pod template as the Deployment. It adds a `strategy` with the canary steps. Start on the version that runs now, `6.14.0`, so the controller treats the next change as a release.
+The Pipeline `scout-ci` declares one workspace, `shared`. A `PipelineRun` must bind it. A `volumeClaimTemplate` makes Tekton create a PersistentVolumeClaim for the run.
 
-Save this as `rollout-scout.yaml`:
+Save this as `pipelinerun-scout-ci.yaml`:
 
 ```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Rollout
+apiVersion: tekton.dev/v1
+kind: PipelineRun
 metadata:
-  name: scout
+  generateName: scout-ci-
   namespace: starfleet
 spec:
-  replicas: 5
-  revisionHistoryLimit: 3
-  selector:
-    matchLabels:
-      app: scout
-  template:
-    metadata:
-      labels:
-        app: scout
-    spec:
-      containers:
-        - name: scout
-          image: ghcr.io/stefanprodan/podinfo:6.14.0
-          ports:
-            - name: http
-              containerPort: 9898
-          readinessProbe:
-            httpGet:
-              path: /readyz
-              port: http
+  pipelineRef:
+    name: scout-ci
+  workspaces:
+    - name: shared
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
           resources:
             requests:
-              cpu: 10m
-              memory: 32Mi
-            limits:
-              memory: 64Mi
-  strategy:
-    canary:
-      maxSurge: 1
-      maxUnavailable: 0
-      steps:
-        - setWeight: 20
-        - pause: {}
-        - setWeight: 60
-        - pause: {}
+              storage: 100Mi
+```
+
+The file uses `generateName`, so you start it with `create`, not `apply`:
+
+```sh
+kubectl create -f pipelinerun-scout-ci.yaml
+```
+
+## Step 2: read the failure
+
+Wait about 30 seconds. Then describe the newest PipelineRun:
+
+```sh
+tkn -n starfleet pipelinerun describe --last
+```
+
+The PipelineRun is `Failed`. The TaskRun `fetch-source` is `Succeeded` and the TaskRun `run-tests` is `Failed(StepFailed)`. Read the log of the failed TaskRun. Replace `<run-name>` with the name of your PipelineRun:
+
+```sh
+tkn -n starfleet taskrun logs <run-name>-run-tests
+```
+
+The step log says `sh: can't open 'test.sh': No such file or directory`. The step started in a folder without `test.sh`. Compare the folder of the step with the place where the workspace is mounted:
+
+```sh
+kubectl -n starfleet get task run-tests -o jsonpath='{.spec.steps[0].workingDir}{"\n"}'
+```
+
+The step has `workingDir: /workspace/wrong`. The workspace `source` is mounted at `/workspace/source`, and that is where `fetch-source` cloned the repository.
+
+## Step 3: fix the Task
+
+Point `workingDir` at the workspace with the Tekton variable. Save this as `task-run-tests.yaml`:
+
+```yaml
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: run-tests
+  namespace: starfleet
+spec:
+  params:
+    - name: version
+      type: string
+      default: 6.15.0
+  workspaces:
+    - name: source
+  results:
+    - name: version
+      description: The tested application version
+  steps:
+    - name: test
+      image: alpine:3.23
+      workingDir: $(workspaces.source.path)
+      env:
+        - name: SCOUT_VERSION
+          value: $(params.version)
+      script: |
+        #!/bin/sh
+        set -eu
+        sh test.sh
+        printf '%s' "$SCOUT_VERSION" > "$(results.version.path)"
 ```
 
 Apply it:
 
 ```sh
-kubectl apply -f rollout-scout.yaml
+kubectl apply -f task-run-tests.yaml
 ```
 
-Then check the result:
+A finished run never changes, so the old run stays `Failed`.
+
+## Step 4: run the Pipeline again
+
+Start a new run from the same file:
 
 ```sh
-kubectl argo rollouts status scout -n starfleet --timeout 180s
+kubectl create -f pipelinerun-scout-ci.yaml
 ```
 
-The first revision of a Rollout skips the canary steps. The command prints `Healthy` when the stable ReplicaSet has 5 ready pods.
-
-## Step 2: remove the Deployment
-
-The Deployment and the Rollout both select `app=scout`. Delete the Deployment so only the Rollout manages the pods:
+Then check the result after about 30 seconds:
 
 ```sh
-kubectl -n starfleet delete deployment scout
-kubectl -n starfleet get pods -l app=scout
+tkn -n starfleet pipelinerun list
+kubectl -n starfleet get pipelinerun -o jsonpath='{range .items[*]}{.metadata.name}{"  "}{.status.results[0].value}{"\n"}{end}'
 ```
 
-Only the Rollout's pods remain, and the Service `scout` keeps sending requests to them.
+The new run is `Succeeded`, and its `version` result is `6.15.0`. The old run is still listed as `Failed`.
 
-## Step 3: release 6.15.0
-
-Change the image. This is a template change, so the Rollout starts a release and stops at the first pause:
-
-```sh
-kubectl argo rollouts set image scout scout=ghcr.io/stefanprodan/podinfo:6.15.0 -n starfleet
-kubectl argo rollouts get rollout scout -n starfleet --no-color
-```
-
-The status is `Paused` with `CanaryPauseStep`, step `1/4`, and `SetWeight: 20`. One of the 5 pods runs `6.15.0`.
-
-## Step 4: promote both pauses
-
-Promote the first pause. The Rollout moves to 60 percent and stops at the second pause:
-
-```sh
-kubectl argo rollouts promote scout -n starfleet
-```
-
-Wait until the status shows `Paused` again at step `3/4`, then promote the second pause:
-
-```sh
-kubectl argo rollouts promote scout -n starfleet
-kubectl argo rollouts status scout -n starfleet --timeout 180s
-```
-
-Do not use `--full`: it skips the remaining steps.
-
-## Step 5: prove the result
-
-Wait a few seconds for the old pods to end, then send a request from `shuttle`:
-
-```sh
-kubectl argo rollouts get rollout scout -n starfleet --no-color
-kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout | grep '"version"'
-```
-
-The status is `Healthy` with `6.15.0 (stable)` and the response shows `"version": "6.15.0"`.
+## Step 5: submit
 
 Stop the watch with Ctrl-C, then run the plain command once:
 
 ```sh
-astrona submit -c sections/section-050/module-01/labs/lab-01
+astrona submit
 ```
+
+The first check reads the Task and the Pipeline. The second check looks for a `Succeeded` PipelineRun of `scout-ci` whose `run-tests` TaskRun started in the workspace and whose result `version` is `6.15.0`.

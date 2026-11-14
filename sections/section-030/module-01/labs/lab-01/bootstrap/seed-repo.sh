@@ -20,5 +20,5 @@ cd "$WORK"
 git init -q -b main
 git -c user.name=platform -c user.email=platform@starfleet.local add -A
 git -c user.name=platform -c user.email=platform@starfleet.local commit -q -m "Initial content of $REPO"
-git push -q "http://$AUTH@127.0.0.1:$LOCAL_PORT/starfleet/$REPO.git" main
-echo "[playground] Seeded starfleet/$REPO"
+git push -q "http://$AUTH@127.0.0.1:$LOCAL_PORT/starfleet/$REPO.git" main --force
+echo "[lab] Seeded starfleet/$REPO"

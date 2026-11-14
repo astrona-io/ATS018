@@ -1,130 +1,95 @@
 #!/usr/bin/env bash
-# Reference solution, applied only by `astrona test`.
-# Adds the pre-promotion gate, releases a good and a faulty candidate, and restores the good one.
-# Keep in step with solution.md.
+# Reference solution, applied only by `astrona test`. Keep in step with solution.md.
 set -euo pipefail
 
-WORK="$(mktemp -d)"
-trap 'rm -rf "$WORK"' EXIT
-
-cat > "$WORK/analysistemplate-scout-success.yaml" <<'YAML'
-apiVersion: argoproj.io/v1alpha1
-kind: AnalysisTemplate
+kubectl apply -f - <<'YAML'
+apiVersion: v1
+kind: Secret
 metadata:
-  name: scout-success
+  name: gitea-credentials
+  namespace: starfleet
+  annotations:
+    tekton.dev/git-0: http://gitea-http.gitea.svc:3000
+type: kubernetes.io/basic-auth
+stringData:
+  username: platform
+  password: starfleet-gitops
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: scout-ci
+  namespace: starfleet
+secrets:
+  - name: gitea-credentials
+---
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: scout-release
   namespace: starfleet
 spec:
-  args:
-    - name: candidate-hash
-  metrics:
-    - name: success-rate
-      initialDelay: 45s
-      interval: 15s
-      count: 3
-      failureLimit: 1
-      successCondition: len(result) == 1 && result[0] >= 0.99
-      failureCondition: len(result) != 1 || result[0] < 0.99
-      provider:
-        prometheus:
-          address: http://kps-prometheus.monitoring.svc:9090
-          query: |
-            sum(rate(http_request_duration_seconds_count{namespace="starfleet",path="root",rollouts_pod_template_hash="{{args.candidate-hash}}",status=~"2.."}[2m]))
-            /
-            sum(rate(http_request_duration_seconds_count{namespace="starfleet",path="root",rollouts_pod_template_hash="{{args.candidate-hash}}"}[2m]))
+  params:
+    - name: revision
+      type: string
+      default: main
+  workspaces:
+    - name: source
+  tasks:
+    - name: fetch-source
+      taskRef:
+        name: fetch-source
+      params:
+        - name: url
+          value: http://gitea-http.gitea.svc:3000/starfleet/scout-app.git
+        - name: revision
+          value: $(params.revision)
+      workspaces:
+        - name: source
+          workspace: source
+    - name: publish-image
+      taskRef:
+        name: publish-image
+      params:
+        - name: version
+          value: $(tasks.fetch-source.results.version)
+    - name: update-deploy
+      runAfter:
+        - publish-image
+      taskRef:
+        name: update-deploy
+      params:
+        - name: version
+          value: $(tasks.fetch-source.results.version)
+  results:
+    - name: deploy-commit
+      value: $(tasks.update-deploy.results.commit)
 YAML
 
-write_rollout() {
-  local message="$1" error_flag="$2"
-  cat > "$WORK/rollout-scout.yaml" <<YAML
-apiVersion: argoproj.io/v1alpha1
-kind: Rollout
+RUN=$(kubectl create -o name -f - <<'YAML'
+apiVersion: tekton.dev/v1
+kind: PipelineRun
 metadata:
-  name: scout
+  generateName: scout-release-
   namespace: starfleet
 spec:
-  replicas: 2
-  revisionHistoryLimit: 3
-  selector:
-    matchLabels:
-      app: scout
-  template:
-    metadata:
-      labels:
-        app: scout
-    spec:
-      containers:
-      - name: scout
-        image: ghcr.io/stefanprodan/podinfo:6.15.0
-        command:
-        - ./podinfo
-        - --port=9898
-        - --port-metrics=9797
-${error_flag}
-        env:
-        - name: PODINFO_UI_MESSAGE
-          value: ${message}
-        ports:
-        - name: http
-          containerPort: 9898
-        - name: metrics
-          containerPort: 9797
-        readinessProbe:
-          tcpSocket:
-            port: http
-        resources:
-          requests:
-            cpu: 10m
-            memory: 32Mi
-          limits:
-            memory: 64Mi
-  strategy:
-    blueGreen:
-      activeService: scout
-      previewService: scout-preview
-      autoPromotionEnabled: false
-      scaleDownDelaySeconds: 30
-      prePromotionAnalysis:
-        templates:
-        - templateName: scout-success
-        args:
-        - name: candidate-hash
-          valueFrom:
-            podTemplateHashValue: Latest
+  pipelineRef:
+    name: scout-release
+  taskRunTemplate:
+    serviceAccountName: scout-ci
+  workspaces:
+    - name: source
+      emptyDir: {}
 YAML
-}
+)
+kubectl -n starfleet wait "$RUN" --for=condition=Succeeded --timeout=300s
 
-wait_for_phase() {
-  local want="$1"
-  for _ in $(seq 1 120); do
-    phase=$(kubectl -n starfleet get rollout scout -o jsonpath='{.status.phase}' 2>/dev/null || true)
-    message=$(kubectl -n starfleet get rollout scout -o jsonpath='{.status.message}' 2>/dev/null || true)
-    case "$want" in
-      paused)   [[ "$phase" == "Paused" && "$message" == *BlueGreenPause* ]] && return 0 ;;
-      degraded) [[ "$phase" == "Degraded" ]] && return 0 ;;
-    esac
-    sleep 5
-  done
-  echo "Rollout did not reach $want" >&2
-  kubectl argo rollouts get rollout scout -n starfleet --no-color >&2 || true
-  return 1
-}
-
-kubectl apply -f "$WORK/analysistemplate-scout-success.yaml"
-
-# Good candidate: analysis passes, then the operator promotes it.
-write_rollout gated-good ""
-kubectl apply -f "$WORK/rollout-scout.yaml"
-wait_for_phase paused
-kubectl argo rollouts promote scout -n starfleet
-kubectl argo rollouts status scout -n starfleet --timeout 180s
-
-# Faulty candidate: analysis fails and the controller aborts the release.
-write_rollout bad-release "        - --random-error"
-kubectl apply -f "$WORK/rollout-scout.yaml"
-wait_for_phase degraded
-
-# Restore the accepted template.
-write_rollout gated-good ""
-kubectl apply -f "$WORK/rollout-scout.yaml"
-kubectl argo rollouts status scout -n starfleet --timeout 180s
-sleep 20
+# Argo CD polls Git about every 3 minutes; ask for a refresh and wait for the new version.
+kubectl -n argocd annotate application/scout --overwrite argocd.argoproj.io/refresh=hard
+kubectl -n starfleet rollout status deploy/scout --timeout=240s
+for i in $(seq 1 60); do
+  if kubectl -n starfleet exec deploy/shuttle -- curl -s http://scout.starfleet | grep -q '"version": "6.15.0"'; then exit 0; fi
+  sleep 3
+done
+echo "scout did not serve 6.15.0" >&2
+exit 1

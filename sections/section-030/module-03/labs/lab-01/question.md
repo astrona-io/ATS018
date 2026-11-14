@@ -2,18 +2,19 @@
 
 Solve this question on: `terminal`
 
-Flux delivers the `scout` application from the Gitea repository `starfleet/scout-deploy` (folder `apps/scout`) and it runs version `6.14.0`. The in-cluster registry `registry.registry.svc:5000` also holds the image `starfleet/scout` at the tag `6.15.0`. The registry speaks plain HTTP. The `GitRepository` `scout-deploy` in `flux-system` already has a credential that can push.
+Three Argo CD `Applications` in the namespace `argocd` deliver `scout` from the private Git repository `starfleet/scout-faults` (branch `main`). None of them works:
 
-Set up Flux image automation so that Flux itself finds the newest tag and commits it to Git. Do not edit the image tag by hand in Git and do not change the Deployment with `kubectl`.
+- `scout-path` deploys to `starfleet-path`.
+- `scout-reject` deploys to `starfleet-reject`.
+- `scout-image` deploys to `starfleet-image`.
 
-When you finish, these must be true:
+Find the fault of each application and fix it. The repository is reachable from your terminal at `http://127.0.0.1:3000/starfleet/scout-faults.git` (user `platform`, password `starfleet-gitops`). Fix a problem in Git when the faulty file is in Git, and fix it in the `Application` when the fault is in the `Application`. Do not delete an `Application`, do not turn off automated sync, `prune` or `selfHeal`, and do not change the `repoURL`, the destination or the folder of `scout-reject` and `scout-image`.
 
-- An `ImageRepository` named `scout` in `flux-system` scans `registry.registry.svc:5000/starfleet/scout` and is `Ready`.
-- An `ImagePolicy` named `scout` reads that `ImageRepository`, uses a semver range that allows `6.14.0` and above, is `Ready` and selects `6.15.0`.
-- The `newTag` line in `apps/scout/kustomization.yaml` carries the setter marker for the policy `flux-system:scout:tag`.
-- An `ImageUpdateAutomation` named `scout` in `flux-system` uses `strategy: Setters` on the path `./apps/scout`, pushes to the branch `main` of the `GitRepository` `scout-deploy`, uses the commit author name `fluxcdbot`, is `Ready` and has pushed a commit.
-- On the branch `main`, `newTag` is `6.15.0`, and the newest commit of that file is by the author `fluxcdbot`. Flux applies that commit, and a request from the `shuttle` pod to `http://scout.starfleet.svc/` returns version `6.15.0`.
+When you finish, these must be true for each of the three applications:
 
-Use the user `platform` (password `starfleet-gitops`) to clone and push at `http://127.0.0.1:3000/starfleet/scout-deploy.git`.
+- The `Application` is `Synced` and `Healthy`.
+- The Deployment `scout` in its namespace is created by Argo CD from Git.
+- A request from the `shuttle` pod (namespace `starfleet`) to `http://scout.<namespace>/` returns version `6.15.0`.
+- For `scout-reject` and `scout-image`, the faulty file in Git is fixed on the branch `main`.
 
 Check your work with `astrona submit`.
