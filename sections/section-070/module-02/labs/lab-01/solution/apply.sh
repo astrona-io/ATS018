@@ -106,9 +106,24 @@ wait_for_phase() {
   done
   echo "Rollout did not reach $want" >&2
   kubectl argo rollouts get rollout scout -n starfleet --no-color >&2 || true
+  kubectl -n starfleet get analysisrun -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.metricResults[0].measurements[*].value}{"\n"}{end}' >&2 || true
   return 1
 }
 
+# astrona test starts this script seconds after bootstrap. Wait until Prometheus
+# has a request rate for the stable pods, so the first analysis has scrapes to read.
+wait_for_scrapes() {
+  local query='sum(rate(http_request_duration_seconds_count{namespace="starfleet",path="root"}[2m]))'
+  for _ in $(seq 1 36); do
+    kubectl -n starfleet exec deploy/shuttle -- curl -sG http://kps-prometheus.monitoring.svc:9090/api/v1/query \
+      --data-urlencode "query=$query" 2>/dev/null | grep -q '"result":\[{' && return 0
+    sleep 5
+  done
+  echo "Prometheus has no request rate for scout" >&2
+  return 1
+}
+
+wait_for_scrapes
 kubectl apply -f "$WORK/analysistemplate-scout-success.yaml"
 
 # Good candidate: analysis passes, then the operator promotes it.
