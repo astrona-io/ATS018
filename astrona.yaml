@@ -871,8 +871,9 @@ modules:
         - argo-cli
         - params-results
         learning_goals:
-        - Pass image, name, namespace and task into a resource template
-        - Submit two successful runs and verify their ready Deployments
+        - Write a WorkflowTemplate whose resource template creates a Deployment from input parameters
+        - Submit a run from the template with the argo command-line tool and four input parameters
+        - Prove the run's Deployment uses the requested image and prints its message
         resources:
         - name: Argo resource templates
           url: https://argo-workflows.readthedocs.io/en/latest/walk-through/kubernetes-resources/

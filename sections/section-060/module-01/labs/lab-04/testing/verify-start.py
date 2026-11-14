@@ -45,7 +45,7 @@ def verify(lab, graders):
 
 
 
-GRADERS = ['validation/validate.sh']
+GRADERS = ['validation/validate-template.sh', 'validation/validate-runs.sh', 'validation/validate-deployments.sh']
 
 if __name__ == '__main__':
     try:
