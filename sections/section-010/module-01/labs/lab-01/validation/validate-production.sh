@@ -24,7 +24,12 @@ lim=$(kubectl -n "$NS" get deploy scout -o jsonpath='{.spec.template.spec.contai
 [[ "$req" == "64Mi" ]] || fail "memory request is '$req', expected 64Mi"
 [[ "$lim" == "128Mi" ]] || fail "memory limit is '$lim', expected 128Mi - the JSON 6902 patch must select the Deployment"
 
-body=$(kubectl -n starfleet exec deploy/shuttle -- curl -s --max-time 10 "http://scout.$NS/" 2>/dev/null)
+# A new pod is ready a few seconds before its Service endpoint routes requests; retry briefly.
+for _ in $(seq 1 10); do
+  body=$(kubectl -n starfleet exec deploy/shuttle -- curl -s --max-time 10 "http://scout.$NS/" 2>/dev/null)
+  grep -q '"version": *"6.14.0"' <<<"$body" && break
+  sleep 3
+done
 grep -q '"version": *"6.14.0"' <<<"$body" || fail "request from shuttle did not return version 6.14.0"
 
 echo "PASS: production serves 6.14.0 with three replicas and a memory limit"
