@@ -42,10 +42,6 @@ def deployed(obj, replicas=1):
     require(obj['spec'].get('replicas', 1) == replicas, 'wrong replica count')
     require(status.get('updatedReplicas', 0) == replicas and status.get('availableReplicas', 0) == replicas, 'Deployment has not completed its rollout')
 
-def response(url):
-    return command('kubectl', '-n', 'starfleet', 'exec', 'deploy/shuttle', '-c', 'shuttle', '--',
-                   'curl', '-fsS', '--max-time', '10', url)
-
 def run(check):
     deadline = time.monotonic() + (180 if '--wait' in sys.argv else 0)
     while True:

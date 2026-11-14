@@ -23,7 +23,12 @@ cm=$(kubectl -n "$NS" get deploy scout -o jsonpath='{.spec.template.spec.contain
 [[ "$cm" =~ ^scout-settings-.+ ]] || fail "envFrom ConfigMap is '$cm', expected the generated name scout-settings-<hash>"
 kubectl -n "$NS" get configmap "$cm" >/dev/null 2>&1 || fail "ConfigMap $cm does not exist in $NS"
 
-body=$(kubectl -n starfleet exec deploy/shuttle -- curl -s --max-time 10 "http://scout.$NS/" 2>/dev/null)
+# A new pod is ready a few seconds before its Service endpoint routes requests; retry briefly.
+for _ in $(seq 1 10); do
+  body=$(kubectl -n starfleet exec deploy/shuttle -- curl -s --max-time 10 "http://scout.$NS/" 2>/dev/null)
+  grep -q '"version": *"6.15.0"' <<<"$body" && break
+  sleep 3
+done
 grep -q '"version": *"6.15.0"' <<<"$body" || fail "request from shuttle did not return version 6.15.0"
 grep -q '"message": *"staging"' <<<"$body" || fail "request from shuttle did not return message staging"
 

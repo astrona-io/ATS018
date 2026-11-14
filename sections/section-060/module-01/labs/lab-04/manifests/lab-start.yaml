@@ -3,6 +3,11 @@ kind: Namespace
 metadata:
   name: starfleet
 ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: outpost
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -35,21 +40,16 @@ spec:
             memory: 32Mi
 ---
 apiVersion: v1
-kind: Namespace
-metadata:
-  name: outpost
----
-apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: deployment-writer
   namespace: starfleet
 ---
+# Manage Deployments and report workflow results; bound only in starfleet and outpost.
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
   name: deployment-writer
-  namespace: starfleet
 rules:
 - apiGroups:
   - apps
@@ -81,26 +81,8 @@ subjects:
   namespace: starfleet
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
+  kind: ClusterRole
   name: deployment-writer
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: deployment-writer
-  namespace: outpost
-rules:
-- apiGroups:
-  - apps
-  resources:
-  - deployments
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - patch
-  - update
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -113,5 +95,5 @@ subjects:
   namespace: starfleet
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
+  kind: ClusterRole
   name: deployment-writer

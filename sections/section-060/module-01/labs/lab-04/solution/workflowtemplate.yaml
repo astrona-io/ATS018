@@ -11,8 +11,7 @@ spec:
       - name: image
       - name: name
       - name: namespace
-      - name: task
-        value: release-check
+      - name: msg
   templates:
     - name: main
       steps:
@@ -26,15 +25,15 @@ spec:
                   value: "{{workflow.parameters.name}}"
                 - name: namespace
                   value: "{{workflow.parameters.namespace}}"
-                - name: task
-                  value: "{{workflow.parameters.task}}"
+                - name: msg
+                  value: "{{workflow.parameters.msg}}"
     - name: deploy
       inputs:
         parameters:
           - name: image
           - name: name
           - name: namespace
-          - name: task
+          - name: msg
       resource:
         action: create
         successCondition: status.availableReplicas > 0
@@ -44,8 +43,6 @@ spec:
           metadata:
             name: "{{inputs.parameters.name}}"
             namespace: "{{inputs.parameters.namespace}}"
-            annotations:
-              training.astrona.io/workflow-uid: "{{workflow.uid}}"
           spec:
             replicas: 1
             selector:
@@ -60,16 +57,9 @@ spec:
                   - name: workload
                     image: "{{inputs.parameters.image}}"
                     env:
-                      - name: PODINFO_UI_MESSAGE
-                        value: "{{inputs.parameters.task}}"
-                    ports:
-                      - name: http
-                        containerPort: 9898
-                    readinessProbe:
-                      httpGet:
-                        path: /readyz
-                        port: http
-                    resources:
-                      requests:
-                        cpu: 10m
-                        memory: 32Mi
+                      - name: MSG
+                        value: "{{inputs.parameters.msg}}"
+                    command:
+                      - sh
+                      - -c
+                      - echo "$MSG"; while true; do sleep 3600; done

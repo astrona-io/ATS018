@@ -15,8 +15,6 @@ runtime:
     - alpine:3.23
     - quay.io/argoproj/workflow-controller:v4.1.6
     - quay.io/argoproj/argoexec:v4.1.6
-    - ghcr.io/stefanprodan/podinfo:6.15.0
-    - ghcr.io/stefanprodan/podinfo:6.14.0
 bootstrap:
   manifests:
   - name: lab-start
@@ -48,10 +46,17 @@ testing:
     timeout: 15m
 validation:
   scripts:
-  - name: live-result
-    description: Pass image, name, namespace and task into a resource template; Submit two successful runs and verify
-      their ready Deployments
+  - name: workflow-template
+    description: WorkflowTemplate deploy-workload declares image, name, namespace and msg, runs as deployment-writer and fills the Deployment from them and waits for an available replica
     type: file
-    source: validation/validate.sh
+    source: validation/validate-template.sh
+  - name: workflow-runs
+    description: A Succeeded run from the current template with the requested inputs
+    type: file
+    source: validation/validate-runs.sh
+  - name: deployment-logs
+    description: The run created scout in outpost with alpine:3.23, and its container log prints the msg value
+    type: file
+    source: validation/validate-deployments.sh
 teardown:
   keepCluster: false
