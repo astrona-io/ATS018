@@ -15,6 +15,7 @@ runtime:
     - alpine:3.23
     - quay.io/argoproj/workflow-controller:v4.1.6
     - quay.io/argoproj/argoexec:v4.1.6
+    - quay.io/argoproj/argocli:v4.1.6
 bootstrap:
   manifests:
   - name: lab-start
@@ -26,7 +27,7 @@ bootstrap:
     type: file
     source: bootstrap/00-install-argo-cli.sh
   - name: install-argo-workflows
-    description: Installs Argo Workflows v4.1.6 into starfleet
+    description: Installs Argo Workflows v4.1.6 into starfleet, with the web UI on port 2746
     type: file
     source: bootstrap/01-install-argo-workflows.sh
   waitFor:
