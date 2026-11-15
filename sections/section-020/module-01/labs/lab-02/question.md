@@ -1,3 +1,7 @@
+---
+title: Recover A Helm Release From History
+estimated_duration: 15m
+---
 # Question
 
 Solve this question on: `terminal`

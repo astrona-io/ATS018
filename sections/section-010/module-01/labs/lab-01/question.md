@@ -1,3 +1,7 @@
+---
+title: Fix And Deploy Kustomize Overlays
+estimated_duration: 25m
+---
 # Question
 
 Solve this question on: `terminal`

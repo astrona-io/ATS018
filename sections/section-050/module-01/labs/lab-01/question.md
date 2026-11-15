@@ -1,3 +1,7 @@
+---
+title: Fix A Failing Tekton Pipeline
+estimated_duration: 20m
+---
 # Question
 
 Solve this question on: `terminal`

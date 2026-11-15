@@ -1,3 +1,7 @@
+---
+title: Build A Kustomize Overlay With A Generated ConfigMap
+estimated_duration: 20m
+---
 # Question
 
 Solve this question on: `terminal`

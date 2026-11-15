@@ -1,3 +1,7 @@
+---
+title: Run And Repair Workflows With The argo Command-Line Tool
+estimated_duration: 25m
+---
 # Question
 
 Solve this question on: `terminal`

@@ -1,3 +1,7 @@
+---
+title: Generate Applications From Git Directories
+estimated_duration: 15m
+---
 # Question
 
 Solve this question on: `terminal`

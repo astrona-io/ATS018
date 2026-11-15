@@ -1,3 +1,7 @@
+---
+title: Create PipelineRuns From JSON Requests With Tekton Triggers
+estimated_duration: 20m
+---
 # Question
 
 Solve this question on: `terminal`

@@ -1,3 +1,7 @@
+---
+title: Repair Three OpenTofu Working Directories
+estimated_duration: 35m
+---
 # Question
 
 Solve this question on: `terminal`

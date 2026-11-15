@@ -1,3 +1,7 @@
+---
+title: Deliver An Application From Git With Argo CD
+estimated_duration: 25m
+---
 # Question
 
 Solve this question on: `terminal`

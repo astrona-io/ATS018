@@ -1,3 +1,7 @@
+---
+title: Gate A Mesh-Free Blue/Green Release With Flagger
+estimated_duration: 20m
+---
 # Question
 
 Solve this question on: `terminal`

@@ -1,3 +1,7 @@
+---
+title: Fix Broken Argo CD Applications
+estimated_duration: 30m
+---
 # Question
 
 Solve this question on: `terminal`

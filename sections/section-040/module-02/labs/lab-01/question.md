@@ -1,3 +1,7 @@
+---
+title: Repair A Failing HelmRelease And Add Remediation
+estimated_duration: 20m
+---
 # Question
 
 Solve this question on: `terminal`

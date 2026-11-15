@@ -1,3 +1,7 @@
+---
+title: Release And Roll Back A Canary With Flagger
+estimated_duration: 40m
+---
 # Question
 
 Solve this question on: `terminal`

@@ -1,3 +1,7 @@
+---
+title: Author And Upgrade A Helm Chart
+estimated_duration: 15m
+---
 # Question
 
 Solve this question on: `terminal`

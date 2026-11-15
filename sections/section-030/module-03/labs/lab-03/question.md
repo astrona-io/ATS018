@@ -1,3 +1,7 @@
+---
+title: Order A Sync With A Hook And Waves
+estimated_duration: 15m
+---
 # Question
 
 Solve this question on: `terminal`

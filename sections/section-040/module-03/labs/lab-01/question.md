@@ -1,3 +1,7 @@
+---
+title: Automate Image Updates With Flux
+estimated_duration: 30m
+---
 # Question
 
 Solve this question on: `terminal`
