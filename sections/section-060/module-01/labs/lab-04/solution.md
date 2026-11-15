@@ -78,6 +78,10 @@ Apply it:
 kubectl apply -f workflowtemplate-deploy-workload.yaml
 ```
 
+```text
+workflowtemplate.argoproj.io/deploy-workload created
+```
+
 Run `astrona submit` now. The `workflow-template` check passes; the other two fail because no workflow has run yet.
 
 Each `-p` flag sets one workflow parameter. `--from workflowtemplate/deploy-workload` creates a Workflow from the stored template, and `--wait` keeps the command running until the workflow finishes:
@@ -89,17 +93,124 @@ argo submit -n starfleet --from workflowtemplate/deploy-workload \
   -p msg="scout is running" --wait
 ```
 
-The workflow runs in `starfleet`. The `namespace` parameter only decides where the Deployment goes, here `outpost`. The `successCondition` keeps the resource step running until the Deployment has an available replica, so `Succeeded` means the pod runs.
+```text
+Name:                deploy-workload-5cbq7
+Namespace:           starfleet
+ServiceAccount:      unset
+Status:              Pending
+Created:             Sun Nov 15 00:17:13 +0100 (now)
+Progress:            
+Parameters:          
+  image:             alpine:3.23
+  name:              scout
+  namespace:         outpost
+  msg:               scout is running
+deploy-workload-5cbq7 Succeeded at 2026-11-15 00:17:23 +0100 CET
+```
 
-Then check the result:
+The `argo` command-line tool prints the new workflow while it is still `Pending`, then one line when it ends. The workflow name ends in five random characters, so yours is different. The workflow runs in `starfleet`. The `namespace` parameter only decides where the Deployment goes, here `outpost`. The `successCondition` keeps the resource step running until the Deployment has an available replica, so `Succeeded` means the pod runs.
+
+You can now check the run in two ways: with commands in the terminal, or in the Argo Workflows web UI. Both read the same Workflow object, so pick the one you like. The exam gives you only a terminal, so practise the terminal path at least once.
+
+## Check the result in the terminal
+
+`argo list` shows every workflow in a namespace with its status:
 
 ```sh
 argo list -n starfleet
+```
+
+```text
+NAME                    STATUS      AGE   DURATION   PRIORITY   MESSAGE
+deploy-workload-5cbq7   Succeeded   10s   10s        0          
+```
+
+`argo get` shows one workflow in detail. Use the name from your own `argo submit` output:
+
+```sh
+argo get -n starfleet deploy-workload-5cbq7
+```
+
+```text
+Name:                deploy-workload-5cbq7
+Namespace:           starfleet
+ServiceAccount:      deployment-writer
+Status:              Succeeded
+Conditions:          
+ PodRunning          False
+ Completed           True
+Created:             Sun Nov 15 00:17:13 +0100 (10 seconds ago)
+Started:             Sun Nov 15 00:17:13 +0100 (10 seconds ago)
+Finished:            Sun Nov 15 00:17:23 +0100 (now)
+Duration:            10 seconds
+Progress:            1/1
+ResourcesDuration:   0s*(1 cpu),7s*(100Mi memory)
+Parameters:          
+  image:             alpine:3.23
+  name:              scout
+  namespace:         outpost
+  msg:               scout is running
+
+STEP                      TEMPLATE  PODNAME                                 DURATION  MESSAGE
+ ✔ deploy-workload-5cbq7  main                                                          
+ └───✔ deploy             deploy    deploy-workload-5cbq7-deploy-747168124  8s          
+```
+
+The run used the ServiceAccount `deployment-writer` from the template and received the four parameters. The step tree shows the `main` steps template and its one `deploy` step, both with a check mark. The `deploy` pod is the Argo executor that sent the manifest; it is not the `scout` pod.
+
+The workflow only proves that the controller created something. Check the Deployment it created in `outpost` and the log of its container:
+
+```sh
 kubectl -n outpost get deployment scout -o wide
 kubectl -n outpost logs deploy/scout
 ```
 
-`argo list` shows the workflow with status `Succeeded`. The Deployment shows `1/1` ready and image `alpine:3.23`, and its log prints `scout is running`. Use `argo get -n starfleet <workflow-name>` to see the parameters and the resource node of the run.
+```text
+NAME    READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES        SELECTOR
+scout   1/1     1            1           8s    workload     alpine:3.23   app=scout
+scout is running
+```
+
+The Deployment has `1/1` ready, the image `alpine:3.23` and the selector `app=scout`, all filled from the parameters. The container printed the `msg` value, `scout is running`.
+
+## Check the result in the web UI
+
+The Argo Workflows web UI is served by the `argo-server` Deployment in `starfleet`. It reads the same Workflow and WorkflowTemplate objects as the `argo` command-line tool. In this lab it runs without a login, so the page opens straight away.
+
+`kind` has no load balancer, so forward the `argo-server` port to your machine. Run this in a second terminal and leave it running:
+
+```sh
+kubectl -n starfleet port-forward svc/argo-server 2746:2746
+```
+
+Open `http://127.0.0.1:2746` in a browser. On the first visit the web UI may show a "new version" note and a short survey; close both with the `×` in their top right corner.
+
+Click **Workflow Templates** in the left menu and then `deploy-workload`. The **MANIFEST** tab shows the stored template, with the `main` step passing each `{{workflow.parameters.*}}` value to `deploy`:
+
+![The deploy-workload WorkflowTemplate in the Argo Workflows web UI](images/01-workflow-template.png)
+
+Click **Workflows** in the left menu. The list shows the run from `argo submit` with a green check, a duration of 10 seconds and progress `1/1`:
+
+![The workflow list in namespace starfleet with one Succeeded run](images/02-workflows.png)
+
+Click the workflow name, then the summary icon at the top right (the first of the four icons). The summary shows the status `Succeeded`, the template it came from (`DEPLOY-WORKLOAD`) and the label `workflows.argoproj.io/workflow-template: deploy-workload`:
+
+![The workflow summary with status Succeeded and the template it came from](images/03-workflow-summary.png)
+
+Click the graph icon (the last of the four icons) and then the `deploy` node. Open the **INPUTS/OUTPUTS** tab in the panel on the right. It lists the four parameters the step received:
+
+![The deploy step with its four input parameters](images/04-step-inputs.png)
+
+The web UI shows the workflow and its steps, but not the `scout` Deployment, because that object is not part of Argo Workflows. Check the Deployment and its log with `kubectl` as in the terminal path:
+
+```sh
+kubectl -n outpost get deployment scout -o wide
+kubectl -n outpost logs deploy/scout
+```
+
+The log prints `scout is running`. Stop the port-forward with `Ctrl+C` when you are done.
+
+## Run it again
 
 A second run with a name that already exists fails, because action `create` refuses an existing object. Use a new name, or delete only that Deployment, before you run it again.
 
