@@ -1,3 +1,7 @@
+---
+title: Require Manual Approval Before A Flagger Rollout
+estimated_duration: 20m
+---
 # Question
 
 Solve this question on: `terminal`

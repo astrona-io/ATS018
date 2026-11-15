@@ -476,7 +476,7 @@ A lab folder holds:
 | `config.yaml` | Lab definition; `metadata.docs` points at `question.md` and `solution.md` |
 | `README.md` | Short intro for authors with `estimated_duration` front matter and the run, submit and destroy commands |
 | `prerequisites.md` | What the learner needs before starting |
-| `question.md` | The exam-style task. Starts with `# Question` and `Solve this question on: \`terminal\`` |
+| `question.md` | The exam-style task. Starts with front matter (`title`: the lab's `astrona.yaml` title without the trailing " Lab", `estimated_duration`), then `# Question` and `Solve this question on: \`terminal\`` |
 | `solution.md` | Step-by-step walkthrough with real output |
 | `bootstrap/` | Numbered scripts that install the tools (`01-install-<tool>.sh`), seed Gitea and create the starting state |
 | `manifests/` | The starting workloads and the broken or incomplete objects the learner must fix |

@@ -1,3 +1,7 @@
+---
+title: Gate A Blue/Green Release With Analysis
+estimated_duration: 35m
+---
 # Question
 
 Solve this question on: `terminal`

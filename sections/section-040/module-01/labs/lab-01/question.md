@@ -1,3 +1,7 @@
+---
+title: Reconcile A Git Source With Flux
+estimated_duration: 25m
+---
 # Question
 
 Solve this question on: `terminal`

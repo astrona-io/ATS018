@@ -1,3 +1,7 @@
+---
+title: Create Deployments From Workflow Inputs
+estimated_duration: 15m
+---
 # Question
 
 Solve this question on: `terminal`

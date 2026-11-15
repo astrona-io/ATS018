@@ -1,3 +1,7 @@
+---
+title: Let The HPA Own Replicas During GitOps Sync
+estimated_duration: 15m
+---
 # Question
 
 Solve this question on: `terminal`

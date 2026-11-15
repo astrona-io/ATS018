@@ -1,3 +1,7 @@
+---
+title: Bootstrap Child Applications From Git
+estimated_duration: 15m
+---
 # Question
 
 Solve this question on: `terminal`

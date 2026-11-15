@@ -1,3 +1,7 @@
+---
+title: Approve A Canary After Analysis
+estimated_duration: 15m
+---
 # Question
 
 Solve this question on: `terminal`

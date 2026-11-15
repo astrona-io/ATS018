@@ -1,3 +1,7 @@
+---
+title: Hand Off A Release From Tekton To Argo CD
+estimated_duration: 30m
+---
 # Question
 
 Solve this question on: `terminal`

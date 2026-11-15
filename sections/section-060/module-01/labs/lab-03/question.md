@@ -1,3 +1,7 @@
+---
+title: Insert A Step Between Two Existing Steps
+estimated_duration: 20m
+---
 # Question
 
 Solve this question on: `terminal`

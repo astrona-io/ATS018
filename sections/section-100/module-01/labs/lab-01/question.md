@@ -1,3 +1,7 @@
+---
+title: Plan And Apply A Deployment And Service
+estimated_duration: 20m
+---
 # Question
 
 Solve this question on: `terminal`

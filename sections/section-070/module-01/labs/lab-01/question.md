@@ -1,3 +1,7 @@
+---
+title: Release A New Version With A Canary Rollout
+estimated_duration: 25m
+---
 # Question
 
 Solve this question on: `terminal`

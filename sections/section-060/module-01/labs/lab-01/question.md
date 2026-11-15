@@ -1,3 +1,7 @@
+---
+title: Start A Workflow From A Git Push With Argo Events
+estimated_duration: 30m
+---
 # Question
 
 Solve this question on: `terminal`

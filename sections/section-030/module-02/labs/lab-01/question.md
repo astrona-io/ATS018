@@ -1,3 +1,7 @@
+---
+title: Generate Applications And Restrict A Team With An AppProject
+estimated_duration: 30m
+---
 # Question
 
 Solve this question on: `terminal`

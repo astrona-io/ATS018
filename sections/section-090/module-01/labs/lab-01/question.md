@@ -1,3 +1,7 @@
+---
+title: Deliver The Platform With Argo CD And Repair Production
+estimated_duration: 30m
+---
 # Question
 
 Solve this question on: `terminal`

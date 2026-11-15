@@ -1,3 +1,7 @@
+---
+title: Repair A Push-Driven Argo Events And Workflows Pipeline
+estimated_duration: 40m
+---
 # Question
 
 Solve this question on: `terminal`

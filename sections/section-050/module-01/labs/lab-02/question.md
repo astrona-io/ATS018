@@ -1,3 +1,7 @@
+---
+title: Run A Pipeline That Changes The Cluster With tkn
+estimated_duration: 25m
+---
 # Question
 
 Solve this question on: `terminal`

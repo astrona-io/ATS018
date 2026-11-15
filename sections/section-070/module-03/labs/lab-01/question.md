@@ -1,3 +1,7 @@
+---
+title: Route And Guard A Canary Through The Gateway API
+estimated_duration: 40m
+---
 # Question
 
 Solve this question on: `terminal`
