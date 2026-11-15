@@ -875,8 +875,12 @@ modules:
         - Submit a run from the template with the argo command-line tool and four input parameters
         - Prove the run's Deployment uses the requested image and prints its message
         resources:
+        - name: Argo WorkflowTemplates
+          url: https://argo-workflows.readthedocs.io/en/latest/workflow-templates/
         - name: Argo resource templates
           url: https://argo-workflows.readthedocs.io/en/latest/walk-through/kubernetes-resources/
+        - name: Kubernetes Deployments
+          url: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
       - type: reading
         title: "Trace A Git Push Into A Workflow Run"
         path: sections/section-060/module-01/course-08-trace-a-git-push-into-a-workflow-run.md
