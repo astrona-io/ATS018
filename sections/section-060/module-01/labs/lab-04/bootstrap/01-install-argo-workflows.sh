@@ -12,10 +12,13 @@ kubectl apply --server-side --force-conflicts -n starfleet \
 
 # Keep the web UI for the solution's UI path. auth-mode server lets the UI use
 # the argo-server ServiceAccount, so no login token is needed; secure=false serves
-# plain HTTP on the port-forward. Local lab only: never use these on a shared cluster.
+# plain HTTP on the port-forward. An empty x-frame-options removes the default
+# "X-Frame-Options: DENY" header, so the browser workspace can show the web UI in
+# its "Argo Workflows" tab. Local lab only: never use these on a shared cluster.
 kubectl -n starfleet patch deploy/argo-server --type=json -p='[
   {"op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--auth-mode=server"},
   {"op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--secure=false"},
+  {"op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--x-frame-options="},
   {"op": "replace", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet/scheme", "value": "HTTP"}]' >/dev/null
 kubectl -n starfleet rollout status deploy/workflow-controller --timeout=300s
 kubectl -n starfleet rollout status deploy/argo-server --timeout=300s

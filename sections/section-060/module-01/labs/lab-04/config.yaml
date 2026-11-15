@@ -16,6 +16,19 @@ runtime:
     - quay.io/argoproj/workflow-controller:v4.1.6
     - quay.io/argoproj/argoexec:v4.1.6
     - quay.io/argoproj/argocli:v4.1.6
+  portForwards:
+  - name: argo-workflows
+    description: Argo Workflows web UI
+    namespace: starfleet
+    resource: svc/argo-server
+    targetPort: 2746
+    hostPort: 2746
+    scheme: http
+tabs:
+- name: argo-workflows
+  title: Argo Workflows
+  type: browser
+  portForward: argo-workflows
 bootstrap:
   manifests:
   - name: lab-start

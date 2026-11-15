@@ -122,13 +122,7 @@ The `argo` command-line tool prints the new workflow while it is still `Pending`
 
 The Argo Workflows web UI is served by the `argo-server` Deployment in `starfleet`. In this lab it runs without a login, so the page opens straight away.
 
-`kind` has no load balancer, so forward the `argo-server` port to your machine. Run this in a second terminal and leave it running:
-
-```sh
-kubectl -n starfleet port-forward svc/argo-server 2746:2746
-```
-
-Open `http://127.0.0.1:2746` in a browser. On the first visit the web UI may show a "new version" note and a short survey; close both with the `×` in their top right corner.
+`kind` has no load balancer, so the lab forwards port `2746` of the `argo-server` Service to your machine when it starts. Open the **Argo Workflows** tab next to the terminal, or open `http://127.0.0.1:2746` in a browser. On the first visit the web UI may show a "new version" note and a short survey; close both with the `×` in their top right corner.
 
 Click **Workflow Templates** in the left menu and then `deploy-workload`. The **MANIFEST** tab shows the stored template, with the `main` step passing each `{{workflow.parameters.*}}` value to `deploy`:
 
@@ -159,7 +153,7 @@ scout   1/1     1            1           8s    workload     alpine:3.23   app=sc
 scout is running
 ```
 
-The Deployment has `1/1` ready, the image `alpine:3.23` and the selector `app=scout`, all filled from the parameters. The container printed the `msg` value, `scout is running`. Stop the port-forward with `Ctrl+C` when you are done.
+The Deployment has `1/1` ready, the image `alpine:3.23` and the selector `app=scout`, all filled from the parameters. The container printed the `msg` value, `scout is running`.
 
 A second run with a name that already exists fails, because action `create` refuses an existing object. Use a new name, or delete only that Deployment, before you run it again.
 
