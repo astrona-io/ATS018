@@ -7,8 +7,8 @@
 # Each environment runs on its own runner with its declared kind or QEMU runtime.
 #
 # Which environments (scripts/ci/list-environments.sh):
-#   - pull request: the sections with a changed file; every section when
-#     scripts/ or this file changes;
+#   - pull request: only the labs and playgrounds with a changed file in
+#     their own directory; every section when scripts/ or this file changes;
 #   - every Monday: every section (a floating image tag or a removed download
 #     can break a lab without a commit);
 #   - by hand: every section, or the paths given in the "paths" input.
@@ -20,8 +20,8 @@ name: labs
 
 on:
   # Every pull request, with no path filter, so "all environments pass" reports
-  # on every pull request and can be made a required check. When no
-  # section changed, the list is empty, the tests are skipped and the check
+  # on every pull request and can be made a required check. When no lab or
+  # playground changed, the list is empty, the tests are skipped and the check
   # passes within a minute.
   pull_request:
   schedule:
@@ -205,7 +205,8 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
-      # "skipped" means the pull request changed no section, so nothing to test.
+      # "skipped" means the pull request changed no lab or playground, so
+      # nothing to test.
       - run: |
           echo "list result: ${{ needs.list.result }}, test result: ${{ needs.test.result }}"
           [ "${{ needs.list.result }}" = "success" ]
